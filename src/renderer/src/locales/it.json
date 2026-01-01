@@ -1,0 +1,170 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "add": "Aggiungi",
+    "search": "Cerca",
+    "confirm": "Conferma",
+    "error": "Errore",
+    "success": "Successo"
+  },
+  "nav": {
+    "dashboard": "Panoramica",
+    "accounts": "Conti",
+    "investments": "Investimenti",
+    "properties": "Immobili",
+    "collectibles": "Collezionabili",
+    "settings": "Impostazioni",
+    "developer": "Sviluppatore",
+    "noAccounts": "Nessun conto ancora"
+  },
+  "dashboard": {
+    "netWorth": "Patrimonio Netto",
+    "assetAllocation": "Allocazione Asset",
+    "recentTransactions": "Transazioni Recenti",
+    "cashAccounts": "Conti & Liquidità"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "general": "Generale",
+    "appearance": "Aspetto",
+    "baseCurrency": "Valuta Base",
+    "language": "Lingua",
+    "theme": "Tema",
+    "themes": {
+      "light": "Chiaro",
+      "dark": "Scuro",
+      "system": "Sistema"
+    }
+  },
+  "collectibles": {
+    "title": "Collezionabili",
+    "yourCollectibles": "I tuoi Collezionabili",
+    "trackDescription": "Traccia il valore di orologi, arte, vini e altri beni preziosi.",
+    "addFirst": "Aggiungi Primo Oggetto",
+    "addItem": "Aggiungi Oggetto",
+    "totalValue": "Valore Totale",
+    "appreciation": "Plusvalenza",
+    "purchaseCost": "Costo Acquisto",
+    "currentValue": "Valore Attuale",
+    "items": "oggetti",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "confirmDelete": "Sei sicuro di voler eliminare questo oggetto?"
+  },
+  "properties": {
+    "title": "Immobili",
+    "yourProperties": "Gestisci i tuoi Immobili",
+    "trackDescription": "Monitora il valore degli immobili, traccia l'apprezzamento e gestisci il tuo portafoglio immobiliare.",
+    "addFirst": "Aggiungi Primo Immobile",
+    "addProperty": "Aggiungi Immobile",
+    "totalValue": "Valore Totale",
+    "appreciation": "Plusvalenza",
+    "purchaseCost": "Costo Acquisto",
+    "currentValue": "Valore Attuale",
+    "properties": "immobili",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "confirmDelete": "Sei sicuro di voler eliminare questo immobile?"
+  },
+  "accounts": {
+    "title": "Dashboard",
+    "welcome": "Bentornato! Ecco la tua panoramica finanziaria.",
+    "importCSV": "Importa CSV",
+    "addTransaction": "Aggiungi Transazione",
+    "refreshData": "Aggiorna Dati",
+    "totalNetWorth": "Patrimonio Netto Totale",
+    "monthlyIncome": "Entrate Mensili",
+    "monthlyExpenses": "Uscite Mensili",
+    "recentActivity": "Attività Recente",
+    "noRecentActivity": "Nessuna attività recente"
+  },
+  "investments": {
+    "title": "Investimenti",
+    "startInvesting": "Inizia ad Investire",
+    "trackDescription": "Traccia azioni, ETF e crypto in un unico posto. Quotazioni in tempo reale e analisi delle performance.",
+    "addFirst": "Aggiungi Primo Investimento",
+    "addInvestment": "Aggiungi Investimento",
+    "refresh": "Aggiorna",
+    "refreshPrices": "Aggiorna tutti i prezzi dal mercato",
+    "totalValue": "Valore Totale",
+    "dayChange": "Variazione Giornaliera",
+    "totalReturn": "Rendimento Totale",
+    "costBasis": "Costo Base",
+    "holdings": "Posizioni",
+    "asset": "Asset",
+    "price": "Prezzo",
+    "day": "Giorno",
+    "qty": "Qtà",
+    "value": "Valore",
+    "return": "Rendimento",
+    "actions": "Azioni",
+    "sell": "Vendi"
+  },
+  "modals": {
+    "cancel": "Annulla",
+    "save": "Salva",
+    "saveChanges": "Salva Modifiche",
+    "add": "Aggiungi",
+    "close": "Chiudi",
+    "propertyModal": {
+      "addTitle": "Aggiungi Immobile",
+      "editTitle": "Modifica Immobile",
+      "name": "Nome Immobile",
+      "namePlaceholder": "Es: Appartamento Milano",
+      "type": "Tipo",
+      "types": {
+        "residence": "Residenza Principale",
+        "rental": "Immobile in Affitto",
+        "vacation": "Casa Vacanze",
+        "land": "Terreno",
+        "commercial": "Commerciale",
+        "other": "Altro"
+      },
+      "address": "Indirizzo",
+      "addressPlaceholder": "Via Roma 1, 20100 Milano",
+      "currentValue": "Valore Attuale",
+      "purchasePrice": "Prezzo Acquisto",
+      "purchaseDate": "Data Acquisto",
+      "size": "Dimensione (m²)",
+      "notes": "Note",
+      "notesPlaceholder": "Dettagli aggiuntivi..."
+    },
+    "collectibleModal": {
+      "addTitle": "Aggiungi Collezionabile",
+      "editTitle": "Modifica Collezionabile",
+      "name": "Nome Oggetto",
+      "namePlaceholder": "Es: Rolex Submariner",
+      "type": "Tipo",
+      "types": {
+        "watch": "Orologio",
+        "art": "Arte",
+        "wine": "Vino",
+        "jewelry": "Gioielli",
+        "vehicle": "Veicolo",
+        "trading_card": "Carta Collezionabile",
+        "coin": "Moneta",
+        "other": "Altro"
+      },
+      "description": "Descrizione",
+      "currentValue": "Valore Attuale",
+      "purchasePrice": "Prezzo Acquisto",
+      "purchaseDate": "Data Acquisto",
+      "notes": "Note",
+      "notesPlaceholder": "Dettagli, numero di riferimento, condizioni..."
+    },
+    "investmentModal": {
+      "addTitle": "Aggiungi Investimento",
+      "symbol": "Simbolo Ticker",
+      "symbolPlaceholder": "AAPL, BTC-USD, VWCE.DE",
+      "searchHint": "Cerca per simbolo o nome",
+      "quantity": "Quantità",
+      "buyPrice": "Prezzo Acquisto (per unità)",
+      "buyDate": "Data Acquisto",
+      "addToPortfolio": "Aggiungi al Portafoglio"
+    }
+  }
+}

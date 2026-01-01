@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   THEME TOKENS - Light Mode (default)
+   ============================================ */
+:root {
+  /* Backgrounds */
+  --background: 255 255 255;
+  --background-subtle: 248 250 252;
+  --background-muted: 241 245 249;
+  --background-card: 255 255 255;
+  --background-popover: 255 255 255;
+  --background-sidebar: 248 250 252;
+  
+  /* Foregrounds */
+  --foreground: 15 23 42;
+  --foreground-muted: 100 116 139;
+  --foreground-subtle: 148 163 184;
+  
+  /* Borders */
+  --border: 226 232 240;
+  --border-muted: 241 245 249;
+  
+  /* Primary Accent (Indigo) */
+  --primary: 99 102 241;
+  --primary-hover: 79 70 229;
+  --primary-foreground: 255 255 255;
+  
+  /* Success (Emerald) */
+  --success: 16 185 129;
+  --success-foreground: 255 255 255;
+  --success-muted: 209 250 229;
+  
+  /* Warning (Amber) */
+  --warning: 245 158 11;
+  --warning-foreground: 255 255 255;
+  --warning-muted: 254 243 199;
+  
+  /* Error (Rose) */
+  --error: 239 68 68;
+  --error-foreground: 255 255 255;
+  --error-muted: 254 226 226;
+  
+  /* Info (Blue) */
+  --info: 59 130 246;
+  --info-foreground: 255 255 255;
+  
+  /* Input */
+  --input: 255 255 255;
+  --input-border: 203 213 225;
+  
+  /* Ring (focus) */
+  --ring: 99 102 241;
+}
+
+/* ============================================
+   THEME TOKENS - Dark Mode
+   ============================================ */
+.dark {
+  /* Backgrounds */
+  --background: 15 23 42;
+  --background-subtle: 30 41 59;
+  --background-muted: 51 65 85;
+  --background-card: 30 41 59;
+  --background-popover: 30 41 59;
+  --background-sidebar: 15 23 42;
+  
+  /* Foregrounds */
+  --foreground: 248 250 252;
+  --foreground-muted: 148 163 184;
+  --foreground-subtle: 100 116 139;
+  
+  /* Borders */
+  --border: 51 65 85;
+  --border-muted: 71 85 105;
+  
+  /* Primary Accent (Indigo) - slightly brighter for dark */
+  --primary: 129 140 248;
+  --primary-hover: 165 180 252;
+  --primary-foreground: 15 23 42;
+  
+  /* Success (Emerald) */
+  --success: 52 211 153;
+  --success-foreground: 15 23 42;
+  --success-muted: 6 78 59;
+  
+  /* Warning (Amber) */
+  --warning: 251 191 36;
+  --warning-foreground: 15 23 42;
+  --warning-muted: 120 53 15;
+  
+  /* Error (Rose) */
+  --error: 251 113 133;
+  --error-foreground: 15 23 42;
+  --error-muted: 136 19 55;
+  
+  /* Info (Blue) */
+  --info: 96 165 250;
+  --info-foreground: 15 23 42;
+  
+  /* Input */
+  --input: 30 41 59;
+  --input-border: 71 85 105;
+  
+  /* Ring (focus) */
+  --ring: 129 140 248;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+}
+
+/* Title bar drag region for macOS */
+.app-drag-region {
+  -webkit-app-region: drag;
+}
+
+.app-drag-region button,
+.app-drag-region a {
+  -webkit-app-region: no-drag;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--background-muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--foreground-subtle));
+}
+
+/* Selection styling */
+::selection {
+  background: rgb(var(--primary) / 0.3);
+  color: rgb(var(--foreground));
+}
+
+/* ============================================
+   COMPONENT CLASSES
+   ============================================ */
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-hover;
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground;
+  }
+  
+  .btn-danger {
+    @apply bg-error text-error-foreground hover:bg-error/90;
+  }
+  
+  /* Card styles */
+  .card {
+    @apply bg-card rounded-xl border border-border shadow-sm;
+  }
+  
+  /* Input styles */
+  .input {
+    @apply w-full p-2 bg-input border border-input-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-colors;
+  }
+}

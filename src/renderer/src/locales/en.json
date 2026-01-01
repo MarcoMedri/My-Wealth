@@ -1,0 +1,170 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "confirm": "Confirm",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "dashboard": "Overview",
+    "accounts": "Accounts",
+    "investments": "Investments",
+    "properties": "Real Estate",
+    "collectibles": "Collectibles",
+    "settings": "Settings",
+    "developer": "Developer",
+    "noAccounts": "No accounts yet"
+  },
+  "dashboard": {
+    "netWorth": "Net Worth",
+    "assetAllocation": "Asset Allocation",
+    "recentTransactions": "Recent Transactions",
+    "cashAccounts": "Cash & Accounts"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "appearance": "Appearance",
+    "baseCurrency": "Base Currency",
+    "language": "Language",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "collectibles": {
+    "title": "Collectibles",
+    "yourCollectibles": "Your Collectibles",
+    "trackDescription": "Track the value of watches, art, wine and other precious goods.",
+    "addFirst": "Add First Item",
+    "addItem": "Add Item",
+    "totalValue": "Total Value",
+    "appreciation": "Appreciation",
+    "purchaseCost": "Purchase Cost",
+    "currentValue": "Current Value",
+    "items": "items",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this item?"
+  },
+  "properties": {
+    "title": "Real Estate",
+    "yourProperties": "Track Your Real Estate",
+    "trackDescription": "Monitor property values, track appreciation, and manage your real estate portfolio.",
+    "addFirst": "Add First Property",
+    "addProperty": "Add Property",
+    "totalValue": "Total Value",
+    "appreciation": "Appreciation",
+    "purchaseCost": "Purchase Cost",
+    "currentValue": "Current Value",
+    "properties": "properties",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this property?"
+  },
+  "accounts": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! Here's your financial overview.",
+    "importCSV": "Import CSV",
+    "addTransaction": "Add Transaction",
+    "refreshData": "Refresh Data",
+    "totalNetWorth": "Total Net Worth",
+    "monthlyIncome": "Monthly Income",
+    "monthlyExpenses": "Monthly Expenses",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity"
+  },
+  "investments": {
+    "title": "Investments",
+    "startInvesting": "Start Investing",
+    "trackDescription": "Track your stocks, ETFs, and crypto in one place. Real-time quotes and performance analysis.",
+    "addFirst": "Add First Investment",
+    "addInvestment": "Add Investment",
+    "refresh": "Refresh",
+    "refreshPrices": "Refresh all prices from market",
+    "totalValue": "Total Value",
+    "dayChange": "Day Change",
+    "totalReturn": "Total Return",
+    "costBasis": "Cost Basis",
+    "holdings": "Holdings",
+    "asset": "Asset",
+    "price": "Price",
+    "day": "Day",
+    "qty": "Qty",
+    "value": "Value",
+    "return": "Return",
+    "actions": "Actions",
+    "sell": "Sell"
+  },
+  "modals": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "add": "Add",
+    "close": "Close",
+    "propertyModal": {
+      "addTitle": "Add Property",
+      "editTitle": "Edit Property",
+      "name": "Property Name",
+      "namePlaceholder": "E.g: Milan Apartment",
+      "type": "Type",
+      "types": {
+        "residence": "Primary Residence",
+        "rental": "Rental Property",
+        "vacation": "Vacation Home",
+        "land": "Land",
+        "commercial": "Commercial",
+        "other": "Other"
+      },
+      "address": "Address",
+      "addressPlaceholder": "Via Roma 1, 20100 Milan",
+      "currentValue": "Current Value",
+      "purchasePrice": "Purchase Price",
+      "purchaseDate": "Purchase Date",
+      "size": "Size (m²)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional details..."
+    },
+    "collectibleModal": {
+      "addTitle": "Add Collectible",
+      "editTitle": "Edit Collectible",
+      "name": "Item Name",
+      "namePlaceholder": "E.g: Rolex Submariner",
+      "type": "Type",
+      "types": {
+        "watch": "Watch",
+        "art": "Art",
+        "wine": "Wine",
+        "jewelry": "Jewelry",
+        "vehicle": "Vehicle",
+        "trading_card": "Trading Card",
+        "coin": "Coin",
+        "other": "Other"
+      },
+      "description": "Description",
+      "currentValue": "Current Value",
+      "purchasePrice": "Purchase Price",
+      "purchaseDate": "Purchase Date",
+      "notes": "Notes",
+      "notesPlaceholder": "Details, reference number, condition..."
+    },
+    "investmentModal": {
+      "addTitle": "Add Investment",
+      "symbol": "Ticker Symbol",
+      "symbolPlaceholder": "AAPL, BTC-USD, VWCE.DE",
+      "searchHint": "Search by symbol or name",
+      "quantity": "Quantity",
+      "buyPrice": "Buy Price (per unit)",
+      "buyDate": "Purchase Date",
+      "addToPortfolio": "Add to Portfolio"
+    }
+  }
+}
