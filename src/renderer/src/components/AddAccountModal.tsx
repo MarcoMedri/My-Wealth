@@ -47,7 +47,10 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
         currency: 'EUR',
         initialBalance: '0.00',
         color: COLORS[0],
+        brokerId: '',
     });
+
+    const brokers = useVaultStore(state => state.brokers);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -66,6 +69,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 currency: formData.currency,
                 initialBalance: initialBalanceCents,
                 color: formData.color,
+                brokerId: formData.brokerId || undefined,
                 isArchived: false,
                 sortOrder: 0,
             });
@@ -79,6 +83,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 currency: 'EUR',
                 initialBalance: '0.00',
                 color: COLORS[0],
+                brokerId: '',
             });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create account');
@@ -124,6 +129,25 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                         {ACCOUNT_TYPES.map(type => (
                             <option key={type.value} value={type.value}>
                                 {type.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Broker (Optional) */}
+                <div>
+                    <label className="block text-sm font-medium text-foreground-muted mb-1">
+                        Linked Broker (Optional)
+                    </label>
+                    <select
+                        value={formData.brokerId}
+                        onChange={e => setFormData({ ...formData, brokerId: e.target.value })}
+                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                    >
+                        <option value="">-- None --</option>
+                        {brokers.map(broker => (
+                            <option key={broker.id} value={broker.id}>
+                                {broker.name}
                             </option>
                         ))}
                     </select>

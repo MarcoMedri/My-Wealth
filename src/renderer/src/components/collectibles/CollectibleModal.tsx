@@ -68,7 +68,7 @@ export function CollectibleModal({ isOpen, onClose, collectible }: CollectibleMo
             const payload = {
                 id: collectible ? collectible.id : crypto.randomUUID(),
                 name,
-                type,
+                type: type as Collectible['type'],
                 description: description || undefined,
                 currentValue: Math.round(parseFloat(currentValue) * 100), // to cents
                 purchasePrice: purchasePrice ? Math.round(parseFloat(purchasePrice) * 100) : undefined,

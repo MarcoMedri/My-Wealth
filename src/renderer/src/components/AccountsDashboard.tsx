@@ -2,21 +2,20 @@ import { useState, useEffect, useMemo } from 'react';
 import {
     TrendingUp,
     TrendingDown,
-    ArrowUpRight,
-    ArrowDownRight,
     Wallet,
     RefreshCw,
     Plus,
     Upload
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
-import { formatMoney } from '../../../shared/schemas';
-import { cn, getRelativeTime } from '../lib/utils';
+import { cn } from '../lib/utils';
 import TransactionTable from './TransactionTable';
 import AddTransactionModal from './AddTransactionModal';
 import ImportModal from './ImportModal';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
+import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
+import { useFormatMoney } from '../hooks/useFormatMoney';
 
 export default function AccountsDashboard() {
     const {
@@ -39,6 +38,7 @@ export default function AccountsDashboard() {
     // Use Net Worth hook
     const { netWorth: totalWealth, convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
+    const formatMoney = useFormatMoney();
 
     // Calculate summary stats
     const stats = useMemo(() => {
@@ -61,12 +61,25 @@ export default function AccountsDashboard() {
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .slice(0, 5);
 
+        // Date range for charts (Current Month default)
+        // Date range for charts (Last 90 Days for better context, especially at start of month)
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 90);
+        startDate.setHours(0, 0, 0, 0);
+
+        const endDate = new Date();
+        endDate.setHours(23, 59, 59, 999);
+
         return {
             monthlyIncome,
             monthlyExpenses,
-            recent
+            recent,
+            startDate,
+            endDate
         };
     }, [transactions, convert]);
+
+    const categories = useVaultStore(state => state.categories);
 
     return (
         <div className="h-full flex flex-col">
@@ -114,7 +127,7 @@ export default function AccountsDashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-6 p-6">
-                <div className="p-4 rounded-xl bg-background-card border border-border">
+                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-emerald-500/10">
                             <Wallet className="w-5 h-5 text-emerald-500" />
@@ -126,7 +139,7 @@ export default function AccountsDashboard() {
                     </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background-card border border-border">
+                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-blue-500/10">
                             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -138,7 +151,7 @@ export default function AccountsDashboard() {
                     </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background-card border border-border">
+                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-red-500/10">
                             <TrendingDown className="w-5 h-5 text-red-500" />
@@ -151,54 +164,20 @@ export default function AccountsDashboard() {
                 </div>
             </div>
 
-            <div className="flex-1 min-h-0 flex gap-6 px-6 pb-6">
-                {/* Main Feed */}
-                <div className="flex-[2] flex flex-col bg-background-card rounded-xl border border-border overflow-hidden">
-                    <TransactionTable />
-                </div>
+            {/* Charts Row - New Requirement */}
+            <div className="px-6 pb-6">
+                <IncomeExpenseCharts
+                    transactions={transactions}
+                    categories={categories}
+                    startDate={stats.startDate}
+                    endDate={stats.endDate}
+                />
+            </div>
 
-                {/* Sidebar / Recent Blocks */}
-                <div className="flex-1 flex flex-col gap-6">
-                    <div className="bg-background-card rounded-xl border border-border p-4">
-                        <h3 className="font-semibold text-foreground mb-4">{t('accounts.recentActivity')}</h3>
-                        <div className="space-y-4">
-                            {stats.recent.length === 0 ? (
-                                <p className="text-sm text-foreground-subtle text-center py-4">{t('accounts.noRecentActivity')}</p>
-                            ) : (
-                                stats.recent.map((tx) => (
-                                    <div key={tx.id} className="flex items-start justify-between group">
-                                        <div className="flex gap-3">
-                                            <div className={cn(
-                                                "p-2 rounded-lg mt-0.5",
-                                                tx.type === 'income' ? "bg-emerald-500/10 text-emerald-500" :
-                                                    tx.type === 'expense' ? "bg-red-500/10 text-red-500" :
-                                                        "bg-blue-500/10 text-blue-500"
-                                            )}>
-                                                {tx.type === 'income' ? <ArrowDownRight className="w-4 h-4" /> :
-                                                    tx.type === 'expense' ? <ArrowUpRight className="w-4 h-4" /> :
-                                                        <RefreshCw className="w-4 h-4" />}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
-                                                    {tx.payee}
-                                                </p>
-                                                <p className="text-xs text-foreground-subtle">
-                                                    {getRelativeTime(tx.date)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <span className={cn(
-                                            "text-sm font-semibold tabular-nums",
-                                            tx.type === 'income' ? "text-emerald-400" : "text-foreground-muted"
-                                        )}>
-                                            {tx.type === 'income' ? '+' : '-'}
-                                            {formatMoney(tx.amount, tx.currency)}
-                                        </span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
+            <div className="flex-1 min-h-0 flex gap-6 px-6 pb-6">
+                {/* Main Feed - Full Width */}
+                <div className="flex-1 flex flex-col bg-background-card rounded-xl border border-border overflow-hidden shadow-sm">
+                    <TransactionTable />
                 </div>
             </div>
         </div>

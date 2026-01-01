@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme } from '../../../../shared/types';
 import { cn } from '../../lib/utils';
+import { CategoryManager } from './CategoryManager';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -12,9 +13,7 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const { t } = useTranslation();
-    const { currency, language, theme, setCurrency, setLanguage, setTheme } = useSettingsStore();
-
-
+    const { currency, language, theme, decimals, setCurrency, setLanguage, setTheme, setDecimals } = useSettingsStore();
 
     if (!isOpen) return null;
 
@@ -89,6 +88,29 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 ))}
                             </div>
                         </div>
+                        {/* Decimals */}
+                        <div className="space-y-2 pt-2">
+                            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                                <span className="font-mono text-xs border border-foreground-muted rounded px-1">.00</span>
+                                {t('settings.decimals')}
+                            </label>
+                            <div className="flex gap-2">
+                                {[0, 1, 2, 3].map((d) => (
+                                    <button
+                                        key={d}
+                                        onClick={() => setDecimals(d)}
+                                        className={cn(
+                                            "flex-1 px-3 py-2 rounded-lg border text-sm transition-all text-center font-medium",
+                                            decimals === d
+                                                ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300"
+                                                : "border-border hover:bg-background-muted text-foreground"
+                                        )}
+                                    >
+                                        {d}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </section>
 
                     <div className="border-t border-border" />
@@ -118,6 +140,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     <span className="capitalize">{t(`settings.themes.${tVal}`)}</span>
                                 </button>
                             ))}
+                        </div>
+                    </section>
+
+                    <div className="border-t border-border" />
+
+                    {/* Categories */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
+                            {t('settings.categories')}
+                        </h3>
+                        {/* We use a specific height container for the manager to allow internal scrolling */}
+                        <div className="h-[400px]">
+                            <CategoryManager />
                         </div>
                     </section>
 

@@ -27,6 +27,8 @@
 
 import { z } from 'zod';
 
+
+
 // ============================================================================
 // PRIMITIVE TYPES
 // ============================================================================
@@ -100,9 +102,40 @@ export const AssetSchema = z.object({
 });
 export type Asset = z.infer<typeof AssetSchema>;
 
+// ============================================================================
+// BROKER/INSTITUTION SCHEMA
+// ============================================================================
+
+export const BrokerTypeSchema = z.enum([
+  'bank',
+  'broker',
+  'crypto_exchange',
+  'other'
+]);
+export type BrokerType = z.infer<typeof BrokerTypeSchema>;
+
+export const BrokerSchema = z.object({
+  id: UUID,
+  name: z.string().min(1).max(100),
+  type: BrokerTypeSchema,
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6366f1'),
+  icon: z.string().optional(),
+  sortOrder: z.number().int().default(0),
+  createdAt: ISODate,
+  updatedAt: ISODate,
+});
+export type Broker = z.infer<typeof BrokerSchema>;
+
+export const BrokersFileSchema = z.object({
+  version: z.literal(1),
+  brokers: z.array(BrokerSchema),
+});
+export type BrokersFile = z.infer<typeof BrokersFileSchema>;
+
 export const HoldingSchema = z.object({
   id: UUID,
   accountId: UUID, // Links to the Broker Account
+  brokerId: UUID.optional(), // Links holding directly to a broker
   assetId: UUID,   // Links to Asset
   quantity: z.number(),         // Float is acceptable for quantity
   averageBuyPrice: Money, // In cents (unit cost)
@@ -219,6 +252,31 @@ export const PropertiesFileSchema = z.object({
 export type PropertiesFile = z.infer<typeof PropertiesFileSchema>;
 
 // ============================================================================
+// SNAPSHOTS (NET WORTH HISTORY)
+// ============================================================================
+
+export const SnapshotSchema = z.object({
+  id: UUID,
+  date: ISODate,
+  totalNetWorth: Money, // in cents
+  currency: CurrencyCode,
+  breakdown: z.object({
+    cash: Money,
+    investments: Money,
+    realEstate: Money,
+    collectibles: Money,
+    // Add liabilities if implemented later
+  }),
+});
+export type Snapshot = z.infer<typeof SnapshotSchema>;
+
+export const SnapshotsFileSchema = z.object({
+  version: z.literal(1),
+  snapshots: z.array(SnapshotSchema),
+});
+export type SnapshotsFile = z.infer<typeof SnapshotsFileSchema>;
+
+// ============================================================================
 // COLLECTIBLES
 // ============================================================================
 
@@ -301,6 +359,7 @@ export type AccountType = z.infer<typeof AccountTypeSchema>;
  */
 export const AccountSchema = z.object({
   id: UUID,
+  brokerId: UUID.optional(), // Links account to a broker
   name: z.string().min(1).max(100).describe('Account display name'),
   type: AccountTypeSchema,
   currency: CurrencyCode,
@@ -597,7 +656,18 @@ export interface VaultState {
   /**
    * Dividend payments received
    */
+
   dividends: Dividend[];
+  
+  /**
+   * Brokers/Institutions
+   */
+  brokers: Broker[];
+
+  /**
+   * Historical Net Worth Snapshots
+   */
+  snapshots: Snapshot[];
 }
 
 /**
@@ -618,6 +688,8 @@ export function createEmptyVaultState(): VaultState {
     collectibles: [],
     trades: [],
     dividends: [],
+    brokers: [],
+    snapshots: [],
   };
 }
 
@@ -639,6 +711,8 @@ export interface SerializableVaultState {
   collectibles: Collectible[];
   trades: InvestmentTrade[];
   dividends: Dividend[];
+  brokers: Broker[];
+  snapshots: Snapshot[];
   loadedMonths: string[];
   accountBalances: Record<string, number>;
 }
@@ -653,16 +727,21 @@ export interface SerializableVaultState {
  * @param currency - ISO 4217 currency code
  * @returns Formatted string like "$10.99"
  */
-export function formatMoney(cents: number, currency: string): string {
+export function formatMoney(cents: number, currency: string, decimals: number = 2): string {
   // JPY and other zero-decimal currencies
   const zeroDecimalCurrencies = ['JPY', 'KRW', 'VND'];
   const isZeroDecimal = zeroDecimalCurrencies.includes(currency.toUpperCase());
   
   const amount = isZeroDecimal ? cents : cents / 100;
   
+  // If zero decimal currency, force 0 decimals regardless of setting
+  const fractionalDigits = isZeroDecimal ? 0 : decimals;
+
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: currency,
+    minimumFractionDigits: fractionalDigits,
+    maximumFractionDigits: fractionalDigits,
   }).format(amount);
 }
 

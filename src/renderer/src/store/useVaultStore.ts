@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InvestmentTrade, Dividend } from '../../../shared/schemas';
+import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InvestmentTrade, Dividend, Broker, Snapshot } from '../../../shared/schemas';
 import { formatMoney } from '../../../shared/schemas';
 
 // ============================================================================
@@ -27,12 +27,15 @@ interface VaultStore {
   collectibles: Collectible[];
   trades: InvestmentTrade[];
   dividends: Dividend[];
+  brokers: Broker[];
+  snapshots: Snapshot[];
   accountBalances: Record<string, number>;
   loadedMonths: string[];
 
   // Navigation
-  activeView: 'dashboard' | 'investments' | 'properties' | 'collectibles' | 'transactions' | 'accounts' | 'settings';
-  setActiveView: (view: 'dashboard' | 'investments' | 'properties' | 'collectibles' | 'transactions' | 'accounts' | 'settings') => void;
+  // Navigation
+  activeView: string;
+  setActiveView: (view: string) => void;
 
   // ========== DERIVED STATE ==========
   /** Total net worth (sum of all account balances) in cents */
@@ -52,17 +55,29 @@ interface VaultStore {
   setTransactions: (transactions: Transaction[]) => void;
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (transaction: Transaction) => void;
+  deleteTransaction: (transactionId: string) => void;
 
   // Investment Actions
   refreshInvestments: () => Promise<void>; // Re-fetches prices? For now just reloads vault data
   refreshAllPrices: () => Promise<void>; // Batch update all asset prices from Yahoo
   sellInvestment: (holdingId: string, quantity: number, price: number, fees: number, date: string) => Promise<void>;
   deleteHolding: (holdingId: string) => Promise<void>; // Snapshot mode
+  
+  // Broker Actions
+  saveBroker: (broker: Broker) => Promise<void>;
+  deleteBroker: (brokerId: string) => Promise<void>;
+
+  // Category Actions
+  addCategory: (category: Category) => void;
+  updateCategory: (category: Category) => void;
+  deleteCategory: (categoryId: string) => void;
+  getCategoriesByType: (type: 'income' | 'expense') => Category[];
 
   // Getters
   getAccount: (id: string) => Account | undefined;
   getCategory: (id: string) => Category | undefined;
   getAsset: (id: string) => Asset | undefined;
+  getBroker: (id: string) => Broker | undefined;
   /** Get formatted balance for an account */
   getFormattedBalance: (accountId: string) => string;
 }
@@ -87,6 +102,8 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
   collectibles: [],
   trades: [],
   dividends: [],
+  brokers: [],
+  snapshots: [],
   accountBalances: {},
   loadedMonths: [],
   netWorth: 0,
@@ -127,6 +144,8 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       collectibles: data.collectibles,
       trades: data.trades,
       dividends: data.dividends,
+      brokers: data.brokers,
+      snapshots: data.snapshots,
       accountBalances: data.accountBalances,
       loadedMonths: data.loadedMonths,
       netWorth,
@@ -181,6 +200,34 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
     }
   },
 
+  // ========== BROKER ACTIONS ==========
+
+  saveBroker: async (broker) => {
+    set({ isLoading: true });
+    try {
+      await window.api.saveBroker(broker); 
+      await get().refreshData();
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to save broker' });
+      throw error;
+    } finally {
+        set({ isLoading: false });
+    }
+  },
+
+  deleteBroker: async (brokerId) => {
+    set({ isLoading: true });
+    try {
+      await window.api.deleteBroker(brokerId); 
+      await get().refreshData();
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to delete broker' });
+      throw error;
+    } finally {
+        set({ isLoading: false });
+    }
+  },
+
   // ========== TRANSACTIONS ==========
   
   setTransactions: (transactions) => {
@@ -228,6 +275,35 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
     set({ transactions: newTransactions });
   },
 
+  deleteTransaction: (transactionId) => {
+    const { transactions } = get();
+    const newTransactions = transactions.filter(t => t.id !== transactionId);
+    set({ transactions: newTransactions });
+    // Note: We'll assume the caller also handles the backend call or refreshes data
+  },
+
+  // ========== CATEGORY ACTIONS ==========
+  
+  addCategory: (category) => {
+    set((state) => ({ categories: [...state.categories, category] }));
+  },
+
+  updateCategory: (category) => {
+    set((state) => ({
+      categories: state.categories.map((c) => (c.id === category.id ? category : c)),
+    }));
+  },
+
+  deleteCategory: (categoryId) => {
+    set((state) => ({
+      categories: state.categories.filter((c) => c.id !== categoryId),
+    }));
+  },
+
+  getCategoriesByType: (type) => {
+    return get().categories.filter((c) => c.type === type);
+  },
+
   // ========== GETTERS ==========
   
   getAccount: (id) => {
@@ -240,6 +316,10 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
 
   getAsset: (id) => {
     return get().assets.find(a => a.id === id);
+  },
+
+  getBroker: (id) => {
+    return get().brokers.find(b => b.id === id);
   },
 
   getFormattedBalance: (accountId) => {

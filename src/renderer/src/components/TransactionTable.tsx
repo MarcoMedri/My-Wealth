@@ -1,9 +1,5 @@
-/**
- * TransactionTable Component
- * Virtualized table for 10k+ transactions using TanStack Table + Virtual
- */
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
     createColumnHelper,
     flexRender,
@@ -14,21 +10,53 @@ import {
     type Column,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, Copy, Trash2 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import type { Transaction } from '../../../shared/schemas';
-import { formatMoney } from '../../../shared/schemas';
+
 import { cn, formatDate } from '../lib/utils';
-import { useState } from 'react';
+import AddTransactionModal from './AddTransactionModal';
+import { useFormatMoney } from '../hooks/useFormatMoney';
 
 const columnHelper = createColumnHelper<Transaction>();
 
 export default function TransactionTable() {
     const transactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
+    const formatMoney = useFormatMoney();
     const [sorting, setSorting] = useState<SortingState>([
         { id: 'date', desc: true }
     ]);
+
+    // Modal State
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [isDuplicateMode, setIsDuplicateMode] = useState(false);
+
+    // Handlers
+    const handleEdit = (tx: Transaction) => {
+        setSelectedTransaction(tx);
+        setIsDuplicateMode(false);
+        setIsTransactionModalOpen(true);
+    };
+
+    const handleDuplicate = (tx: Transaction) => {
+        setSelectedTransaction(tx);
+        setIsDuplicateMode(true);
+        setIsTransactionModalOpen(true);
+    };
+
+    const handleDelete = async (tx: Transaction) => {
+        if (confirm(`Are you sure you want to delete this transaction: ${tx.payee}?`)) {
+            try {
+                await window.api.deleteTransaction(tx.id);
+                await useVaultStore.getState().refreshData();
+            } catch (e) {
+                console.error("Failed to delete", e);
+                alert("Failed to delete transaction");
+            }
+        }
+    };
 
     // Memoize category lookup
     const categoryMap = useMemo(() => {
@@ -88,6 +116,36 @@ export default function TransactionTable() {
                 );
             },
         }),
+        columnHelper.display({
+            id: 'actions',
+            header: () => null,
+            cell: (info) => (
+                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                    <button
+                        onClick={() => handleDuplicate(info.row.original)}
+                        className="p-1.5 text-foreground-muted hover:text-foreground hover:bg-background-subtle rounded-md transition-colors"
+                        title="Duplicate"
+                    >
+                        <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                        onClick={() => handleEdit(info.row.original)}
+                        className="p-1.5 text-foreground-muted hover:text-blue-400 hover:bg-blue-400/10 rounded-md transition-colors"
+                        title="Edit"
+                    >
+                        <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(info.row.original)}
+                        className="p-1.5 text-foreground-muted hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                        title="Delete"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ),
+
+        })
     ], [categoryMap]);
 
     // Sort transactions
@@ -123,7 +181,7 @@ export default function TransactionTable() {
     return (
         <div className="flex flex-col h-full">
             {/* Table Header */}
-            <div className="border-b border-border bg-background-muted">
+            <div className="border-b border-border bg-background-muted pr-4"> {/* Added pr-4 for scrollbar offset */}
                 {table.getHeaderGroups().map(headerGroup => (
                     <div key={headerGroup.id} className="flex">
                         {headerGroup.headers.map(header => (
@@ -135,6 +193,7 @@ export default function TransactionTable() {
                                     header.id === 'payee' && "flex-1",
                                     header.id === 'categoryId' && "w-40",
                                     header.id === 'amount' && "w-32 text-right",
+                                    header.id === 'actions' && "w-28", // Width for actions
                                 )}
                             >
                                 {header.isPlaceholder
@@ -169,7 +228,7 @@ export default function TransactionTable() {
                             return (
                                 <div
                                     key={row.id}
-                                    className="flex absolute w-full hover:bg-background-muted transition-colors border-b border-border/30"
+                                    className="flex absolute w-full hover:bg-background-muted transition-colors border-b border-border/30 group"
                                     style={{
                                         height: `${virtualRow.size}px`,
                                         transform: `translateY(${virtualRow.start}px)`,
@@ -184,6 +243,7 @@ export default function TransactionTable() {
                                                 cell.column.id === 'payee' && "flex-1 min-w-0",
                                                 cell.column.id === 'categoryId' && "w-40",
                                                 cell.column.id === 'amount' && "w-32",
+                                                cell.column.id === 'actions' && "w-28",
                                             )}
                                         >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -195,6 +255,13 @@ export default function TransactionTable() {
                     </div>
                 )}
             </div>
+
+            <AddTransactionModal
+                isOpen={isTransactionModalOpen}
+                onClose={() => setIsTransactionModalOpen(false)}
+                transaction={selectedTransaction}
+                isDuplicate={isDuplicateMode}
+            />
         </div>
     );
 }

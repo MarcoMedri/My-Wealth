@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { VaultStatus, ImportPreset, ColumnMapping, ImportResult, InvestmentSearchResult } from '../shared/types'
 import { IPC_CHANNELS } from '../shared/types'
-import type { Transaction, Account, Category, SerializableVaultState, Property, Collectible, Asset, Holding } from '../shared/schemas'
+import type { Transaction, Account, Category, SerializableVaultState, Property, Collectible, Asset, Holding, Broker, Snapshot } from '../shared/schemas'
 
 // ============================================================================
 // API EXPOSED TO RENDERER
@@ -33,6 +33,11 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.VAULT_LOAD)
   },
 
+  /** Create a Net Worth Snapshot */
+  createSnapshot: (): Promise<Snapshot> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.VAULT_CREATE_SNAPSHOT)
+  },
+
   // ========== TRANSACTIONS ==========
   
   /** Save a transaction (creates new or updates existing) */
@@ -40,6 +45,11 @@ const api = {
     transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }
   ): Promise<Transaction> => {
     return ipcRenderer.invoke(IPC_CHANNELS.TRANSACTION_SAVE, transaction)
+  },
+
+  /** Delete a transaction */
+  deleteTransaction: (id: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.TRANSACTION_DELETE, id)
   },
 
   // ========== ACCOUNTS ==========
@@ -58,6 +68,18 @@ const api = {
     category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }
   ): Promise<Category> => {
     return ipcRenderer.invoke(IPC_CHANNELS.CATEGORY_SAVE, category)
+  },
+
+  // ========== BROKERS ==========
+
+  /** Save a broker (creates new or updates existing) */
+  saveBroker: (broker: Broker): Promise<Broker> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BROKER_SAVE, broker)
+  },
+
+  /** Delete a broker */
+  deleteBroker: (id: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BROKER_DELETE, id)
   },
 
   // ========== IMPORT ==========

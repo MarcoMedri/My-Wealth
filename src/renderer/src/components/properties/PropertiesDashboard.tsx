@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Plus, Home, Building2, RefreshCw, MapPin, Pencil, Trash2 } from 'lucide-react';
-import { formatMoney, type Property } from '../../../../shared/schemas';
+import { Plus, Home, Building2, RefreshCw, MapPin, Trash2 } from 'lucide-react';
+import { type Property } from '../../../../shared/schemas';
+import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { PropertyModal } from './PropertyModal';
 import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
@@ -21,8 +22,10 @@ export function PropertiesDashboard() {
     const [editingProperty, setEditingProperty] = useState<Property | undefined>(undefined);
 
     // Use Net Worth hook for currency conversion
+    // Use Net Worth hook for currency conversion
     const { convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
+    const formatMoney = useFormatMoney();
 
     // Calculate totals
     const metrics = useMemo(() => {
@@ -126,11 +129,11 @@ export function PropertiesDashboard() {
                 </div>
                 <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
                     <div className="text-sm text-foreground-muted mb-1">{t('properties.appreciation')}</div>
-                    <div className={`text-2xl font-bold flex items-center gap-2 ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <div className={`text-2xl font-bold ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {metrics.appreciation >= 0 ? '+' : ''}{formatMoney(metrics.appreciation, baseCurrency)}
-                        <span className="text-sm font-normal bg-background-muted px-2 py-0.5 rounded">
-                            {metrics.appreciationPercent.toFixed(1)}%
-                        </span>
+                    </div>
+                    <div className={`text-sm mt-1 ${metrics.appreciation >= 0 ? 'text-emerald-500/80' : 'text-rose-500/80'}`}>
+                        {metrics.appreciationPercent >= 0 ? '+' : ''}{metrics.appreciationPercent.toFixed(2)}%
                     </div>
                 </div>
                 <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
@@ -152,18 +155,12 @@ export function PropertiesDashboard() {
                     return (
                         <div
                             key={property.id}
-                            className="bg-background-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow group relative"
+                            onClick={() => handleEdit(property)} // Click to edit
+                            className="bg-background-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow group relative cursor-pointer"
                         >
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                 <button
-                                    onClick={() => handleEdit(property)}
-                                    className="p-1.5 hover:bg-background-muted dark:hover:bg-background-muted rounded text-foreground-subtle hover:text-indigo-500"
-                                    title={t('properties.edit')}
-                                >
-                                    <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(property.id)}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(property.id); }}
                                     className="p-1.5 hover:bg-background-muted dark:hover:bg-background-muted rounded text-foreground-subtle hover:text-rose-500"
                                     title={t('properties.delete')}
                                 >

@@ -19,15 +19,60 @@
     *   **Collectibles**: Manage high-value assets like watches, art, jewelry, and vehicles.
 *   **📊 Insightful Dashboard**: A beautiful, responsive interface that gives you an at-a-glance view of your financial health.
 *   **⚡ Modern & Fast**: Built with cutting-edge web technologies for a native application experience.
+*   **🏷️ Transaction Management**:
+    *   **Custom Categories**: Create, edit, and delete categories with custom icons and colors.
+    *   **Demo Data**: Includes a robust seed generator for realistic historical data and exploring features.
 
 ## 🛠️ Tech Stack
 
 *   **Core**: [Electron](https://www.electronjs.org/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
-*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/), [Lucide React](https://lucide.dev/) (Icons)
 *   **State Management**: [Zustand](https://github.com/pmndrs/zustand)
 *   **Charts**: [Recharts](https://recharts.org/) & [Chart.js](https://www.chartjs.org/)
 *   **Data Validation**: [Zod](https://zod.dev/)
+*   **Utilities**: [Papaparse](https://www.papaparse.com/) (CSV Import), [Faker.js](https://fakerjs.dev/) (Data Seeding)
 *   **Build Tooling**: [Electron-Vite](https://electron-vite.org/)
+
+## 📁 Architecture
+
+### Data Model
+
+My Wealth uses a **Vault** system - a folder on your local machine containing JSON files for each data type:
+
+```
+/your-vault-folder/
+├── accounts.json      # Bank accounts, wallets, credit cards
+├── transactions.json  # Income, expenses, transfers
+├── assets.json        # Investment asset definitions (AAPL, BTC, etc.)
+├── holdings.json      # Your positions in assets
+├── trades.json        # Buy/sell transaction history
+├── properties.json    # Real estate holdings
+├── collectibles.json  # Watches, art, vehicles, etc.
+├── brokers.json       # Financial institutions (planned)
+└── categories.json    # Transaction categories
+```
+
+### Core Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Broker** | A financial institution (bank, brokerage, crypto exchange) that holds your accounts and/or investments |
+| **Account** | A cash container (checking, savings, credit card) with a balance calculated from transactions |
+| **Holding** | Your position in an asset (e.g., 10 shares of AAPL) |
+| **Asset** | An investable item with real-time price tracking (stocks, ETFs, crypto) |
+| **Property** | Real estate with purchase price and current value tracking |
+| **Collectible** | High-value items (watches, art, vehicles) with appreciation tracking |
+
+### Money Handling
+
+All monetary values are stored as **integers in cents** to avoid floating-point precision errors:
+
+```
+$10.99 → 1099 (stored in JSON)
+€5.00  → 500
+```
+
+The frontend handles formatting for display.
 
 ## 🚀 Getting Started
 

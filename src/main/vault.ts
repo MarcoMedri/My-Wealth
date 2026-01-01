@@ -24,6 +24,8 @@ import {
   DividendsFileSchema,
   PropertiesFileSchema,
   CollectiblesFileSchema,
+  BrokersFileSchema,
+  SnapshotsFileSchema,
   type AppSettings,
   type Account,
   type Category,
@@ -34,6 +36,9 @@ import {
   type Dividend,
   type Property,
   type Collectible,
+  type Broker,
+  type Snapshot,
+  type SnapshotsFile,
   type VaultState,
   type SerializableVaultState,
   createEmptyVaultState,
@@ -265,6 +270,23 @@ export class VaultManager {
         }
       }
 
+      // Load Brokers
+      const brokersPath = path.join(vaultPath, VAULT_STRUCTURE.BROKERS_FILE);
+      if (await fs.pathExists(brokersPath)) {
+        try {
+          const brokersData = await fs.readJson(brokersPath);
+          const parsed = BrokersFileSchema.safeParse(brokersData);
+          if (parsed.success) {
+            this.vaultState.brokers = parsed.data.brokers;
+          } else {
+            console.error('Invalid brokers.json:', parsed.error);
+          }
+        } catch (e) {
+          console.error('Failed to load brokers:', e);
+        }
+      }
+
+
       // Load Assets
       const assetsPath = path.join(vaultPath, 'assets.json');
       if (await fs.pathExists(assetsPath)) {
@@ -358,6 +380,22 @@ export class VaultManager {
             }
         } catch (e) {
             console.error('Failed to load dividends:', e);
+        }
+      }
+
+      // Load Snapshots
+      const snapshotsPath = path.join(vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE);
+      if (await fs.pathExists(snapshotsPath)) {
+        try {
+            const data = await fs.readJson(snapshotsPath);
+            const parsed = SnapshotsFileSchema.safeParse(data);
+            if (parsed.success) {
+                this.vaultState.snapshots = parsed.data.snapshots;
+            } else {
+                console.error('Invalid snapshots.json:', parsed.error);
+            }
+        } catch (e) {
+            console.error('Failed to load snapshots:', e);
         }
       }
 
@@ -498,10 +536,12 @@ export class VaultManager {
       transactions: Array.from(state.transactions.values()),
       assets: state.assets,
       holdings: state.holdings,
+      brokers: state.brokers,
       properties: state.properties,
       collectibles: state.collectibles,
       trades: state.trades,
       dividends: state.dividends,
+      snapshots: state.snapshots,
       loadedMonths: Array.from(state.loadedMonths),
       accountBalances: Object.fromEntries(state.accountBalances),
     };
@@ -593,6 +633,63 @@ export class VaultManager {
     this.calculateBalances();
 
     return validated;
+  }
+
+  /**
+   * Delete a transaction from disk
+   */
+  async deleteTransaction(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    // Find transaction in memory to get the date (needed for file path)
+    const transaction = this.vaultState.transactions.get(id);
+    if (!transaction) {
+      console.warn(`Transaction ${id} not found in memory, scanning all files or aborting.`);
+      // If not in memory, we might need to scan index? But for now assume memory is source of truth.
+      // If not found, nothing to delete.
+      return;
+    }
+
+    const txDate = new Date(transaction.date);
+    const year = txDate.getFullYear();
+    const month = txDate.getMonth() + 1;
+    const monthStr = month.toString().padStart(2, '0');
+    
+    const monthDir = path.join(
+      this.settings.vaultPath,
+      VAULT_STRUCTURE.TRANSACTIONS_DIR,
+      year.toString(),
+      monthStr
+    );
+    const filePath = path.join(monthDir, 'transactions.json');
+
+    if (await fs.pathExists(filePath)) {
+        try {
+            const data = await fs.readJson(filePath);
+            const parsed = TransactionsFileSchema.safeParse(data);
+            
+            if (parsed.success) {
+                const newTransactions = parsed.data.transactions.filter(t => t.id !== id);
+                
+                // If no transactions left, maybe delete file? 
+                // For now, just save empty array or filtered array.
+                const newFileContent = {
+                    ...parsed.data,
+                    transactions: newTransactions
+                };
+                
+                await this.atomicWriteJson(filePath, newFileContent);
+            }
+        } catch (e) {
+            throw new Error(`Failed to delete transaction from file: ${e}`);
+        }
+    }
+
+    // Update in-memory state
+    this.vaultState.transactions.delete(id);
+    this.calculateBalances();
   }
 
   /**
@@ -688,6 +785,41 @@ export class VaultManager {
     this.vaultState.categories.set(fullCategory.id, fullCategory);
 
     return fullCategory;
+  }
+
+  /**
+   * Delete a category from disk
+   */
+  async deleteCategory(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.CATEGORIES_FILE);
+    
+    // Read existing
+    if (await fs.pathExists(filePath)) {
+      try {
+        const existing = await fs.readJson(filePath);
+        const parsed = CategoriesFileSchema.safeParse(existing);
+        
+        if (parsed.success) {
+          const newCategories = parsed.data.categories.filter(c => c.id !== id);
+          
+          const newFileContent = {
+            ...parsed.data,
+            categories: newCategories
+          };
+          
+          await this.atomicWriteJson(filePath, newFileContent);
+        }
+      } catch (e) {
+        throw new Error(`Failed to delete category from file: ${e}`);
+      }
+    }
+
+    // Update in-memory state
+    this.vaultState.categories.delete(id);
   }
 
   /**
@@ -1139,12 +1271,161 @@ export class VaultManager {
     return this.vaultState.collectibles;
   }
   
+  // ==========================================================================
+  // BROKER OPERATIONS
+  // ==========================================================================
+
+  async saveBroker(broker: Broker): Promise<Broker> {
+    if (!this.vaultState.vaultPath) throw new Error('Vault not loaded');
+
+    // Update state
+    const existingIndex = this.vaultState.brokers.findIndex(b => b.id === broker.id);
+    if (existingIndex >= 0) {
+      this.vaultState.brokers[existingIndex] = broker;
+    } else {
+      this.vaultState.brokers.push(broker);
+    }
+
+    // Persist to disk
+    const brokersPath = path.join(this.vaultState.vaultPath, VAULT_STRUCTURE.BROKERS_FILE);
+    await this.atomicWriteJson(brokersPath, {
+      version: 1,
+      brokers: this.vaultState.brokers,
+    });
+
+    return broker;
+  }
+
+  async deleteBroker(brokerId: string): Promise<void> {
+    if (!this.vaultState.vaultPath) throw new Error('Vault not loaded');
+
+    // Update state
+    this.vaultState.brokers = this.vaultState.brokers.filter(b => b.id !== brokerId);
+    
+    // Also remove brokerId from associated accounts and holdings
+    // Note: We don't delete the account/holding, just unlink the broker
+    for (const [id, account] of this.vaultState.accounts) {
+        if (account.brokerId === brokerId) {
+            const updatedAccount = { ...account, brokerId: undefined };
+            this.vaultState.accounts.set(id, updatedAccount);
+            await this.saveAccount(updatedAccount); 
+        }
+    }
+    
+    let holdingsChanged = false;
+    this.vaultState.holdings = this.vaultState.holdings.map(h => {
+        if (h.brokerId === brokerId) {
+            holdingsChanged = true;
+            return { ...h, brokerId: undefined };
+        }
+        return h;
+    });
+
+    if (holdingsChanged) {
+        const holdingsPath = path.join(this.vaultState.vaultPath, 'holdings.json');
+        if (await fs.pathExists(holdingsPath)) {
+             await this.atomicWriteJson(holdingsPath, {
+                version: 1,
+                holdings: this.vaultState.holdings,
+            });
+        }
+    }
+
+    // Persist to disk
+    const brokersPath = path.join(this.vaultState.vaultPath, VAULT_STRUCTURE.BROKERS_FILE);
+    await this.atomicWriteJson(brokersPath, {
+      version: 1,
+      brokers: this.vaultState.brokers,
+    });
+  }
+
   /**
    * Get the path for a specific vault file
    */
   getFilePath(relativePath: string): string | null {
     if (!this.settings?.vaultPath) return null;
     return path.join(this.settings.vaultPath, relativePath);
+  }
+
+  /**
+   * Create a Net Worth Snapshot
+   */
+  async createSnapshot(): Promise<Snapshot> {
+      if (!this.settings?.vaultPath) {
+          throw new Error('No vault initialized');
+      }
+
+      const now = new Date().toISOString();
+
+      // 1. Calculate Cash (Accounts)
+      let cashTotal = 0;
+      for (const balance of this.vaultState.accountBalances.values()) {
+        cashTotal += balance;
+      }
+
+      // 2. Calculate Investments (Holdings * Current Price)
+      let investmentsTotal = 0;
+      for (const holding of this.vaultState.holdings) {
+          // Find asset price
+          const asset = this.vaultState.assets.find(a => a.id === holding.assetId);
+          if (asset) {
+              investmentsTotal += holding.quantity * asset.currentPrice; 
+          }
+      }
+
+      // 3. Calculate Real Estate
+      let realEstateTotal = 0;
+      for (const property of this.vaultState.properties) {
+          realEstateTotal += property.currentValue;
+      }
+
+      // 4. Calculate Collectibles
+      let collectiblesTotal = 0;
+      for (const collectible of this.vaultState.collectibles) {
+          collectiblesTotal += collectible.currentValue;
+      }
+
+      const totalNetWorth = cashTotal + investmentsTotal + realEstateTotal + collectiblesTotal;
+
+      const snapshot: Snapshot = {
+          id: randomUUID(),
+          date: now,
+          totalNetWorth: Math.round(totalNetWorth),
+          currency: 'EUR', // Hardcoded base currency for now, or use settings
+          breakdown: {
+              cash: Math.round(cashTotal),
+              investments: Math.round(investmentsTotal),
+              realEstate: Math.round(realEstateTotal),
+              collectibles: Math.round(collectiblesTotal),
+          }
+      };
+
+      // Save to disk
+      const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE);
+      
+      let snapshotsFile: SnapshotsFile = { version: 1, snapshots: [] };
+      if (await fs.pathExists(filePath)) {
+          try {
+              const data = await fs.readJson(filePath);
+              const parsed = SnapshotsFileSchema.safeParse(data);
+              if (parsed.success) {
+                  snapshotsFile = parsed.data;
+              }
+          } catch (e) {
+              console.warn('Failed to read existing snapshots, starting fresh', e);
+          }
+      }
+
+      snapshotsFile.snapshots.push(snapshot);
+      // Sort by date 
+      snapshotsFile.snapshots.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      await this.atomicWriteJson(filePath, snapshotsFile);
+
+      // Update memory
+      this.vaultState.snapshots = snapshotsFile.snapshots;
+
+      return snapshot;
   }
 }
 
@@ -1163,3 +1444,4 @@ export function getVaultManager(): VaultManager {
   }
   return vaultManager;
 }
+

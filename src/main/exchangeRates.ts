@@ -1,4 +1,5 @@
-import yahooFinance from 'yahoo-finance2';
+// Workaround for ESM/CJS interop in Electron
+const yahooFinance = require('yahoo-finance2').default || require('yahoo-finance2');
 import { app } from 'electron';
 import { join } from 'path';
 import fs from 'fs-extra';
@@ -8,6 +9,11 @@ interface ExchangeRateCache {
   base: string;
   rates: Record<string, number>; // e.g. "USD": 1.05
   timestamp: number;
+}
+
+interface YahooQuote {
+  symbol: string;
+  regularMarketPrice?: number;
 }
 
 const CACHE_FILE = 'exchange_rates.json';
@@ -73,7 +79,7 @@ export class ExchangeRateManager {
       rates[base] = 1;
 
       // Ensure results is array
-      const quotes = (Array.isArray(results) ? results : [results]) as any[];
+      const quotes = (Array.isArray(results) ? results : [results]) as YahooQuote[];
 
       quotes.forEach(quote => {
         // Symbol is like "EURUSD=X"

@@ -13,6 +13,7 @@ import AccountsDashboard from './components/AccountsDashboard';
 import { InvestmentDashboard } from './components/investments/InvestmentDashboard';
 import { PropertiesDashboard } from './components/properties/PropertiesDashboard';
 import { CollectiblesDashboard } from './components/collectibles/CollectiblesDashboard';
+import { BrokerDetailView } from './components/brokers/BrokerDetailView';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
 import { useVaultStore } from './store/useVaultStore';
@@ -184,6 +185,7 @@ function App(): React.ReactElement {
             {activeView === 'investments' && <InvestmentDashboard />}
             {activeView === 'properties' && <PropertiesDashboard />}
             {activeView === 'collectibles' && <CollectiblesDashboard />}
+            {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
         </Layout>
     );
 }

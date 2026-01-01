@@ -8,7 +8,11 @@ import type {
   Asset,
   Holding,
   Property,
-  Collectible
+  Property,
+  Collectible,
+  Collectible,
+  Broker,
+  Snapshot
 } from '../shared/schemas';
 
 interface API {
@@ -19,11 +23,16 @@ interface API {
   
   // Vault data
   getVaultData: () => Promise<SerializableVaultState>
+  createSnapshot: () => Promise<Snapshot>
   
   // Entities
   saveTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Transaction>
+  deleteTransaction: (id: string) => Promise<void>
   saveAccount: (account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Account>
   saveCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Category>
+  deleteCategory: (id: string) => Promise<void>
+  saveBroker: (broker: Broker) => Promise<Broker>
+  deleteBroker: (id: string) => Promise<void>
   
   // Import
   getImportPresets: () => Promise<ImportPreset[]>;

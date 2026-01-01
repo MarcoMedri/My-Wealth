@@ -6,45 +6,53 @@
 import { useState } from 'react';
 import {
     Wallet,
-    CreditCard,
-    PiggyBank,
     TrendingUp,
-    Banknote,
     Building,
     LayoutDashboard,
-    MoreHorizontal,
     Plus,
     Home,
     Settings,
     Database,
     Trash2,
     Loader2,
+    Building2,
+    CandlestickChart,
+    Bitcoin,
+    Landmark,
+    Banknote,
+    PiggyBank,
+    Briefcase,
     Watch
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { formatMoney } from '../../../shared/schemas';
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
-import AddAccountModal from './AddAccountModal';
+// import AddAccountModal from './AddAccountModal'; // Removed in favor of Brokers
+import { AddBrokerModal } from './brokers/AddBrokerModal';
 import { useTranslation } from 'react-i18next';
 
 import { SettingsModal } from './settings/SettingsModal';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 
-const ACCOUNT_ICONS: Record<string, typeof Building> = {
-    checking: Building,
-    savings: PiggyBank,
-    credit: CreditCard,
-    investment: TrendingUp,
-    cash: Banknote,
-    loan: Building,
-    other: MoreHorizontal,
+// Account icons mapping removed as we now show Brokers in sidebar
+// import { SettingsModal } from './settings/SettingsModal'; 
+// Icon mapping for Broker/Account icons
+const ICON_MAP: Record<string, any> = {
+    'wallet': Wallet,
+    'building-2': Building2,
+    'candlestick-chart': CandlestickChart,
+    'bitcoin': Bitcoin,
+    'landmark': Landmark, // Bank
+    'banknote': Banknote, // Cash
+    'piggy-bank': PiggyBank, // Savings
+    'briefcase': Briefcase, // Portfolio
+    // Add more as necessary matches lucide-react names
 };
 
 export default function Sidebar() {
     const { t } = useTranslation();
-    const accounts = useVaultStore(state => state.accounts);
-    const accountBalances = useVaultStore(state => state.accountBalances);
+    const brokers = useVaultStore(state => state.brokers);
     const refreshData = useVaultStore(state => state.refreshData);
     const activeView = useVaultStore(state => state.activeView);
     const setActiveView = useVaultStore(state => state.setActiveView);
@@ -53,11 +61,13 @@ export default function Sidebar() {
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [isSeeding, setIsSeeding] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
-    const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+    const [isAddBrokerOpen, setIsAddBrokerOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    // Group accounts by type
-    const activeAccounts = accounts.filter(a => !a.isArchived);
+    // Group active brokers
+    // Sort brokers by custom sortOrder or name
+    const sortedBrokers = [...brokers].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name));
+
 
     const handleGenerateDemoData = async () => {
         setIsSeeding(true);
@@ -93,9 +103,9 @@ export default function Sidebar() {
             {/* Drag region for macOS */}
             <div className="h-8 app-drag-region" />
 
-            <AddAccountModal
-                isOpen={isAddAccountOpen}
-                onClose={() => setIsAddAccountOpen(false)}
+            <AddBrokerModal
+                isOpen={isAddBrokerOpen}
+                onClose={() => setIsAddBrokerOpen(false)}
             />
 
             <SettingsModal
@@ -192,14 +202,14 @@ export default function Sidebar() {
                 </button>
             </nav>
 
-            {/* Accounts */}
+            {/* Brokers List */}
             <div className="flex-1 overflow-y-auto px-3">
                 <div className="flex items-center justify-between px-3 py-2">
                     <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">
-                        {t('nav.accounts')}
+                        {t('nav.brokers')}
                     </h3>
                     <button
-                        onClick={() => setIsAddAccountOpen(true)}
+                        onClick={() => setIsAddBrokerOpen(true)}
                         className="p-1 rounded hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors"
                     >
                         <Plus className="w-4 h-4" />
@@ -207,39 +217,55 @@ export default function Sidebar() {
                 </div>
 
                 <div className="space-y-1">
-                    {activeAccounts.length === 0 ? (
-                        <p className="px-3 py-2 text-sm text-foreground-subtle">{t('nav.noAccounts')}</p>
+                    {sortedBrokers.length === 0 ? (
+                        <p className="px-3 py-2 text-sm text-foreground-subtle">{t('brokers.noAccounts')}</p>
+                        /* Reusing noAccounts string or add a new one "No Brokers" */
                     ) : (
-                        activeAccounts.map((account) => {
-                            const Icon = ACCOUNT_ICONS[account.type] || Wallet;
-                            const balance = accountBalances[account.id] ?? 0;
-                            const isNegative = balance < 0;
+                        sortedBrokers.map((broker) => {
+                            // const balance = getBrokerBalance(broker.id);
+                            // Determine currency from first account or default to system base? 
+                            // For sidebar summary we might just show base currency or mixed.
+                            // Let's assume EUR or USD for now, or just not show balance if complex.
+                            // OR: Broker usually belongs to a country/currency.
+                            // For now, let's just show the name.
+
+                            const isActive = activeView === `broker:${broker.id}`;
 
                             return (
                                 <button
-                                    key={account.id}
-                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-background-muted transition-colors group"
+                                    key={broker.id}
+                                    onClick={() => setActiveView(`broker:${broker.id}`)}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
+                                        isActive
+                                            ? "bg-background-muted text-foreground font-medium"
+                                            : "hover:bg-background-muted text-foreground-muted hover:text-foreground"
+                                    )}
                                 >
                                     <div
-                                        className="p-1.5 rounded-lg"
-                                        style={{ backgroundColor: `${account.color}20` }}
+                                        className="p-1.5 rounded-lg flex items-center justify-center"
+                                        style={{ backgroundColor: `${broker.color}20` }}
                                     >
-                                        <Icon
-                                            className="w-4 h-4"
-                                            style={{ color: account.color }}
-                                        />
+                                        {(() => {
+                                            const IconComponent = broker.icon ? ICON_MAP[broker.icon] : Building2;
+                                            return IconComponent ? (
+                                                <IconComponent
+                                                    className="w-4 h-4"
+                                                    style={{ color: broker.color }}
+                                                />
+                                            ) : (
+                                                <Building2
+                                                    className="w-4 h-4"
+                                                    style={{ color: broker.color }}
+                                                />
+                                            );
+                                        })()}
                                     </div>
                                     <div className="flex-1 text-left min-w-0">
-                                        <p className="text-sm font-medium text-foreground truncate">
-                                            {account.name}
+                                        <p className="text-sm truncate">
+                                            {broker.name}
                                         </p>
                                     </div>
-                                    <span className={cn(
-                                        "text-sm font-medium tabular-nums",
-                                        isNegative ? "text-error" : "text-foreground-muted"
-                                    )}>
-                                        {formatMoney(balance, account.currency)}
-                                    </span>
                                 </button>
                             );
                         })

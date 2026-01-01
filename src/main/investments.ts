@@ -1,6 +1,4 @@
-import _yahooFinance from 'yahoo-finance2';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- yahoo-finance2 v3.x Class export requires explicit instantiation
-const yahooFinance = new (_yahooFinance as any)();
+import yahooFinance from 'yahoo-finance2';
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import type { Asset, Holding, AssetType, InvestmentTrade } from '../shared/schemas';
@@ -45,7 +43,7 @@ export class InvestmentManager {
    */
   async getQuote(symbol: string) {
     try {
-      const quote = await yahooFinance.quote(symbol);
+      const quote = await yahooFinance.quote(symbol) as any;
       return {
         symbol: quote.symbol,
         price: Math.round((quote.regularMarketPrice || 0) * 100), // to cents
@@ -87,7 +85,8 @@ export class InvestmentManager {
     
     if (!asset) {
       // Fetch details from Yahoo
-      const quote = await yahooFinance.quote(params.symbol);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const quote = await yahooFinance.quote(params.symbol) as any;
       const now = new Date().toISOString();
       
       // Map Yahoo types to our AssetType
@@ -118,7 +117,8 @@ export class InvestmentManager {
       await vaultManager.saveAsset(asset);
     } else {
       // Asset exists - update price and previousClose
-      const quote = await yahooFinance.quote(params.symbol);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const quote = await yahooFinance.quote(params.symbol) as any;
       const now = new Date().toISOString();
       asset = {
         ...asset,
@@ -308,7 +308,7 @@ export class InvestmentManager {
 
     for (const asset of assets) {
       try {
-        const quote = await yahooFinance.quote(asset.symbol);
+        const quote = await yahooFinance.quote(asset.symbol) as any;
         const now = new Date().toISOString();
 
         const updatedAsset: Asset = {

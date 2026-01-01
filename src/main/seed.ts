@@ -11,13 +11,37 @@ import path from 'path';
 import fs from 'fs-extra';
 import { VAULT_STRUCTURE } from '../shared/types';
 import type { 
-  Account, Category, Transaction, Asset, Holding, Property, Collectible,
-  AccountsFile, CategoriesFile, TransactionsFile 
+  Account, Category, Transaction, Asset, Holding, Property, Collectible, Broker, Snapshot,
+  AccountsFile, CategoriesFile, TransactionsFile, BrokersFile, SnapshotsFile
 } from '../shared/schemas';
 
 // ============================================================================
 // DEMO DATA CONFIGURATION
 // ============================================================================
+
+const DEMO_BROKERS: Omit<Broker, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  {
+    name: 'Fineco Bank',
+    type: 'bank',
+    color: '#22c55e',
+    icon: 'building-2',
+    sortOrder: 0
+  },
+  {
+    name: 'Trade Republic',
+    type: 'broker',
+    color: '#000000',
+    icon: 'candlestick-chart',
+    sortOrder: 1
+  },
+  {
+    name: 'Coinbase',
+    type: 'crypto_exchange',
+    color: '#3b82f6',
+    icon: 'bitcoin',
+    sortOrder: 2
+  }
+];
 
 const DEMO_ACCOUNTS: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>[] = [
   {
@@ -57,15 +81,42 @@ const DEMO_CATEGORIES: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>[] = [
   { name: 'Salary', type: 'income', parentId: null, icon: 'briefcase', color: '#10b981', sortOrder: 0 },
   { name: 'Freelance', type: 'income', parentId: null, icon: 'laptop', color: '#22c55e', sortOrder: 1 },
   { name: 'Investments', type: 'income', parentId: null, icon: 'trending-up', color: '#14b8a6', sortOrder: 2 },
+  { name: 'Gifts', type: 'income', parentId: null, icon: 'gift', color: '#f472b6', sortOrder: 3 },
+  { name: 'Dividends', type: 'income', parentId: null, icon: 'banknote', color: '#34d399', sortOrder: 4 },
   
-  // Expenses
-  { name: 'Food & Dining', type: 'expense', parentId: null, icon: 'utensils', color: '#f97316', sortOrder: 3 },
-  { name: 'Rent', type: 'expense', parentId: null, icon: 'home', color: '#ef4444', sortOrder: 4 },
-  { name: 'Utilities', type: 'expense', parentId: null, icon: 'zap', color: '#eab308', sortOrder: 5 },
-  { name: 'Transportation', type: 'expense', parentId: null, icon: 'car', color: '#6366f1', sortOrder: 6 },
-  { name: 'Entertainment', type: 'expense', parentId: null, icon: 'tv', color: '#ec4899', sortOrder: 7 },
-  { name: 'Shopping', type: 'expense', parentId: null, icon: 'shopping-bag', color: '#8b5cf6', sortOrder: 8 },
-  { name: 'Healthcare', type: 'expense', parentId: null, icon: 'heart-pulse', color: '#06b6d4', sortOrder: 9 },
+  // Expenses - Housing & Utilities
+  { name: 'Rent', type: 'expense', parentId: null, icon: 'home', color: '#ef4444', sortOrder: 10 },
+  { name: 'Mortgage', type: 'expense', parentId: null, icon: 'landmark', color: '#b91c1c', sortOrder: 11 },
+  { name: 'Utilities', type: 'expense', parentId: null, icon: 'zap', color: '#eab308', sortOrder: 12 },
+  { name: 'Internet & Phone', type: 'expense', parentId: null, icon: 'wifi', color: '#0ea5e9', sortOrder: 13 },
+  { name: 'Maintenance', type: 'expense', parentId: null, icon: 'hammer', color: '#78716c', sortOrder: 14 },
+
+  // Expenses - Food
+  { name: 'Groceries', type: 'expense', parentId: null, icon: 'shopping-bag', color: '#f97316', sortOrder: 20 },
+  { name: 'Dining Out', type: 'expense', parentId: null, icon: 'utensils', color: '#f59e0b', sortOrder: 21 },
+  { name: 'Coffee', type: 'expense', parentId: null, icon: 'coffee', color: '#92400e', sortOrder: 22 },
+
+  // Expenses - Transportation
+  { name: 'Transportation', type: 'expense', parentId: null, icon: 'car', color: '#6366f1', sortOrder: 30 },
+  { name: 'Fuel', type: 'expense', parentId: null, icon: 'map', color: '#4f46e5', sortOrder: 31 },
+
+  // Expenses - Lifestyle
+  { name: 'Entertainment', type: 'expense', parentId: null, icon: 'tv', color: '#ec4899', sortOrder: 40 },
+  { name: 'Shopping', type: 'expense', parentId: null, icon: 'credit-card', color: '#8b5cf6', sortOrder: 41 },
+  { name: 'Travel', type: 'expense', parentId: null, icon: 'plane', color: '#06b6d4', sortOrder: 42 },
+  { name: 'Subscription', type: 'expense', parentId: null, icon: 'ticket', color: '#d946ef', sortOrder: 43 },
+  { name: 'Hobbies', type: 'expense', parentId: null, icon: 'camera', color: '#a855f7', sortOrder: 44 },
+  { name: 'Gaming', type: 'expense', parentId: null, icon: 'gamepad-2', color: '#6d28d9', sortOrder: 45 },
+
+  // Expenses - Health & Self
+  { name: 'Healthcare', type: 'expense', parentId: null, icon: 'heart-pulse', color: '#ef4444', sortOrder: 50 },
+  { name: 'Fitness', type: 'expense', parentId: null, icon: 'dumbbell', color: '#14b8a6', sortOrder: 51 },
+  { name: 'Personal Care', type: 'expense', parentId: null, icon: 'scissors', color: '#ec4899', sortOrder: 52 },
+  { name: 'Education', type: 'expense', parentId: null, icon: 'graduation-cap', color: '#facc15', sortOrder: 53 },
+
+  // Expenses - Family
+  { name: 'Kids', type: 'expense', parentId: null, icon: 'baby', color: '#fb7185', sortOrder: 60 },
+  { name: 'Pets', type: 'expense', parentId: null, icon: 'dog', color: '#a3e635', sortOrder: 61 },
 ];
 
 const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastValuationDate' | 'currentValue'>[] = [
@@ -155,12 +206,13 @@ const EXPENSE_PAYEES = [
   'Supermarket', 'Restaurant', 'Gas Station', 'Amazon', 'Netflix', 
   'Electricity Co', 'Water Services', 'Phone Provider', 'Gym Membership',
   'Coffee Shop', 'Pharmacy', 'Doctor Visit', 'Public Transit', 'Uber',
-  'Spotify', 'Apple Store', 'IKEA', 'H&M', 'Zara'
+  'Spotify', 'Apple Store', 'IKEA', 'H&M', 'Zara', 'Steam', 'PlayStation',
+  'Airline', 'Hotel', 'Airbnb', 'Pet Store', 'Barber', 'Mechanic', 'Udemy'
 ];
 
 const INCOME_PAYEES = [
   'ACME Corp', 'Client Payment', 'Freelance Project', 'Dividend', 
-  'Interest', 'Refund', 'Bonus'
+  'Interest', 'Refund', 'Bonus', 'Gift', 'Rental Income'
 ];
 
 // ============================================================================
@@ -174,6 +226,8 @@ export interface SeedResult {
   properties: number;
   collectibles: number;
   assets: number;
+  brokers: number;
+  snapshots: number;
 }
 
 /**
@@ -185,23 +239,40 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   const now = new Date();
   const nowISO = now.toISOString();
 
-  // Generate accounts with IDs
-  const accounts: Account[] = DEMO_ACCOUNTS.map((acc) => ({
-    ...acc,
+  // 1. Generate BROKERS first so we can link accounts
+  const brokers: Broker[] = DEMO_BROKERS.map(b => ({
+    ...b,
     id: randomUUID(),
     createdAt: nowISO,
-    updatedAt: nowISO,
+    updatedAt: nowISO
   }));
+  
+  // Helper to find broker by name
+  const getBrokerId = (name: string) => brokers.find(b => b.name === name)?.id;
 
-
+  // Generate accounts with IDs
+  const accounts: Account[] = DEMO_ACCOUNTS.map((acc) => {
+    let brokerId: string | undefined;
+    if (acc.name === 'Main Bank Account') brokerId = getBrokerId('Fineco Bank');
+    
+    return {
+      ...acc,
+      id: randomUUID(),
+      brokerId, // Link to broker
+      createdAt: nowISO,
+      updatedAt: nowISO,
+    };
+  });
 
   // Create an Investment Account specifically for holdings
   const investmentAccount: Account = {
     id: randomUUID(),
-    name: 'Trade Republic',
+    name: 'Trade Republic Portfolio',
     type: 'investment',
     currency: 'EUR',
     initialBalance: 0,
+    brokerId: getBrokerId('Trade Republic'), // Link to broker
+
     color: '#000000',
     icon: 'candlestick-chart',
     isArchived: false,
@@ -228,7 +299,8 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   const twoYearsAgo = new Date();
   twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
 
-  for (let i = 0; i < 500; i++) {
+  // INCREASED TRANSACTION COUNT to 1500 for richer history
+  for (let i = 0; i < 1500; i++) {
     // Random date within the last 2 years
     const txDate = faker.date.between({ from: twoYearsAgo, to: now });
     
@@ -350,6 +422,9 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     const buyDate = faker.date.past({ years: 1 });
     const totalCost = Math.round(quantity * averageBuyPrice);
 
+    // Pick a valid category for the expense (required by schema)
+    const expenseCat = categories.find(c => c.type === 'expense') || categories[0];
+
     transactions.push({
       id: randomUUID(),
       type: 'expense',
@@ -358,7 +433,7 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       amount: totalCost,
       currency: asset.currency,
       accountId: investmentAccount.id,
-      categoryId: null,
+      categoryId: expenseCat?.id || null, // Fix: Assign a categoryId
       toAccountId: null,
       splits: [],
       status: 'cleared',
@@ -369,6 +444,37 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       updatedAt: nowISO,
     });
   });
+  
+  // ===========================================
+  // 3. GENERATE SNAPSHOTS (Net Worth History)
+  // ===========================================
+  const snapshots: Snapshot[] = [];
+  const snapshotStartDate = new Date();
+  snapshotStartDate.setFullYear(snapshotStartDate.getFullYear() - 2);
+  
+  // Generate 24 monthly snapshots for 2 years
+  for (let i = 0; i < 24; i++) {
+    const date = new Date(snapshotStartDate);
+    date.setMonth(date.getMonth() + i);
+    
+    // Fake trend: growing net worth with some variance
+    const baseNetWorth = 10000000 + (i * 250000); // Start 100k, +2.5k/month
+    const randomVar = faker.number.int({ min: -100000, max: 200000 });
+    const total = baseNetWorth + randomVar;
+    
+    snapshots.push({
+      id: randomUUID(),
+      date: date.toISOString(),
+      totalNetWorth: total,
+      currency: 'EUR',
+      breakdown: {
+        cash: Math.round(total * 0.2),
+        investments: Math.round(total * 0.5),
+        realEstate: Math.round(total * 0.25),
+        collectibles: Math.round(total * 0.05),
+      }
+    });
+  }
 
   // Write accounts.json
   const accountsFile: AccountsFile = {
@@ -433,6 +539,17 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     );
   }
 
+  // Write brokers.json
+  const brokersFile: BrokersFile = {
+    version: 1,
+    brokers
+  };
+  await fs.writeJson(
+    path.join(vaultPath, VAULT_STRUCTURE.BROKERS_FILE),
+    brokersFile,
+    { spaces: 2 }
+  );
+
   // Write properties.json
   await fs.writeJson(
     path.join(vaultPath, 'properties.json'),
@@ -461,13 +578,26 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     { spaces: 2 }
   );
 
+  // Write snapshots.json
+  const snapshotsFile: SnapshotsFile = {
+    version: 1,
+    snapshots
+  };
+  await fs.writeJson(
+    path.join(vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE),
+    snapshotsFile,
+    { spaces: 2 }
+  );
+
   return {
     accounts: accounts.length,
     categories: categories.length,
     transactions: transactions.length,
     properties: properties.length,
     collectibles: collectibles.length,
-    assets: assets.length
+    assets: assets.length,
+    brokers: brokers.length,
+    snapshots: snapshots.length
   };
 }
 
@@ -479,19 +609,35 @@ function generateExpenseAmount(categoryName: string): number {
   // Returns amount in cents
   switch (categoryName) {
     case 'Rent':
+    case 'Mortgage':
       return faker.number.int({ min: 80000, max: 150000 }); // €800 - €1500
+    case 'Groceries':
     case 'Food & Dining':
-      return faker.number.int({ min: 500, max: 12000 }); // €5 - €120
+      return faker.number.int({ min: 1000, max: 15000 }); // €10 - €150
     case 'Utilities':
-      return faker.number.int({ min: 3000, max: 20000 }); // €30 - €200
+    case 'Internet & Phone':
+      return faker.number.int({ min: 3000, max: 15000 }); // €30 - €150
     case 'Transportation':
-      return faker.number.int({ min: 500, max: 15000 }); // €5 - €150
+    case 'Fuel':
+      return faker.number.int({ min: 1000, max: 10000 }); // €10 - €100
     case 'Entertainment':
-      return faker.number.int({ min: 1000, max: 8000 }); // €10 - €80
+    case 'Gaming':
+    case 'Subscription':
+      return faker.number.int({ min: 1000, max: 6000 }); // €10 - €60
     case 'Shopping':
+    case 'Hobbies':
       return faker.number.int({ min: 2000, max: 30000 }); // €20 - €300
     case 'Healthcare':
-      return faker.number.int({ min: 2000, max: 25000 }); // €20 - €250
+    case 'Fitness':
+    case 'Personal Care':
+      return faker.number.int({ min: 2000, max: 10000 }); // €20 - €100
+    case 'Travel':
+      return faker.number.int({ min: 10000, max: 100000 }); // €100 - €1000
+    case 'Education':
+      return faker.number.int({ min: 5000, max: 50000 }); // €50 - €500
+    case 'Kids':
+    case 'Pets':
+       return faker.number.int({ min: 2000, max: 20000 }); // €20 - €200
     default:
       return faker.number.int({ min: 1000, max: 10000 }); // €10 - €100
   }
@@ -501,11 +647,14 @@ function generateIncomeAmount(categoryName: string): number {
   // Returns amount in cents
   switch (categoryName) {
     case 'Salary':
-      return faker.number.int({ min: 250000, max: 500000 }); // €2500 - €5000
+      return faker.number.int({ min: 200000, max: 400000 }); // €2000 - €4000
     case 'Freelance':
-      return faker.number.int({ min: 50000, max: 200000 }); // €500 - €2000
+      return faker.number.int({ min: 50000, max: 150000 }); // €500 - €1500
     case 'Investments':
-      return faker.number.int({ min: 10000, max: 100000 }); // €100 - €1000
+    case 'Dividends':
+      return faker.number.int({ min: 5000, max: 50000 }); // €50 - €500
+    case 'Gifts':
+      return faker.number.int({ min: 5000, max: 20000 }); // €50 - €200
     default:
       return faker.number.int({ min: 5000, max: 50000 }); // €50 - €500
   }
@@ -540,4 +689,6 @@ export async function clearVaultData(vaultPath: string): Promise<void> {
   await fs.remove(path.join(vaultPath, 'collectibles.json'));
   await fs.remove(path.join(vaultPath, 'assets.json'));
   await fs.remove(path.join(vaultPath, 'holdings.json'));
+  await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.BROKERS_FILE));
+  await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE));
 }

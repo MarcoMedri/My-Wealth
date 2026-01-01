@@ -14,12 +14,35 @@
   "nav": {
     "dashboard": "Overview",
     "accounts": "Accounts",
+    "brokers": "Brokers",
     "investments": "Investments",
     "properties": "Real Estate",
     "collectibles": "Collectibles",
     "settings": "Settings",
     "developer": "Developer",
     "noAccounts": "No accounts yet"
+  },
+  "brokers": {
+    "addBroker": "Add Broker",
+    "editBroker": "Edit Broker",
+    "nameLabel": "Broker / Institution Name",
+    "namePlaceholder": "e.g. Interactive Brokers, Chase, Binance",
+    "typeLabel": "Institution Type",
+    "totalValue": "Total Value",
+    "cashBalance": "Cash Balance",
+    "investmentsValue": "Investments",
+    "linkedAccounts": "Linked Accounts",
+    "portfolio": "Portfolio",
+    "noAccounts": "No accounts linked to this broker",
+    "noHoldings": "No investment holdings with this broker",
+    "deleteConfirm": "Are you sure you want to delete this broker?",
+    "notFound": "Broker not found",
+    "types": {
+        "bank": "Bank",
+        "broker": "Broker",
+        "crypto_exchange": "Crypto Exchange",
+        "other": "Other"
+    }
   },
   "dashboard": {
     "netWorth": "Net Worth",
@@ -38,7 +61,8 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    }
+    },
+    "decimals": "Decimal Places"
   },
   "collectibles": {
     "title": "Collectibles",

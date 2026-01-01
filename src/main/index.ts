@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
-import type { Transaction, Account, Category } from '../shared/schemas'
+import type { Transaction, Account, Category, Broker } from '../shared/schemas'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -62,10 +62,18 @@ function registerIpcHandlers(): void {
     return vaultManager.loadVault()
   })
 
+  ipcMain.handle(IPC_CHANNELS.VAULT_CREATE_SNAPSHOT, async () => {
+    return vaultManager.createSnapshot()
+  })
+
   // ========== TRANSACTIONS ==========
   
   ipcMain.handle(IPC_CHANNELS.TRANSACTION_SAVE, async (_event, transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
     return vaultManager.saveTransaction(transaction)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.TRANSACTION_DELETE, async (_event, id: string) => {
+    return vaultManager.deleteTransaction(id)
   })
 
   // ========== ACCOUNTS ==========
@@ -78,6 +86,20 @@ function registerIpcHandlers(): void {
   
   ipcMain.handle(IPC_CHANNELS.CATEGORY_SAVE, async (_event, category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
     return vaultManager.saveCategory(category)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.CATEGORY_DELETE, async (_event, id: string) => {
+    return vaultManager.deleteCategory(id)
+  })
+
+  // ========== BROKERS ==========
+  
+  ipcMain.handle(IPC_CHANNELS.BROKER_SAVE, async (_event, broker: Broker) => {
+    return vaultManager.saveBroker(broker)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.BROKER_DELETE, async (_event, id: string) => {
+    return vaultManager.deleteBroker(id)
   })
 
   // ========== CSV IMPORT ==========

@@ -3,20 +3,22 @@
  * Form to create a new transaction
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
 import { Loader2, ArrowRight } from 'lucide-react';
-import type { TransactionType } from '../../../shared/schemas';
+import type { Transaction, TransactionType } from '../../../shared/schemas';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
     onClose: () => void;
+    transaction?: Transaction | null; // Optional transaction to edit
+    isDuplicate?: boolean; // If true, treats the transaction as a template for a new one
 }
 
-export default function AddTransactionModal({ isOpen, onClose }: AddTransactionModalProps) {
-    const { accounts, categories, addTransaction } = useVaultStore();
+export default function AddTransactionModal({ isOpen, onClose, transaction, isDuplicate = false }: AddTransactionModalProps) {
+    const { accounts, categories, addTransaction, updateTransaction } = useVaultStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +39,33 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
         toAccountId: '',
         notes: '',
     });
+
+    useEffect(() => {
+        if (transaction) {
+            setFormData({
+                type: transaction.type,
+                date: transaction.date.split('T')[0],
+                amount: (transaction.amount / 100).toFixed(2),
+                payee: transaction.payee,
+                accountId: transaction.accountId,
+                categoryId: transaction.categoryId || '',
+                toAccountId: transaction.toAccountId || '',
+                notes: transaction.notes || '',
+            });
+        } else {
+            // Reset to defaults
+            setFormData({
+                type: 'expense',
+                date: new Date().toISOString().split('T')[0],
+                amount: '',
+                payee: '',
+                accountId: activeAccounts[0]?.id || '',
+                categoryId: '',
+                toAccountId: '',
+                notes: '',
+            });
+        }
+    }, [transaction, isOpen, activeAccounts]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,7 +107,23 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
             });
 
             // Update UI optimistically (or full refresh)
-            addTransaction(tx);
+            if (isEditing) {
+                // Update existing
+                // We need an update API or just re-save with same ID? 
+                // The main process saveTransaction handles upsert if ID provided?
+                // Let's check main process. The ipc 'TRANSACTION_SAVE' takes Omit<Transaction, 'id' ...> & { id?: string }.
+                // So if we pass ID, it should update.
+
+                // However, window.api.saveTransaction returns the saved object.
+                const saved = await window.api.saveTransaction({
+                    ...tx,
+                    id: transaction.id,
+                });
+                updateTransaction(saved);
+            } else {
+                // Create new
+                addTransaction(tx);
+            }
 
             onClose();
             // Reset form but keep convenience fields
@@ -98,8 +143,10 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
     // Dynamic category list based on transaction type
     const activeCategories = formData.type === 'income' ? incomeCategories : expenseCategories;
 
+    const isEditing = !!transaction && !isDuplicate;
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Add Transaction">
+        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Transaction" : isDuplicate ? "Duplicate Transaction" : "Add Transaction"}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -274,7 +321,7 @@ export default function AddTransactionModal({ isOpen, onClose }: AddTransactionM
                         )}
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        Save Transaction
+                        {isEditing ? 'Update Transaction' : 'Save Transaction'}
                     </button>
                 </div>
             </form>

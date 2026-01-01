@@ -12,6 +12,8 @@ export const VAULT_STRUCTURE = {
   CATEGORIES_FILE: 'categories.json',
   TRANSACTIONS_DIR: 'transactions',
   SETTINGS_FILE: 'settings.json',
+  BROKERS_FILE: 'brokers.json',
+  SNAPSHOTS_FILE: 'snapshots.json',
 } as const;
 
 /**
@@ -43,15 +45,22 @@ export const IPC_CHANNELS = {
   VAULT_SELECT_PATH: 'vault:selectPath',
   VAULT_INITIALIZE: 'vault:initialize',
   VAULT_LOAD: 'vault:load',
+  VAULT_CREATE_SNAPSHOT: 'vault:createSnapshot',
   
   // Transaction operations
   TRANSACTION_SAVE: 'transaction:save',
+  TRANSACTION_DELETE: 'transaction:delete',
   
   // Account operations
   ACCOUNT_SAVE: 'account:save',
   
   // Category operations
   CATEGORY_SAVE: 'category:save',
+  CATEGORY_DELETE: 'category:delete',
+
+  // Broker operations
+  BROKER_SAVE: 'broker:save',
+  BROKER_DELETE: 'broker:delete',
   
   // Import operations
   IMPORT_CSV_PREVIEW: 'import:csvPreview',

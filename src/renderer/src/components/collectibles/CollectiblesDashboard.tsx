@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Plus, RefreshCw, Watch, Palette, Wine, Coins, Car, Box, Pencil, Trash2, Tag } from 'lucide-react';
-import { formatMoney, type Collectible } from '../../../../shared/schemas';
+import { Plus, RefreshCw, Watch, Palette, Wine, Coins, Car, Box, Trash2, Tag } from 'lucide-react';
+import { type Collectible } from '../../../../shared/schemas';
+import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { CollectibleModal } from './CollectibleModal';
 import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ export function CollectiblesDashboard() {
     // Use Net Worth hook for currency conversion
     const { convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
+    const formatMoney = useFormatMoney();
 
     // Calculate totals
     const metrics = useMemo(() => {
@@ -128,11 +130,11 @@ export function CollectiblesDashboard() {
                 </div>
                 <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
                     <div className="text-sm text-foreground-muted mb-1">{t('collectibles.appreciation')}</div>
-                    <div className={`text-2xl font-bold flex items-center gap-2 ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <div className={`text-2xl font-bold ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {metrics.appreciation >= 0 ? '+' : ''}{formatMoney(metrics.appreciation, baseCurrency)}
-                        <span className="text-sm font-normal bg-background-muted px-2 py-0.5 rounded">
-                            {metrics.appreciationPercent.toFixed(1)}%
-                        </span>
+                    </div>
+                    <div className={`text-sm mt-1 ${metrics.appreciation >= 0 ? 'text-emerald-500/80' : 'text-rose-500/80'}`}>
+                        {metrics.appreciationPercent >= 0 ? '+' : ''}{metrics.appreciationPercent.toFixed(2)}%
                     </div>
                 </div>
                 <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
@@ -154,18 +156,12 @@ export function CollectiblesDashboard() {
                     return (
                         <div
                             key={item.id}
-                            className="bg-background-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow group relative"
+                            onClick={() => handleEdit(item)}
+                            className="bg-background-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow group relative cursor-pointer"
                         >
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                 <button
-                                    onClick={() => handleEdit(item)}
-                                    className="p-1.5 hover:bg-background-muted dark:hover:bg-background-muted rounded text-foreground-subtle hover:text-indigo-500"
-                                    title={t('collectibles.edit')}
-                                >
-                                    <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                                     className="p-1.5 hover:bg-background-muted dark:hover:bg-background-muted rounded text-foreground-subtle hover:text-rose-500"
                                     title={t('collectibles.delete')}
                                 >

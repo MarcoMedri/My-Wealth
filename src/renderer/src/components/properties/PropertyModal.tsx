@@ -69,7 +69,7 @@ export function PropertyModal({ isOpen, onClose, property }: PropertyModalProps)
             const payload = {
                 id: property ? property.id : crypto.randomUUID(),
                 name,
-                type,
+                type: type as Property['type'],
                 address: address || undefined,
                 currentValue: Math.round(parseFloat(currentValue) * 100), // to cents
                 purchasePrice: purchasePrice ? Math.round(parseFloat(purchasePrice) * 100) : undefined,
