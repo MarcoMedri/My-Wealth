@@ -164,14 +164,6 @@ export default function Dashboard() {
                         currency={baseCurrency}
                         onClick={() => setActiveView('investments')}
                     />
-                    <button
-                        onClick={handleAddTransaction}
-                        className="rounded-xl p-6 border shadow-lg transition-all flex flex-col justify-between bg-background-card cursor-pointer hover:shadow-xl hover:border-emerald-500/50 hover:bg-emerald-500/5 border-dashed border-border text-foreground-muted items-center justify-center"
-                        data-tour="add-transaction"
-                    >
-                        <Plus className="w-8 h-8 mb-2" />
-                        <span className="font-medium text-sm">{t('dashboard.addTransaction')}</span>
-                    </button>
                     <SummaryCard
                         title={t('nav.properties')}
                         value={realEstateTotal}
