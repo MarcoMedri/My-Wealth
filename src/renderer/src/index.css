@@ -181,6 +181,10 @@ body {
     @apply bg-primary text-primary-foreground hover:bg-primary-hover;
   }
   
+  .btn-secondary {
+    @apply bg-background-subtle text-foreground border border-border hover:bg-background-muted;
+  }
+  
   .btn-ghost {
     @apply bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground;
   }
@@ -189,13 +193,113 @@ body {
     @apply bg-error text-error-foreground hover:bg-error/90;
   }
   
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+  
   /* Card styles */
   .card {
     @apply bg-card rounded-xl border border-border shadow-sm;
   }
   
+  .card-hover {
+    @apply hover:shadow-md hover:border-primary/30 transition-all cursor-pointer;
+  }
+  
   /* Input styles */
   .input {
     @apply w-full p-2 bg-input border border-input-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-colors;
+  }
+  
+  .form-input {
+    @apply w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground placeholder:text-foreground-muted/50 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-colors;
+  }
+  
+  .form-input-error {
+    @apply border-error focus:ring-error;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-foreground-muted mb-1;
+  }
+  
+  .form-section {
+    @apply space-y-4;
+  }
+  
+  .form-section-title {
+    @apply text-sm font-semibold text-foreground-muted flex items-center gap-2;
+  }
+  
+  .form-divider {
+    @apply h-px bg-border/50;
+  }
+  
+  .form-error {
+    @apply text-xs text-error;
+  }
+  
+  .form-hint {
+    @apply text-xs text-foreground-muted;
+  }
+  
+  /* Grid utilities for forms */
+  .form-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+  
+  .form-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+  }
+  
+  /* Alert/Message styles */
+  .alert {
+    @apply p-3 rounded-lg flex items-center gap-2 text-sm;
+  }
+  
+  .alert-error {
+    @apply bg-error/10 border border-error/20 text-error;
+  }
+  
+  .alert-warning {
+    @apply bg-warning/10 border border-warning/20 text-warning;
+  }
+  
+  .alert-success {
+    @apply bg-success/10 border border-success/20 text-success;
+  }
+  
+  .alert-info {
+    @apply bg-info/10 border border-info/20 text-info;
+  }
+  
+  /* KPI Card styles */
+  .kpi-card {
+    @apply bg-background-card p-4 rounded-xl border border-border;
+  }
+  
+  .kpi-value {
+    @apply text-2xl font-bold text-foreground;
+  }
+  
+  .kpi-label {
+    @apply text-sm font-medium text-foreground-muted;
+  }
+  
+  /* Icon container */
+  .icon-container {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center;
+  }
+  
+  .icon-container-sm {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center;
+  }
+  
+  .icon-container-lg {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center;
   }
 }
