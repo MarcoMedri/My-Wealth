@@ -9,7 +9,7 @@ import type { Category } from '../../../../shared/schemas';
 
 export function CategoryManager() {
     const { t } = useTranslation();
-    const { categories, getCategoriesByType, deleteCategory, addCategory } = useVaultStore(); // Note: addCategory used for seeding defaults
+    const { categories, getCategoriesByType, deleteCategory } = useVaultStore(); // Note: addCategory used for seeding defaults
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [activeTab, setActiveTab] = useState<'income' | 'expense'>('expense');
@@ -43,9 +43,9 @@ export function CategoryManager() {
         if (!confirm(t('settings.confirmResetDefaults'))) return;
         setIsLoading(true);
         try {
-            const { categories } = await window.api.generateDemoData();
+            await window.api.generateDemoData();
             // Reload vault data to reflect changes
-            const data = await window.api.getVaultData();
+            await window.api.getVaultData();
             // Manually sync store (or just reload window)
             // Ideally useVaultStore has a sync method, but for now we'll reload window or just rely on IPC?
             // Actually, generateDemoData returns counts.

@@ -26,6 +26,7 @@ import {
   CollectiblesFileSchema,
   BrokersFileSchema,
   SnapshotsFileSchema,
+  WorkspaceSettingsSchema,
   type AppSettings,
   type Account,
   type Category,
@@ -41,6 +42,7 @@ import {
   type SnapshotsFile,
   type VaultState,
   type SerializableVaultState,
+  type WorkspaceSettings,
   createEmptyVaultState,
 } from '../shared/schemas';
 
@@ -234,7 +236,8 @@ export class VaultManager {
     const vaultPath = this.settings?.vaultPath;
     
     if (!vaultPath) {
-      return this.serializeVaultState(createEmptyVaultState());
+        this.vaultState = createEmptyVaultState();
+        return this.getSerializableState();
     }
 
     try {
@@ -399,6 +402,9 @@ export class VaultManager {
         }
       }
 
+      // Load workspace settings
+      await this.loadWorkspace(vaultPath);
+
       // Scan transactions folder
       await this.scanTransactions(vaultPath);
 
@@ -406,10 +412,11 @@ export class VaultManager {
       this.calculateBalances();
 
       this.vaultState.isLoaded = true;
-      return this.serializeVaultState(this.vaultState);
+      return this.getSerializableState();
     } catch (error) {
       console.error('Failed to load vault:', error);
-      return this.serializeVaultState(createEmptyVaultState());
+      this.vaultState = createEmptyVaultState();
+      return this.getSerializableState();
     }
   }
 
@@ -524,26 +531,107 @@ export class VaultManager {
     }
   }
 
+  // ==========================================================================
+  // WORKSPACE SETTINGS
+  // ==========================================================================
+
   /**
-   * Convert VaultState (with Maps) to serializable format (with arrays)
+   * Load workspace settings from vault
    */
-  private serializeVaultState(state: VaultState): SerializableVaultState {
+  private async loadWorkspace(vaultPath: string): Promise<void> {
+    try {
+      const workspacePath = path.join(vaultPath, VAULT_STRUCTURE.WORKSPACE_FILE);
+      
+      if (await fs.pathExists(workspacePath)) {
+        const data = await fs.readJson(workspacePath);
+        const result = WorkspaceSettingsSchema.safeParse(data);
+        
+        if (result.success) {
+          this.vaultState.workspace = result.data;
+        } else {
+          console.warn('Invalid workspace settings, using defaults:', result.error);
+          this.vaultState.workspace = {};
+        }
+      } else {
+        this.vaultState.workspace = {};
+      }
+    } catch (error) {
+      console.error('Failed to load workspace settings:', error);
+      this.vaultState.workspace = {};
+    }
+  }
+
+  /**
+   * Save workspace settings to vault
+   */
+  async saveWorkspace(settings: Partial<WorkspaceSettings>): Promise<boolean> {
+    if (!this.vaultState.isLoaded || !this.vaultState.vaultPath) {
+      return false;
+    }
+
+    try {
+      // Merge with existing settings
+      const newSettings = {
+        ...this.vaultState.workspace,
+        ...settings,
+      };
+
+      // Validate
+      const result = WorkspaceSettingsSchema.safeParse(newSettings);
+      if (!result.success) {
+        console.error('Invalid workspace settings:', result.error);
+        return false;
+      }
+
+      const workspacePath = path.join(this.vaultState.vaultPath, VAULT_STRUCTURE.WORKSPACE_FILE);
+      await fs.writeJson(workspacePath, result.data, { spaces: 2 });
+      
+      this.vaultState.workspace = result.data;
+      return true;
+    } catch (error) {
+      console.error('Failed to save workspace settings:', error);
+      return false;
+    }
+  }
+
+  // ==========================================================================
+  // IPC HANDLERS
+  // ==========================================================================
+  
+  /**
+   * Register IPC handlers for renderer communication
+   */
+  /* 
+   * Note: This method is manually called in main/index.ts to register handlers.
+   * We don't register them here strictly to keep separation of concerns, 
+   * but we expose public methods that main/index.ts calls.
+   */
+
+  // ==========================================================================
+  // HELPERS
+  // ==========================================================================
+
+  /**
+   * Convert internal state to IPC-safe object (Arrays instead of Maps/Sets)
+   */
+  getSerializableState(): SerializableVaultState {
     return {
-      isLoaded: state.isLoaded,
-      vaultPath: state.vaultPath,
-      accounts: Array.from(state.accounts.values()),
-      categories: Array.from(state.categories.values()),
-      transactions: Array.from(state.transactions.values()),
-      assets: state.assets,
-      holdings: state.holdings,
-      brokers: state.brokers,
-      properties: state.properties,
-      collectibles: state.collectibles,
-      trades: state.trades,
-      dividends: state.dividends,
-      snapshots: state.snapshots,
-      loadedMonths: Array.from(state.loadedMonths),
-      accountBalances: Object.fromEntries(state.accountBalances),
+      isLoaded: this.vaultState.isLoaded,
+      vaultPath: this.vaultState.vaultPath,
+      accounts: Array.from(this.vaultState.accounts.values()),
+      categories: Array.from(this.vaultState.categories.values()),
+      transactions: Array.from(this.vaultState.transactions.values()),
+      loadedMonths: Array.from(this.vaultState.loadedMonths),
+      accountBalances: Object.fromEntries(this.vaultState.accountBalances),
+      assets: this.vaultState.assets,
+      holdings: this.vaultState.holdings,
+      properties: this.vaultState.properties,
+      collectibles: this.vaultState.collectibles,
+      trades: this.vaultState.trades,
+      dividends: this.vaultState.dividends,
+      brokers: this.vaultState.brokers,
+      snapshots: this.vaultState.snapshots,
+      workspace: this.vaultState.workspace,
     };
   }
 

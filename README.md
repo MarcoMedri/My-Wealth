@@ -22,6 +22,9 @@
 *   **🏷️ Transaction Management**:
     *   **Custom Categories**: Create, edit, and delete categories with custom icons and colors.
     *   **Demo Data**: Includes a robust seed generator for realistic historical data and exploring features.
+*   **💾 Workspace Persistence**:
+    *   Remembers your dashboard filters (date ranges, toggle states) across sessions.
+    *   Stores UI preferences locally in the vault (`workspace.json`).
 
 ## 🛠️ Tech Stack
 
@@ -48,8 +51,10 @@ My Wealth uses a **Vault** system - a folder on your local machine containing JS
 ├── trades.json        # Buy/sell transaction history
 ├── properties.json    # Real estate holdings
 ├── collectibles.json  # Watches, art, vehicles, etc.
-├── brokers.json       # Financial institutions (planned)
-└── categories.json    # Transaction categories
+├── brokers.json       # Financial institutions
+├── categories.json    # Transaction categories
+├── snapshots.json     # Historical net worth snapshots
+└── workspace.json     # UI preferences and workspace settings
 ```
 
 ### Core Concepts

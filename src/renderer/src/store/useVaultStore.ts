@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InvestmentTrade, Dividend, Broker, Snapshot } from '../../../shared/schemas';
+import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InvestmentTrade, Dividend, Broker, Snapshot, WorkspaceSettings } from '../../../shared/schemas';
 import { formatMoney } from '../../../shared/schemas';
 
 // ============================================================================
@@ -31,8 +31,8 @@ interface VaultStore {
   snapshots: Snapshot[];
   accountBalances: Record<string, number>;
   loadedMonths: string[];
+  workspace: WorkspaceSettings;
 
-  // Navigation
   // Navigation
   activeView: string;
   setActiveView: (view: string) => void;
@@ -51,6 +51,9 @@ interface VaultStore {
   /** Set all vault data at once */
   setVaultData: (data: SerializableVaultState) => void;
   
+  /** Save workspace settings */
+  setWorkspaceSettings: (settings: Partial<WorkspaceSettings>) => Promise<void>;
+
   // Transaction Actions
   setTransactions: (transactions: Transaction[]) => void;
   addTransaction: (transaction: Transaction) => void;
@@ -106,6 +109,7 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
   snapshots: [],
   accountBalances: {},
   loadedMonths: [],
+  workspace: {},
   netWorth: 0,
 
   // ========== BASIC SETTERS ==========
@@ -148,10 +152,26 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       snapshots: data.snapshots,
       accountBalances: data.accountBalances,
       loadedMonths: data.loadedMonths,
+      workspace: data.workspace || {},
       netWorth,
       isLoading: false,
       error: null,
     });
+  },
+
+  setWorkspaceSettings: async (settings) => {
+    // Optimistic update
+    set((state) => ({
+      workspace: { ...state.workspace, ...settings }
+    }));
+    
+    // Persist
+    try {
+      await window.api.saveWorkspaceSettings(settings);
+    } catch (error) {
+      console.error('Failed to save workspace settings:', error);
+      // Revert not implemented for simplicity, relying on eventual consistency
+    }
   },
 
   activeView: 'dashboard',

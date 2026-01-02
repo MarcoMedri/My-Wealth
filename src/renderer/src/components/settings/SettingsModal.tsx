@@ -115,6 +115,49 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                     <div className="border-t border-border" />
 
+                    {/* Date & Time */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
+                            Date & Time
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Date Format */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">
+                                    Date Format
+                                </label>
+                                <select
+                                    value={useSettingsStore(s => s.dateFormat)}
+                                    onChange={(e) => useSettingsStore.getState().setDateFormat(e.target.value as any)}
+                                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="dd/MM/yyyy">DD/MM/YYYY (31/12/2023)</option>
+                                    <option value="MM/dd/yyyy">MM/DD/YYYY (12/31/2023)</option>
+                                    <option value="yyyy-MM-dd">YYYY-MM-DD (2023-12-31)</option>
+                                    <option value="dd.MM.yyyy">DD.MM.YYYY (31.12.2023)</option>
+                                </select>
+                            </div>
+
+                            {/* Time Format */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">
+                                    Time Format
+                                </label>
+                                <select
+                                    value={useSettingsStore(s => s.timeFormat)}
+                                    onChange={(e) => useSettingsStore.getState().setTimeFormat(e.target.value as any)}
+                                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="HH:mm">24-hour (14:30)</option>
+                                    <option value="hh:mm a">12-hour (02:30 PM)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="border-t border-border" />
+
                     {/* Appearance */}
                     <section className="space-y-4">
                         <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">

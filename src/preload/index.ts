@@ -2,7 +2,19 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { VaultStatus, ImportPreset, ColumnMapping, ImportResult, InvestmentSearchResult } from '../shared/types'
 import { IPC_CHANNELS } from '../shared/types'
-import type { Transaction, Account, Category, SerializableVaultState, Property, Collectible, Asset, Holding, Broker, Snapshot } from '../shared/schemas'
+import type { 
+  Asset, 
+  Holding,  
+  Property, 
+  Collectible, 
+  WorkspaceSettings,
+  SerializableVaultState,
+  Transaction,
+  Account,
+  Category,
+  Broker,
+  Snapshot
+} from '../shared/schemas'
 
 // ============================================================================
 // API EXPOSED TO RENDERER
@@ -131,6 +143,11 @@ const api = {
   },
   deleteHolding: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.HOLDING_DELETE, id)
+  },
+
+  // ========== WORKSPACE ==========
+  saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>): Promise<boolean> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_SAVE, settings)
   },
 
   // ========== REAL ESTATE ==========

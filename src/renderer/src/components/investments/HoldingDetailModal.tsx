@@ -2,6 +2,7 @@ import React from 'react';
 import { X, TrendingUp, TrendingDown, Calendar, DollarSign, Percent } from 'lucide-react';
 import { formatMoney } from '../../../../shared/schemas';
 import type { Holding, Asset } from '../../../../shared/schemas';
+import { useFormatDate } from '../../hooks/useFormatDate';
 
 interface HoldingDetailModalProps {
     isOpen: boolean;
@@ -11,6 +12,7 @@ interface HoldingDetailModalProps {
 }
 
 export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingDetailModalProps) {
+    const { formatDateTime } = useFormatDate();
     if (!isOpen) return null;
 
     const currentValue = holding.quantity * asset.currentPrice;
@@ -155,7 +157,7 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                                 <div>
                                     <span className="text-foreground-muted">Last Updated:</span>
                                     <span className="ml-2 text-foreground">
-                                        {new Date(asset.lastUpdated).toLocaleDateString()}
+                                        {formatDateTime(asset.lastUpdated)}
                                     </span>
                                 </div>
                             </div>

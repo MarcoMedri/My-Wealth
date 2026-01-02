@@ -8,7 +8,13 @@
     "refresh": "Refresh",
     "calculating": "Calculating...",
     "searchPlaceholder": "Search by name or symbol...",
-    "manualEntry": "Manual Entry"
+    "manualEntry": "Manual Entry",
+    "expense": "Expense",
+    "income": "Income",
+    "uncategorized": "Uncategorized",
+    "transfer": "Transfer",
+    "noCategoriesFound": "No categories found",
+    "notEnoughData": "Not enough data"
   },
   "nav": {
     "dashboard": "Overview",
@@ -44,7 +50,13 @@
     }
   },
   "dashboard": {
+    "title": "Financial Overview",
+    "subtitle": "Your net worth at a glance.",
+    "takeSnapshot": "Take Snapshot",
+    "snapshotSuccess": "Snapshot created successfully!",
+    "snapshotError": "Error creating snapshot",
     "netWorth": "Net Worth",
+    "netWorthTrend": "Net Worth Trend",
     "assetAllocation": "Asset Allocation",
     "recentTransactions": "Recent Transactions",
     "cashAccounts": "Cash & Accounts"
@@ -203,7 +215,9 @@
     "allocationByType": "Allocation by Type",
     "allocationByBroker": "Allocation by Broker",
     "allocationByGeography": "Allocation by Geography",
-    "sell": "Sell"
+    "sell": "Sell",
+    "portfolioDistribution": "Portfolio Distribution",
+    "moreItems": "+ {{count}} more"
   },
   "modals": {
     "cancel": "Cancel",

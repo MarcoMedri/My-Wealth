@@ -38,7 +38,7 @@ import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 // Account icons mapping removed as we now show Brokers in sidebar
 // import { SettingsModal } from './settings/SettingsModal'; 
 // Icon mapping for Broker/Account icons
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ElementType> = {
     'wallet': Wallet,
     'building-2': Building2,
     'candlestick-chart': CandlestickChart,

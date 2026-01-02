@@ -1,5 +1,4 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import type { VaultStatus, ImportPreset, ColumnMapping, ImportResult } from '../shared/types'
 import type { 
   SerializableVaultState, 
   Account, 
@@ -8,11 +7,10 @@ import type {
   Asset,
   Holding,
   Property,
-  Property,
-  Collectible,
   Collectible,
   Broker,
-  Snapshot
+  Snapshot,
+  WorkspaceSettings
 } from '../shared/schemas';
 
 interface API {
@@ -48,6 +46,7 @@ interface API {
   refreshInvestmentPrices: () => Promise<Asset[]>;
   deleteAsset: (id: string) => Promise<void>;
   deleteHolding: (id: string) => Promise<void>;
+  saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>) => Promise<boolean>;
 
   // Real Estate
   saveProperty: (property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Property>;

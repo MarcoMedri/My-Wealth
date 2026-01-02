@@ -8,6 +8,7 @@ import { useNetWorth } from '../hooks/useNetWorth';
 import { Loader2, AlertTriangle, RefreshCw, Check, Clock } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useFormatDate } from '../hooks/useFormatDate';
 
 interface ExchangeRateIndicatorProps {
     className?: string;
@@ -18,6 +19,7 @@ export function ExchangeRateIndicator({ className, showLabel = true }: ExchangeR
     const { t } = useTranslation();
     const { isRatesLoading, ratesError, isRatesStale, ratesLastUpdated, baseCurrency } = useNetWorth();
     const fetchRates = useExchangeRates(state => state.fetchRates);
+    const { formatTime } = useFormatDate();
 
     const handleRefresh = () => {
         fetchRates();
@@ -35,7 +37,7 @@ export function ExchangeRateIndicator({ className, showLabel = true }: ExchangeR
         if (diffMins < 1) return t('exchangeRates.justNow', 'Just now');
         if (diffMins < 60) return t('exchangeRates.minsAgo', '{{mins}}m ago', { mins: diffMins });
         if (diffHours < 24) return t('exchangeRates.hoursAgo', '{{hours}}h ago', { hours: diffHours });
-        return date.toLocaleDateString();
+        return formatTime(date);
     };
 
     // Loading state

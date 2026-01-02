@@ -1,5 +1,5 @@
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     createColumnHelper,
@@ -51,19 +51,20 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
     const [isDuplicateMode, setIsDuplicateMode] = useState(false);
 
     // Handlers
-    const handleEdit = (tx: Transaction) => {
+    // Handlers
+    const handleEdit = useCallback((tx: Transaction) => {
         setSelectedTransaction(tx);
         setIsDuplicateMode(false);
         setIsTransactionModalOpen(true);
-    };
+    }, []);
 
-    const handleDuplicate = (tx: Transaction) => {
+    const handleDuplicate = useCallback((tx: Transaction) => {
         setSelectedTransaction(tx);
         setIsDuplicateMode(true);
         setIsTransactionModalOpen(true);
-    };
+    }, []);
 
-    const handleDelete = async (tx: Transaction) => {
+    const handleDelete = useCallback(async (tx: Transaction) => {
         if (confirm(`${t('transactions.confirmDelete')}: ${tx.payee}?`)) {
             try {
                 await window.api.deleteTransaction(tx.id);
@@ -73,7 +74,7 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
                 alert(t('common.error'));
             }
         }
-    };
+    }, [t]);
 
     // Memoize category lookup
     const categoryMap = useMemo(() => {
@@ -163,7 +164,7 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
             ),
 
         })
-    ], [categoryMap]);
+    ], [categoryMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate]);
 
     // Sort transactions
     const sortedData = useMemo(() => {

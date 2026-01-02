@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { Transaction, Snapshot } from '../../../shared/schemas';
 import NetWorthTrendChart from './charts/NetWorthTrendChart';
-import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
-import { useVaultStore } from '../store/useVaultStore';
+
 
 export type DashboardPeriod = 'current_month' | 'last_month' | '3m' | '6m' | '1y';
 
@@ -12,8 +11,10 @@ interface DashboardChartsProps {
     snapshots: Snapshot[];
 }
 
-export default function DashboardCharts({ period, transactions, snapshots }: DashboardChartsProps) {
-    const categories = useVaultStore(state => state.categories);
+import { useTranslation } from 'react-i18next';
+
+export default function DashboardCharts({ period, snapshots }: DashboardChartsProps) {
+    const { t } = useTranslation();
 
     // Filter Logic (Centralized here or passed down?)
     // Let's keep logic here to pass correct dates/data to sub-charts
@@ -59,7 +60,7 @@ export default function DashboardCharts({ period, transactions, snapshots }: Das
 
     return (
         <div className="bg-card rounded-xl p-6 shadow-sm border border-border flex flex-col items-center justify-center min-h-[300px]">
-            <h3 className="text-sm font-semibold text-foreground-muted mb-4 self-start">Net Worth Trend</h3>
+            <h3 className="text-sm font-semibold text-foreground-muted mb-4 self-start">{t('dashboard.netWorthTrend')}</h3>
             <NetWorthTrendChart
                 snapshots={snapshots}
                 startDate={startDate}

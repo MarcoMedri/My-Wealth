@@ -23,12 +23,29 @@ export default function AccountsDashboard() {
         isLoading,
         isLoaded,
         transactions,
-        refreshData
+        refreshData,
+        workspace,
+        setWorkspaceSettings
     } = useVaultStore();
 
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-    const [dateRange, setDateRange] = useState<DateRange>('current-month');
+
+    // Load persisted setting or default to current-month
+    const [dateRange, setLocalDateRange] = useState<DateRange>(
+        (workspace.accountsDashboard?.dateRange as DateRange) || 'current-month'
+    );
+
+    // Sync local state to store when changed (wrapped to debounce if needed, but simple set is fine)
+    const handleDateRangeChange = (range: DateRange) => {
+        setLocalDateRange(range);
+        setWorkspaceSettings({
+            accountsDashboard: {
+                ...workspace.accountsDashboard,
+                dateRange: range
+            }
+        });
+    };
 
     // Load data on mount
     useEffect(() => {
@@ -95,7 +112,7 @@ export default function AccountsDashboard() {
                     {t('accounts.title')}
                 </h1>
                 <div className="flex items-center gap-3">
-                    <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                    <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
 
                     <button
                         onClick={() => setIsImportModalOpen(true)}

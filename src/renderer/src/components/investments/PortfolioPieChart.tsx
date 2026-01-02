@@ -1,21 +1,9 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../../store/useVaultStore';
 import { formatMoney } from '../../../../shared/schemas';
-
-// Color palette for the pie chart
-const COLORS = [
-    '#6366f1', // Indigo
-    '#22c55e', // Green
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#8b5cf6', // Violet
-    '#06b6d4', // Cyan
-    '#ec4899', // Pink
-    '#14b8a6', // Teal
-    '#f97316', // Orange
-    '#84cc16', // Lime
-];
+import { CHART_COLORS } from '../../lib/constants';
 
 interface ChartDataItem {
     name: string;
@@ -47,6 +35,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 export function PortfolioPieChart() {
+    const { t } = useTranslation();
     const { assets, holdings } = useVaultStore();
 
     const chartData = useMemo(() => {
@@ -76,7 +65,7 @@ export function PortfolioPieChart() {
             .map((item, index) => ({
                 ...item,
                 percentage: totalValue > 0 ? (item.value / totalValue) * 100 : 0,
-                color: COLORS[index % COLORS.length],
+                color: CHART_COLORS[index % CHART_COLORS.length],
             }));
     }, [assets, holdings]);
 
@@ -86,7 +75,7 @@ export function PortfolioPieChart() {
 
     return (
         <div className="bg-background-card rounded-xl shadow-sm border border-border p-4">
-            <h3 className="font-semibold text-foreground mb-4">Portfolio Distribution</h3>
+            <h3 className="font-semibold text-foreground mb-4">{t('investments.portfolioDistribution')}</h3>
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -134,7 +123,7 @@ export function PortfolioPieChart() {
                 ))}
                 {chartData.length > 5 && (
                     <div className="text-xs text-foreground-muted text-center pt-1">
-                        + {chartData.length - 5} more
+                        {t('investments.moreItems', { count: chartData.length - 5 })}
                     </div>
                 )}
             </div>

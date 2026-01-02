@@ -1,11 +1,15 @@
-import YahooFinance from 'yahoo-finance2';
+import yahooFinanceModule from 'yahoo-finance2';
 import { app } from 'electron';
 import { join } from 'path';
 import fs from 'fs-extra';
 import { SUPPORTED_CURRENCIES } from '../shared/types';
+// Handle CommonJS/ESM interop
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const YahooFinanceModule = (yahooFinanceModule as any).default || yahooFinanceModule;
+const yahooFinance = new YahooFinanceModule();
 
-// Initialize Yahoo Finance v3
-const yahooFinance = new YahooFinance();
+// usage: yahooFinance.quote(...)
+
 
 interface ExchangeRateCache {
   base: string;

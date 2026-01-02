@@ -31,7 +31,8 @@ export default function Dashboard() {
         collectibles,
         transactions,
         accounts,
-        snapshots
+        snapshots,
+        setActiveView
     } = useVaultStore();
 
     const { netWorth, convert, baseCurrency } = useNetWorth();
@@ -43,7 +44,7 @@ export default function Dashboard() {
     const [isDuplicateMode, setIsDuplicateMode] = useState(false);
 
     // --- Filter State ---
-    const [period] = useState<DashboardPeriod>('current_month');
+    const [period, setPeriod] = useState<DashboardPeriod>('1y');
 
     // --- Aggregations ---
 
@@ -187,6 +188,7 @@ export default function Dashboard() {
                         bg="bg-emerald-500/10"
                         borderColor="border-emerald-500/20"
                         currency={baseCurrency}
+                        onClick={() => setActiveView('accounts')}
                     />
                     <SummaryCard
                         title={t('nav.investments')}
@@ -196,6 +198,7 @@ export default function Dashboard() {
                         bg="bg-blue-500/10"
                         borderColor="border-blue-500/20"
                         currency={baseCurrency}
+                        onClick={() => setActiveView('investments')}
                     />
                     <SummaryCard
                         title={t('nav.properties')}
@@ -205,6 +208,7 @@ export default function Dashboard() {
                         bg="bg-amber-500/10"
                         borderColor="border-amber-500/20"
                         currency={baseCurrency}
+                        onClick={() => setActiveView('properties')}
                     />
                     <SummaryCard
                         title={t('nav.collectibles')}
@@ -214,6 +218,7 @@ export default function Dashboard() {
                         bg="bg-violet-500/10"
                         borderColor="border-violet-500/20"
                         currency={baseCurrency}
+                        onClick={() => setActiveView('collectibles')}
                     />
                 </div>
 
@@ -318,17 +323,21 @@ interface SummaryCardProps {
     borderColor: string;
     className?: string;
     currency: string;
+    onClick?: () => void;
 }
 
-function SummaryCard({ title, value, icon: Icon, color, bg, borderColor, className, currency }: SummaryCardProps) {
+function SummaryCard({ title, value, icon: Icon, color, bg, borderColor, className, currency, onClick }: SummaryCardProps) {
     const formatMoney = useFormatMoney();
     return (
-        <div className={cn(
-            "rounded-xl p-6 border shadow-lg transition-all hover:shadow-xl flex flex-col justify-between",
-            "bg-background-card",
-            borderColor,
-            className
-        )}>
+        <div
+            onClick={onClick}
+            className={cn(
+                "rounded-xl p-6 border shadow-lg transition-all flex flex-col justify-between",
+                "bg-background-card",
+                onClick ? "cursor-pointer hover:shadow-xl hover:border-emerald-500/50 hover:bg-emerald-500/5" : "hover:shadow-xl",
+                borderColor,
+                className
+            )}>
             <div className="flex items-center gap-3 mb-3">
                 <div className={cn("p-2 rounded-lg", bg, color)}>
                     <Icon className="w-5 h-5" />

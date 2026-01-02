@@ -1,4 +1,7 @@
-import YahooFinance from 'yahoo-finance2';
+import yahooFinanceModule from 'yahoo-finance2';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const YahooFinanceModule = (yahooFinanceModule as any).default || yahooFinanceModule;
+const yahooFinance = new YahooFinanceModule();
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import path from 'path';
@@ -6,8 +9,7 @@ import fs from 'fs-extra';
 import type { Asset, Holding, AssetType, InvestmentTrade } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
 
-// Initialize Yahoo Finance v3
-const yahooFinance = new YahooFinance();
+
 
 export interface SellResult {
   updatedHolding: Holding | null; // null if fully sold
@@ -48,6 +50,7 @@ export class InvestmentManager {
    */
   async getQuote(symbol: string) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const quote = await yahooFinance.quote(symbol) as any;
       return {
         symbol: quote.symbol,
@@ -474,6 +477,7 @@ export class InvestmentManager {
 
     for (const asset of assets) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const quote = await yahooFinance.quote(asset.symbol) as any;
         const now = new Date().toISOString();
 

@@ -8,8 +8,10 @@ import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
-import { Loader2, ArrowRight } from 'lucide-react';
-import type { Transaction, TransactionType } from '../../../shared/schemas';
+import { Loader2, ArrowRight, Check, ChevronDown, Tag } from 'lucide-react';
+import type { Transaction, TransactionType, Category } from '../../../shared/schemas';
+import { ICON_MAP } from './settings/IconPicker';
+import { DEFAULT_CATEGORY_COLOR } from '../lib/constants';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
@@ -156,7 +158,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
 
                 {/* Transaction Type Tabs */}
                 <div className="flex p-1 bg-background-subtle rounded-lg border border-border">
-                    {(['expense', 'income', 'transfer'] as const).map((type) => (
+                    {(['expense', 'income'] as const).map((type) => (
                         <button
                             key={type}
                             type="button"
@@ -258,24 +260,18 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                             <label className="block text-sm font-medium text-foreground-muted mb-1">
                                 {t('transactions.category')}
                             </label>
-                            <select
-                                required
+
+                            <CategorySelect
                                 value={formData.categoryId}
-                                onChange={e => setFormData({ ...formData, categoryId: e.target.value })}
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
-                            >
-                                <option value="" disabled>{t('transactions.selectCategory')}</option>
-                                {activeCategories.map(category => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={(id) => setFormData({ ...formData, categoryId: id })}
+                                categories={activeCategories}
+                                placeholder={t('transactions.selectCategory')}
+                            />
                         </div>
                     )}
                 </div>
 
-                {/* Payee / Description */}
+                {/* Payee / Description - MOVED INSIDE */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
                         {t('transactions.payeeDescription')}
@@ -298,13 +294,14 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     <textarea
                         value={formData.notes}
                         onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none resize-none h-20"
+                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
+                        rows={3}
                         placeholder={t('transactions.notesPlaceholder')}
                     />
                 </div>
 
                 {/* Actions */}
-                <div className="pt-4 flex justify-end gap-3">
+                <div className="flex justify-end gap-3 pt-2">
                     <button
                         type="button"
                         onClick={onClose}
@@ -315,16 +312,109 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={cn(
-                            "px-4 py-2 rounded-lg bg-emerald-500 text-foreground font-medium hover:bg-emerald-600 transition-colors flex items-center gap-2",
-                            isLoading && "opacity-50 cursor-not-allowed"
-                        )}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium shadow-sm hover:shadow"
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {isEditing ? t('transactions.updateTransaction') : t('transactions.saveTransaction')}
+                        {isEditing ? t('common.save') : t('transactions.addTransactionShort')}
                     </button>
                 </div>
             </form>
         </Modal>
+    );
+}
+
+// Custom Select Component for Categories with Icons
+function CategorySelect({
+    value,
+    onChange,
+    categories,
+    placeholder
+}: {
+    value: string;
+    onChange: (id: string) => void;
+    categories: Category[];
+    placeholder: string;
+}) {
+    const { t } = useTranslation();
+    const [isOpen, setIsOpen] = useState(false);
+    const selectedCategory = categories.find(c => c.id === value);
+
+    // Close on click outside (simulated by backdrop)
+    return (
+        <div className="relative">
+            {isOpen && (
+                <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none text-left"
+            >
+                {selectedCategory ? (
+                    <div className="flex items-center gap-2">
+                        {(() => {
+                            const IconComp = ICON_MAP[selectedCategory.icon as keyof typeof ICON_MAP] || Tag;
+                            return (
+                                <div
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
+                                    style={{ backgroundColor: selectedCategory.color || DEFAULT_CATEGORY_COLOR }}
+                                >
+                                    <IconComp className="w-3.5 h-3.5" />
+                                </div>
+                            );
+                        })()}
+                        <span>{selectedCategory.name}</span>
+                    </div>
+                ) : (
+                    <span className="text-foreground-muted">{placeholder}</span>
+                )}
+                <ChevronDown className="w-4 h-4 text-foreground-muted" />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-background-card border border-border rounded-lg shadow-lg z-20">
+                    {categories.length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-foreground-muted text-center">
+                            {t('common.noCategoriesFound')}
+                        </div>
+                    ) : (
+                        categories.map(category => {
+                            const IconComp = ICON_MAP[category.icon as keyof typeof ICON_MAP] || Tag;
+                            const isSelected = category.id === value;
+
+                            return (
+                                <button
+                                    key={category.id}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(category.id);
+                                        setIsOpen(false);
+                                    }}
+                                    className={cn(
+                                        "w-full flex items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-background-subtle",
+                                        isSelected && "bg-background-subtle text-primary"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
+                                            style={{ backgroundColor: category.color || DEFAULT_CATEGORY_COLOR }}
+                                        >
+                                            <IconComp className="w-3.5 h-3.5" />
+                                        </div>
+                                        <span>{category.name}</span>
+                                    </div>
+                                    {isSelected && <Check className="w-4 h-4" />}
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
+            )}
+        </div>
     );
 }

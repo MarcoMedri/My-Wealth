@@ -617,58 +617,81 @@ export interface VaultState {
   transactions: Map<string, Transaction>;
   
   /**
-   * Which months are currently loaded
-   * Format: "YYYY-MM" → true
-   */
-  loadedMonths: Set<string>;
-  
-  /**
-   * Calculated balances per account (derived from transactions)
-   * Updated whenever transactions change
-   */
-  accountBalances: Map<string, number>;
-
-  /**
-   * Assets (Stocks, ETFs, Crypto)
-   */
-  assets: Asset[];
-
-  /**
-   * Holdings (User ownership of assets)
-   */
-  holdings: Holding[];
-
-  /**
-   * Real Estate Properties
-   */
-  properties: Property[];
-
-  /**
-   * Collectibles (Watches, Art, etc.)
-   */
-  collectibles: Collectible[];
-
-  /**
-   * Investment trades history (buy/sell records)
-   */
-  trades: InvestmentTrade[];
-
-  /**
-   * Dividend payments received
-   */
-
-  dividends: Dividend[];
-  
-  /**
-   * Brokers/Institutions
-   */
-  brokers: Broker[];
-
-  /**
-   * Historical Net Worth Snapshots
-   */
-  snapshots: Snapshot[];
+    * Which months are currently loaded
+    * Format: "YYYY-MM" → true
+    */
+   loadedMonths: Set<string>;
+   
+   /**
+    * Calculated balances per account (derived from transactions)
+    * Updated whenever transactions change
+    */
+   accountBalances: Map<string, number>;
+ 
+   /**
+    * Assets (Stocks, ETFs, Crypto)
+    */
+   assets: Asset[];
+ 
+   /**
+    * Holdings (User ownership of assets)
+    */
+   holdings: Holding[];
+ 
+   /**
+    * Real Estate Properties
+    */
+   properties: Property[];
+ 
+   /**
+    * Collectibles (Watches, Art, etc.)
+    */
+   collectibles: Collectible[];
+ 
+   /**
+    * Investment trades history (buy/sell records)
+    */
+   trades: InvestmentTrade[];
+ 
+   /**
+    * Dividend payments received
+    */
+   dividends: Dividend[];
+   
+   /**
+    * Loaded Brokers
+    */
+   brokers: Broker[];
+ 
+   /**
+    * Loaded Snapshots
+    */
+   snapshots: Snapshot[];
+   
+   /**
+    * Workspace Settings (Filters, UI preferences)
+    */
+   workspace: WorkspaceSettings;
 }
+
+// ============================================================================
+// WORKSPACE SETTINGS
+// ============================================================================
+
+export const WorkspaceSettingsSchema = z.object({
+  accountsDashboard: z.object({
+    dateRange: z.string().optional(), // 'current-month', 'last-3-months', etc.
+  }).optional(),
+  investmentsDashboard: z.object({
+    dateRange: z.string().optional(),
+    includeClosed: z.boolean().optional(),
+  }).optional(),
+  global: z.object({
+    // potentially theme, language, etc in future?
+  }).optional()
+});
+
+export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 
 /**
  * Create an empty VaultState for initialization
@@ -690,6 +713,7 @@ export function createEmptyVaultState(): VaultState {
     dividends: [],
     brokers: [],
     snapshots: [],
+    workspace: {},
   };
 }
 
@@ -715,6 +739,7 @@ export interface SerializableVaultState {
   snapshots: Snapshot[];
   loadedMonths: string[];
   accountBalances: Record<string, number>;
+  workspace: WorkspaceSettings;
 }
 
 // ============================================================================

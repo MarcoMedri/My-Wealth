@@ -63,8 +63,12 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(IPC_CHANNELS.VAULT_CREATE_SNAPSHOT, async () => {
-    return vaultManager.createSnapshot()
-  })
+    return vaultManager.createSnapshot();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.WORKSPACE_SAVE, async (_event, settings) => {
+    return vaultManager.saveWorkspace(settings);
+  });
 
   // ========== TRANSACTIONS ==========
   

@@ -9,24 +9,53 @@ import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
+import { cn } from '../../lib/utils';
 
 import {
     Chart as ChartJS,
     ArcElement,
     Tooltip,
-    Legend
+    Legend,
+    type ChartData,
+    type ChartOptions
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export function InvestmentDashboard() {
-    const { assets, holdings, accounts, brokers, refreshAllPrices, isLoading } = useVaultStore();
+    const { assets, holdings, brokers, accounts, refreshAllPrices, isLoading, workspace, setWorkspaceSettings } = useVaultStore();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [sellModal, setSellModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
     const [detailModal, setDetailModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
-    const [dateRange, setDateRange] = useState<DateRange>('all');
-    const [includeClosed, setIncludeClosed] = useState(false);
+
+    // Load persisted settings
+    const [dateRange, setLocalDateRange] = useState<DateRange>(
+        (workspace.investmentsDashboard?.dateRange as DateRange) || 'all'
+    );
+    const [includeClosed, setLocalIncludeClosed] = useState(
+        workspace.investmentsDashboard?.includeClosed || false
+    );
+
+    const handleDateRangeChange = (range: DateRange) => {
+        setLocalDateRange(range);
+        setWorkspaceSettings({
+            investmentsDashboard: {
+                ...workspace.investmentsDashboard,
+                dateRange: range
+            }
+        });
+    };
+
+    const handleIncludeClosedChange = (checked: boolean) => {
+        setLocalIncludeClosed(checked);
+        setWorkspaceSettings({
+            investmentsDashboard: {
+                ...workspace.investmentsDashboard,
+                includeClosed: checked
+            }
+        });
+    };
 
     const { convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
@@ -171,7 +200,7 @@ export function InvestmentDashboard() {
         };
     };
 
-    const chartOptions = {
+    const chartOptions: ChartOptions<'doughnut'> = {
         plugins: {
             legend: {
                 position: 'right' as const,
@@ -182,7 +211,7 @@ export function InvestmentDashboard() {
                     font: {
                         family: '-apple-system, BlinkMacSystemFont, Inter, system-ui', // Use system font stack 
                         size: 13, // Increased from 11
-                        weight: '500' // Medium weight
+                        weight: 'bold', // Changed from '500' to valid type
                     },
                     boxWidth: 8,
                     padding: 15 // Increased padding
@@ -209,9 +238,6 @@ export function InvestmentDashboard() {
         maintainAspectRatio: false,
     };
 
-    const handleRefresh = async () => {
-        await refreshAllPrices();
-    };
 
     if (!holdings.length) {
         return (
@@ -244,9 +270,9 @@ export function InvestmentDashboard() {
                     {t('investments.title')}
                 </h1>
                 <div className="flex gap-2">
-                    <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                    <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
                     <button
-                        onClick={handleRefresh}
+                        onClick={refreshAllPrices}
                         className="btn btn-ghost flex items-center gap-1"
                         disabled={isLoading}
                         title={t('investments.refreshPrices')}
@@ -294,21 +320,39 @@ export function InvestmentDashboard() {
                     <span className="font-semibold text-foreground">{t('investments.holdings')}</span>
 
                     {/* Include Closed Positions Toggle */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-background-subtle rounded-lg px-2 py-1 border border-border">
+                            <label className="text-sm text-foreground-muted cursor-pointer select-none" htmlFor="show-closed-toggle">
+                                {t('investments.showClosedPositions')}
+                            </label>
+                            <button
+                                id="show-closed-toggle"
+                                aria-checked={includeClosed}
+                                role="switch"
+                                onClick={() => handleIncludeClosedChange(!includeClosed)}
+                                className={cn(
+                                    "w-9 h-5 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                    includeClosed ? "bg-primary" : "bg-input hover:bg-input-hover"
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform",
+                                        includeClosed ? "translate-x-4" : "translate-x-0"
+                                    )}
+                                />
+                            </button>
+                        </div>
+                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
                         <button
-                            onClick={() => setIncludeClosed(!includeClosed)}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${includeClosed ? 'bg-primary' : 'bg-input hover:bg-input-hover'
-                                }`}
+                            onClick={() => refreshAllPrices()}
+                            className="btn btn-ghost flex items-center gap-1"
+                            disabled={isLoading}
+                            title={t('investments.refreshPrices')}
                         >
-                            <span
-                                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${includeClosed ? 'translate-x-4.5' : 'translate-x-1'
-                                    }`}
-                                style={{ transform: includeClosed ? 'translateX(18px)' : 'translateX(2px)' }}
-                            />
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
                         </button>
-                        <span className="text-sm text-foreground-muted cursor-pointer select-none" onClick={() => setIncludeClosed(!includeClosed)}>
-                            {t('investments.showClosedPositions')}
-                        </span>
                     </div>
                 </div>
                 <div className="overflow-x-auto flex-1">
@@ -423,7 +467,7 @@ function KpiCard({ title, value, currency, percent, isChange }: { title: string,
     );
 }
 
-function ChartCard({ title, data, options }: { title: string, data: any, options: any }) {
+function ChartCard({ title, data, options }: { title: string, data: ChartData<'doughnut'>, options: ChartOptions<'doughnut'> }) {
     return (
         <div className="bg-card rounded-xl p-6 shadow-sm border border-border flex flex-col min-h-[300px]">
             <h3 className="text-sm font-semibold text-foreground-muted mb-4">{title}</h3>

@@ -13,7 +13,13 @@
     "search": "Cerca",
     "confirm": "Conferma",
     "error": "Errore",
-    "success": "Successo"
+    "success": "Successo",
+    "expense": "Uscita",
+    "income": "Entrata",
+    "uncategorized": "Non categorizzato",
+    "transfer": "Trasferimento",
+    "noCategoriesFound": "Nessuna categoria trovata",
+    "notEnoughData": "Dati insufficienti"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -22,6 +28,7 @@
     "snapshotSuccess": "Snapshot creato con successo!",
     "snapshotError": "Errore durante la creazione dello snapshot",
     "netWorth": "Patrimonio Netto",
+    "netWorthTrend": "Andamento Patrimonio Netto",
     "assetAllocation": "Allocazione Asset",
     "recentTransactions": "Transazioni Recenti",
     "cashAccounts": "Conti & Liquidità"
@@ -211,7 +218,9 @@
     "allocationByType": "Allocazione per Tipo",
     "allocationByBroker": "Allocazione per Broker",
     "allocationByGeography": "Allocazione per Geografia",
-    "sell": "Vendi"
+    "sell": "Vendi",
+    "portfolioDistribution": "Distribuzione Portafoglio",
+    "moreItems": "+ altri {{count}}"
   },
   "modals": {
     "cancel": "Annulla",

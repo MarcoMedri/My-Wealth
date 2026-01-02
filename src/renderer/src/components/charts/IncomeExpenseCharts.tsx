@@ -119,6 +119,7 @@ export default function IncomeExpenseCharts({ transactions, categories, startDat
             },
             tooltip: {
                 callbacks: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     label: function (context: any) {
                         let label = context.label || '';
                         if (label) {

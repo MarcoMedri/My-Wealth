@@ -14,6 +14,7 @@ export const VAULT_STRUCTURE = {
   SETTINGS_FILE: 'settings.json',
   BROKERS_FILE: 'brokers.json',
   SNAPSHOTS_FILE: 'snapshots.json',
+  WORKSPACE_FILE: 'workspace.json',
 } as const;
 
 /**
@@ -46,6 +47,7 @@ export const IPC_CHANNELS = {
   VAULT_INITIALIZE: 'vault:initialize',
   VAULT_LOAD: 'vault:load',
   VAULT_CREATE_SNAPSHOT: 'vault:createSnapshot',
+  WORKSPACE_SAVE: 'workspace:save',
   
   // Transaction operations
   TRANSACTION_SAVE: 'transaction:save',
@@ -200,3 +202,17 @@ export const SUPPORTED_LANGUAGES: { code: SupportedLanguage; name: string }[] = 
 ];
 
 export type Theme = 'system' | 'light' | 'dark';
+
+export type DateFormat = 'dd/MM/yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd' | 'dd.MM.yyyy';
+export const SUPPORTED_DATE_FORMATS: { code: DateFormat; label: string }[] = [
+  { code: 'dd/MM/yyyy', label: 'DD/MM/YYYY (31/12/2023)' },
+  { code: 'MM/dd/yyyy', label: 'MM/DD/YYYY (12/31/2023)' },
+  { code: 'yyyy-MM-dd', label: 'YYYY-MM-DD (2023-12-31)' },
+  { code: 'dd.MM.yyyy', label: 'DD.MM.YYYY (31.12.2023)' },
+];
+
+export type TimeFormat = 'HH:mm' | 'hh:mm a';
+export const SUPPORTED_TIME_FORMATS: { code: TimeFormat; label: string }[] = [
+  { code: 'HH:mm', label: '24-hour (14:30)' },
+  { code: 'hh:mm a', label: '12-hour (02:30 PM)' },
+];

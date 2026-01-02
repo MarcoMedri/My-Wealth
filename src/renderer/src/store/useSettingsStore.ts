@@ -1,17 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SupportedCurrency, SupportedLanguage, Theme } from '../../../shared/types';
+import type { SupportedCurrency, SupportedLanguage, Theme, DateFormat, TimeFormat } from '../../../shared/types';
 
 interface SettingsState {
   currency: SupportedCurrency;
   language: SupportedLanguage;
   theme: Theme;
   decimals: number;
+  dateFormat: DateFormat;
+  timeFormat: TimeFormat;
   
   setCurrency: (currency: SupportedCurrency) => void;
   setLanguage: (language: SupportedLanguage) => void;
   setTheme: (theme: Theme) => void;
   setDecimals: (decimals: number) => void;
+  setDateFormat: (format: DateFormat) => void;
+  setTimeFormat: (format: TimeFormat) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -21,11 +25,15 @@ export const useSettingsStore = create<SettingsState>()(
       language: 'en', // Default to English
       theme: 'system', // Default as requested
       decimals: 2, // Default to 2 decimal places
+      dateFormat: 'dd/MM/yyyy',
+      timeFormat: 'HH:mm',
       
       setCurrency: (currency) => set({ currency }),
       setLanguage: (language) => set({ language }),
       setTheme: (theme) => set({ theme }),
       setDecimals: (decimals) => set({ decimals }),
+      setDateFormat: (dateFormat) => set({ dateFormat }),
+      setTimeFormat: (timeFormat) => set({ timeFormat }),
     }),
     {
       name: 'my-wealth-settings',
