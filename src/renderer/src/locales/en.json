@@ -483,5 +483,34 @@
     "loan": "Loan / Mortgage",
     "deposit": "Deposit Account",
     "other": "Other"
+  },
+  "tutorial": {
+    "welcome": {
+      "title": "Welcome to My Wealth! 👋",
+      "text": "Let's take a quick tour to help you get started. You can skip this anytime."
+    },
+    "dashboard": {
+      "title": "Your Financial Dashboard 📊",
+      "text": "This is your overview. See your net worth, recent transactions, and financial trends at a glance."
+    },
+    "sidebar": {
+      "title": "Navigate Your Finances 🗂️",
+      "text": "Use the sidebar to access Accounts, Investments, Budgets, and more. Click any section to explore."
+    },
+    "addTransaction": {
+      "title": "Track Your Money ➕",
+      "text": "Click here to add income or expenses. Every transaction helps build your financial picture."
+    },
+    "complete": {
+      "title": "You're All Set! 🎉",
+      "text": "Start by creating your first account or explore with demo data. You can restart this tour anytime from the Help menu."
+    },
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip Tour",
+    "finish": "Get Started"
+  },
+  "help": {
+    "showTutorial": "Show Tutorial"
   }
 }

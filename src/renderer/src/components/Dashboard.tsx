@@ -95,7 +95,7 @@ export default function Dashboard() {
 
 
     return (
-        <div className="h-full flex flex-col overflow-y-auto">
+        <div className="p-6 space-y-6 overflow-y-auto h-full" data-tour="dashboard">
             {/* Header */}
             <header className="px-8 py-6 pb-2 flex justify-between items-end">
                 <div>
@@ -164,6 +164,14 @@ export default function Dashboard() {
                         currency={baseCurrency}
                         onClick={() => setActiveView('investments')}
                     />
+                    <button
+                        onClick={handleAddTransaction}
+                        className="rounded-xl p-6 border shadow-lg transition-all flex flex-col justify-between bg-background-card cursor-pointer hover:shadow-xl hover:border-emerald-500/50 hover:bg-emerald-500/5 border-dashed border-border text-foreground-muted items-center justify-center"
+                        data-tour="add-transaction"
+                    >
+                        <Plus className="w-8 h-8 mb-2" />
+                        <span className="font-medium text-sm">{t('dashboard.addTransaction')}</span>
+                    </button>
                     <SummaryCard
                         title={t('nav.properties')}
                         value={realEstateTotal}

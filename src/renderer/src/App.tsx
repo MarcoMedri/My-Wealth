@@ -22,6 +22,8 @@ import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
 import { useVaultStore } from './store/useVaultStore';
 import { useExchangeRates } from './store/useExchangeRates';
+import { useTutorial } from './hooks/useTutorial';
+import './assets/shepherd-custom.css';
 
 
 function App(): React.ReactElement {
@@ -100,6 +102,20 @@ function App(): React.ReactElement {
         checkVaultStatus();
         // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshData is stable
     }, []);
+
+    // Tutorial Effect - auto-start for first-time users
+    const { startTutorial, hasCompletedTutorial } = useTutorial();
+
+    useEffect(() => {
+        // Only start tutorial if vault is initialized and user hasn't completed it
+        if (vaultStatus?.isInitialized && !hasCompletedTutorial && !isLoading) {
+            // Delay to ensure DOM is ready
+            const timer = setTimeout(() => {
+                startTutorial();
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [vaultStatus?.isInitialized, hasCompletedTutorial, isLoading, startTutorial]);
 
     const handleSelectVault = async () => {
         const path = await window.api.selectVaultLocation();

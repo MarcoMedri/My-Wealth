@@ -63,7 +63,9 @@ export default function Sidebar() {
         <aside className={cn(
             "bg-background-subtle border-r border-border flex flex-col transition-all duration-300 ease-in-out",
             isCollapsed ? "w-16" : "w-64"
-        )}>
+        )}
+            data-tour="sidebar"
+        >
             {/* Drag region for macOS */}
             <div className="h-12 app-drag-region" />
 

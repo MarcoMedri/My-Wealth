@@ -486,5 +486,34 @@
     "loan": "Prestito / Mutuo",
     "deposit": "Conto Deposito",
     "other": "Altro"
+  },
+  "tutorial": {
+    "welcome": {
+      "title": "Benvenuto in My Wealth! 👋",
+      "text": "Facciamo un breve tour per aiutarti a iniziare. Puoi saltarlo in qualsiasi momento."
+    },
+    "dashboard": {
+      "title": "La Tua Dashboard Finanziaria 📊",
+      "text": "Questa è la tua panoramica. Vedi il tuo patrimonio netto, le transazioni recenti e le tendenze finanziarie a colpo d'occhio."
+    },
+    "sidebar": {
+      "title": "Naviga le Tue Finanze 🗂️",
+      "text": "Usa la barra laterale per accedere a Conti, Investimenti, Budget e altro. Clicca su qualsiasi sezione per esplorare."
+    },
+    "addTransaction": {
+      "title": "Traccia i Tuoi Soldi ➕",
+      "text": "Clicca qui per aggiungere entrate o spese. Ogni transazione aiuta a costruire il tuo quadro finanziario."
+    },
+    "complete": {
+      "title": "Tutto Pronto! 🎉",
+      "text": "Inizia creando il tuo primo conto o esplora con i dati demo. Puoi riavviare questo tour in qualsiasi momento dal menu Aiuto."
+    },
+    "next": "Avanti",
+    "back": "Indietro",
+    "skip": "Salta Tour",
+    "finish": "Inizia"
+  },
+  "help": {
+    "showTutorial": "Mostra Tutorial"
   }
 }
