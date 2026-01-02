@@ -13,7 +13,11 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const { t } = useTranslation();
-    const { currency, language, theme, decimals, setCurrency, setLanguage, setTheme, setDecimals } = useSettingsStore();
+
+    const {
+        currency, language, theme, decimals, dateFormat, timeFormat,
+        setCurrency, setLanguage, setTheme, setDecimals, setDateFormat, setTimeFormat
+    } = useSettingsStore();
 
     if (!isOpen) return null;
 
@@ -128,8 +132,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     Date Format
                                 </label>
                                 <select
-                                    value={useSettingsStore(s => s.dateFormat)}
-                                    onChange={(e) => useSettingsStore.getState().setDateFormat(e.target.value as any)}
+                                    value={dateFormat}
+                                    onChange={(e) => setDateFormat(e.target.value as any)}
                                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option value="dd/MM/yyyy">DD/MM/YYYY (31/12/2023)</option>
@@ -145,8 +149,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     Time Format
                                 </label>
                                 <select
-                                    value={useSettingsStore(s => s.timeFormat)}
-                                    onChange={(e) => useSettingsStore.getState().setTimeFormat(e.target.value as any)}
+                                    value={timeFormat}
+                                    onChange={(e) => setTimeFormat(e.target.value as any)}
                                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option value="HH:mm">24-hour (14:30)</option>
