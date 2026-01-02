@@ -3,14 +3,14 @@
  * Form to create a new transaction
  */
 
-import { useState, useEffect } from 'react';
-// Force HMR update
+import { useState, useEffect, useMemo } from 'react';
+// Force HMR update - Deployment finalized
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
 import { Loader2, ArrowRight, Check, ChevronDown, Tag } from 'lucide-react';
-import type { Transaction, TransactionType, Category } from '../../../shared/schemas';
+import type { Transaction, TransactionType, Category, Account } from '../../../shared/schemas';
 import { ICON_MAP } from './settings/IconPicker';
 import { DEFAULT_CATEGORY_COLOR } from '../lib/constants';
 import { useCategoryName } from '../hooks/useCategoryName';
@@ -28,8 +28,8 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Filter out archived accounts
-    const activeAccounts = accounts.filter(a => !a.isArchived);
+    // Memoize active accounts to prevent effect loops
+    const activeAccounts = useMemo(() => accounts.filter((a: Account) => !a.isArchived), [accounts]);
 
     // Group categories by type
     const incomeCategories = categories.filter(c => c.type === 'income');
@@ -47,6 +47,8 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
     });
 
     useEffect(() => {
+        if (!isOpen) return; // Only run when opening
+
         if (transaction) {
             setFormData({
                 type: transaction.type,
@@ -71,6 +73,10 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                 notes: '',
             });
         }
+        // We only want to run this when the modal opens or the transaction/account-list changes significantly.
+        // Including activeAccounts directly caused a loop because filter returns a new array.
+        // Now that it's memoized, it should be safe.
+        // Also added !isOpen check to avoid running on close.
     }, [transaction, isOpen, activeAccounts]);
 
     const handleSubmit = async (e: React.FormEvent) => {
