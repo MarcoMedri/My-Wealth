@@ -168,6 +168,9 @@
     "autoFetchLogo": "(Auto-recupero Logo)",
     "logo": "Logo",
     "preview": "Anteprima",
+    "uploadLogo": "Carica Logo Personalizzato",
+    "customLogo": "Logo Personalizzato",
+    "useAutoFetch": "Usa Auto-Recupero",
     "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
     "types": {
       "bank": "Banca",

@@ -195,6 +195,25 @@ function registerIpcHandlers(): void {
     return vaultManager.downloadBrokerLogo(domain, brokerId)
   })
 
+  ipcMain.handle(IPC_CHANNELS.BROKER_SELECT_LOGO, async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'svg', 'webp'] }
+      ]
+    })
+    
+    if (result.canceled || !result.filePaths[0]) {
+      return null
+    }
+    
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle(IPC_CHANNELS.BROKER_SAVE_LOGO, async (_event, sourcePath: string, brokerId: string) => {
+    return vaultManager.saveBrokerLogo(sourcePath, brokerId)
+  })
+
   // ========== CSV IMPORT ==========
   ipcMain.handle(IPC_CHANNELS.IMPORT_GET_PRESETS, async () => {
     const { IMPORT_PRESETS } = await import('./csv-importer')

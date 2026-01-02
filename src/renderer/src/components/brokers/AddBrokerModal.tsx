@@ -35,6 +35,8 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [color, setColor] = useState('#6366f1');
     const [icon, setIcon] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [customLogoPath, setCustomLogoPath] = useState<string | null>(null);
+    const [useCustomLogo, setUseCustomLogo] = useState(false);
 
     useEffect(() => {
         if (isOpen && editBrokerId) {
@@ -63,6 +65,8 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             setType('broker');
             setColor('#6366f1');
             setIcon('');
+            setCustomLogoPath(null);
+            setUseCustomLogo(false);
         }
     }, [isOpen, editBrokerId, getBroker]);
 
@@ -71,10 +75,22 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
         if (website && website.includes('.')) {
             setLogoUrl(`https://logo.clearbit.com/${website}`);
             setLogoPreviewError(false);
+            setUseCustomLogo(false); // If website changes, assume not using custom logo
         } else {
             setLogoUrl('');
         }
     }, [website]);
+
+    const handleSelectLogo = async () => {
+        const filePath = await window.api.selectBrokerLogo();
+        if (filePath) {
+            setCustomLogoPath(filePath);
+            setUseCustomLogo(true);
+            // Show preview of selected file
+            setLogoUrl(`file://${filePath}`);
+            setLogoPreviewError(false); // Clear any previous error
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,9 +100,18 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             const now = new Date().toISOString();
             const id = editBrokerId || generateId();
 
-            // Attempt to download logo if website is provided
+            // Attempt to download/save logo
             let logoPath: string | null = null;
-            if (website && !logoPreviewError) {
+
+            if (useCustomLogo && customLogoPath) {
+                // Save custom logo
+                try {
+                    logoPath = await window.api.saveBrokerLogo(customLogoPath, id);
+                } catch (err) {
+                    console.error('Failed to save custom logo', err);
+                }
+            } else if (website && !logoPreviewError) {
+                // Auto-fetch from Clearbit
                 try {
                     logoPath = await window.api.downloadBrokerLogo(website, id);
                 } catch (err) {
@@ -167,23 +192,37 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                 />
                             </div>
 
-                            {/* Logo Preview */}
-                            <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {/* Logo Preview and Upload */}
+                            <div className="flex flex-col gap-2">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {t('brokers.logo')}
                                 </label>
-                                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center overflow-hidden relative">
-                                    {logoUrl && !logoPreviewError ? (
-                                        <img
-                                            src={logoUrl}
-                                            alt={t('brokers.preview')}
-                                            className="w-full h-full object-contain"
-                                            onError={() => setLogoPreviewError(true)}
-                                        />
-                                    ) : (
-                                        <span className="text-xs text-gray-400">?</span>
-                                    )}
+                                <div className="flex items-center gap-2">
+                                    <div className="w-12 h-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center overflow-hidden relative">
+                                        {logoUrl && !logoPreviewError ? (
+                                            <img
+                                                src={logoUrl}
+                                                alt={t('brokers.preview')}
+                                                className="w-full h-full object-contain"
+                                                onError={() => setLogoPreviewError(true)}
+                                            />
+                                        ) : (
+                                            <span className="text-xs text-gray-400">?</span>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleSelectLogo}
+                                        className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                                    >
+                                        {t('brokers.uploadLogo')}
+                                    </button>
                                 </div>
+                                {useCustomLogo && (
+                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                        {t('brokers.customLogo')}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

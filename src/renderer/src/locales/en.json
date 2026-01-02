@@ -65,7 +65,10 @@
     "website": "Website",
     "autoFetchLogo": "(Auto-fetch Logo)",
     "logo": "Logo",
-    "preview": "Anteprima",
+    "preview": "Preview",
+    "uploadLogo": "Upload Custom Logo",
+    "customLogo": "Custom Logo",
+    "useAutoFetch": "Use Auto-Fetch",
     "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
     "types": {
         "bank": "Bank",

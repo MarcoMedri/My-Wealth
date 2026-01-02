@@ -706,6 +706,24 @@ export class VaultManager {
     }
   }
 
+  /**
+   * Save a custom logo file to the vault
+   */
+  async saveBrokerLogo(sourcePath: string, brokerId: string): Promise<string> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+    
+    const logosDir = path.join(this.settings.vaultPath, 'logos');
+    await fs.ensureDir(logosDir);
+    
+    const ext = path.extname(sourcePath);
+    const filename = `${brokerId}${ext}`;
+    const destPath = path.join(logosDir, filename);
+    
+    await fs.copyFile(sourcePath, destPath);
+    
+    return `logos/${filename}`;
+  }
+
   // ==========================================================================
   // IPC HANDLERS
   // ==========================================================================

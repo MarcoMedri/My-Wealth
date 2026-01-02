@@ -110,6 +110,14 @@ const api = {
   downloadBrokerLogo: (domain: string, brokerId: string): Promise<string | null> => {
     return ipcRenderer.invoke(IPC_CHANNELS.BROKER_DOWNLOAD_LOGO, domain, brokerId)
   },
+  /** Select a broker logo from file system */
+  selectBrokerLogo: (): Promise<string | null> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BROKER_SELECT_LOGO)
+  },
+  /** Save a selected broker logo to the vault */
+  saveBrokerLogo: (sourcePath: string, brokerId: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BROKER_SAVE_LOGO, sourcePath, brokerId)
+  },
 
   // ========== IMPORT ==========
 

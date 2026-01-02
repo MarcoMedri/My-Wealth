@@ -68,6 +68,8 @@ export const IPC_CHANNELS = {
   BROKER_SAVE: 'broker:save',
   BROKER_DELETE: 'broker:delete',
   BROKER_DOWNLOAD_LOGO: 'broker:downloadLogo',
+  BROKER_SELECT_LOGO: 'broker:selectLogo',
+  BROKER_SAVE_LOGO: 'broker:saveLogo',
   
   // Import operations
   IMPORT_CSV_PREVIEW: 'import:csvPreview',
