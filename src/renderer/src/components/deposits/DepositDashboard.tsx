@@ -46,14 +46,14 @@ export function DepositDashboard() {
     if (!deposits.length) {
         return (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center text-foreground-subtle animate-in fade-in zoom-in duration-300">
-                <div className="bg-blue-500/10 p-6 rounded-full mb-6">
-                    <PiggyBank className="w-12 h-12 text-blue-500" />
+                <div className="bg-primary/10 p-6 rounded-full mb-6">
+                    <PiggyBank className="w-12 h-12 text-primary" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-3">{t('deposits.startTracking')}</h2>
                 <p className="max-w-md text-foreground-muted mb-8 leading-relaxed">{t('deposits.trackDescription')}</p>
                 <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
+                    className="bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95"
                 >
                     <Plus className="w-5 h-5" />
                     {t('deposits.addDeposit')}
@@ -69,7 +69,7 @@ export function DepositDashboard() {
             <div className="flex justify-between items-end">
                 <div>
                     <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                        <PiggyBank className="w-8 h-8 text-blue-500" />
+                        <PiggyBank className="w-8 h-8 text-primary" />
                         {t('deposits.title')}
                     </h1>
                     <p className="text-foreground-muted mt-2 text-lg">{t('deposits.subtitle')}</p>
@@ -77,7 +77,7 @@ export function DepositDashboard() {
 
                 <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
+                    className="bg-primary hover:bg-primary-hover text-primary-foreground px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95"
                 >
                     <Plus className="w-4 h-4" />
                     {t('deposits.addDeposit')}
@@ -98,7 +98,7 @@ export function DepositDashboard() {
                 <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
                     <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
                         <ArrowRight className="w-4 h-4" />
-                        {t('deposits.netRate')} (W. Avg)
+                        {t('deposits.netRate')} ({t('deposits.weightedAvg')})
                     </div>
                     <div className="text-3xl font-bold text-foreground tracking-tight">
                         {averageNetRate.toFixed(2)}%
@@ -126,11 +126,11 @@ export function DepositDashboard() {
                         <div
                             key={deposit.id}
                             onClick={() => handleEdit(deposit)}
-                            className="group bg-background-card p-5 rounded-2xl border border-border/50 hover:border-blue-500/30 hover:shadow-md transition-all duration-200 cursor-pointer"
+                            className="group bg-background-card p-5 rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:scale-110 transition-transform">
+                                    <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform">
                                         <PiggyBank className="w-6 h-6" />
                                     </div>
                                     <div>
@@ -144,8 +144,8 @@ export function DepositDashboard() {
                                                 <Calendar className="w-3 h-3" />
                                                 {formatDate(deposit.maturityDate)}
                                             </span>
-                                            <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider ${deposit.constraintType === 'free' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                deposit.constraintType === 'locked' ? 'bg-red-500/10 text-red-500' :
+                                            <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider ${deposit.constraintType === 'free' ? 'bg-success/10 text-success' :
+                                                deposit.constraintType === 'locked' ? 'bg-error/10 text-error' :
                                                     'bg-amber-500/10 text-amber-500'
                                                 }`}>
                                                 {t(`deposits.constraintTypes.${deposit.constraintType}`)}
@@ -157,8 +157,8 @@ export function DepositDashboard() {
                                     <div className="font-bold text-xl text-foreground">
                                         {formatMoney(deposit.principal, deposit.currency)}
                                     </div>
-                                    <div className="text-sm font-semibold text-emerald-500">
-                                        {deposit.netRate.toFixed(2)}% net
+                                    <div className="text-sm font-semibold text-success">
+                                        {deposit.netRate.toFixed(2)}% {t('deposits.net')}
                                     </div>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@ export function DepositDashboard() {
                                 </div>
                                 <div>
                                     <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.duration')}</span>
-                                    <span className="font-medium text-foreground">{deposit.durationMonths} {t('common.months') || 'months'}</span>
+                                    <span className="font-medium text-foreground">{deposit.durationMonths} {t('common.months')}</span>
                                 </div>
                             </div>
                         </div>

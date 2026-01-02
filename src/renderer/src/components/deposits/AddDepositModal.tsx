@@ -118,7 +118,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
         e.preventDefault();
 
         if (!name || !principal || !grossRate || !maturityDate) {
-            setErrorMessage("Please fill required fields");
+            setErrorMessage(t('errors.missingRequiredFields') || "Please fill required fields");
             return;
         }
 
@@ -165,7 +165,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
             await refreshData();
             onClose();
         } catch (e) {
-            setErrorMessage(e instanceof Error ? e.message : 'Delete failed');
+            setErrorMessage(e instanceof Error ? e.message : t('errors.deleteFailed') || 'Delete failed');
         } finally {
             setIsSubmitting(false);
         }
@@ -178,7 +178,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                 {/* Section 1: Identity & Broker */}
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-blue-500" /> {t('common.details') || 'Details'}
+                        <FileText className="w-4 h-4 text-primary" /> {t('common.details')}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2">
@@ -188,8 +188,8 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                             <input
                                 type="text"
                                 required
-                                placeholder="e.g. Cherry Bank Vincolato 60m"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder={t('deposits.placeholders.name')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                             />
@@ -199,7 +199,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                 {t('deposits.brokerLink')}
                             </label>
                             <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={brokerId}
                                 onChange={e => setBrokerId(e.target.value)}
                             >
@@ -229,7 +229,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                 required
                                 step="0.01"
                                 placeholder="0.00"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground font-semibold text-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground font-semibold text-lg focus:ring-2 focus:ring-primary outline-none"
                                 value={principal}
                                 onChange={e => setPrincipal(e.target.value)}
                             />
@@ -244,7 +244,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                     required
                                     step="0.01"
                                     placeholder="0.00"
-                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none pr-8"
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
                                     value={grossRate}
                                     onChange={e => handleGrossRateChange(e.target.value)}
                                 />
@@ -260,7 +260,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                     type="number"
                                     step="0.01"
                                     placeholder="0.00"
-                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none pr-8"
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
                                     value={netRate}
                                     onChange={e => setNetRate(e.target.value)}
                                 />
@@ -272,7 +272,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                 {t('deposits.interestPeriodicity')}
                             </label>
                             <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={interestPeriodicity}
                                 onChange={e => setInterestPeriodicity(e.target.value as InterestPeriodicity)}
                             >
@@ -291,7 +291,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                 {/* Section 3: Timeline & Constraint */}
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-purple-500" /> Timeline
+                        <Clock className="w-4 h-4 text-purple-500" /> {t('common.timeline')}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -301,7 +301,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                             <input
                                 type="date"
                                 required
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={activationDate}
                                 onChange={e => handleActivationChange(e.target.value)}
                             />
@@ -312,7 +312,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                             </label>
                             <input
                                 type="number"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={durationMonths}
                                 onChange={e => handleDurationChange(e.target.value)}
                             />
@@ -324,7 +324,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                             <input
                                 type="date"
                                 required
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={maturityDate}
                                 onChange={e => handleMaturityChange(e.target.value)}
                             />
@@ -340,8 +340,8 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                                         type="button"
                                         onClick={() => setConstraintType(type)}
                                         className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${constraintType === type
-                                            ? 'bg-blue-500 border-blue-500 text-white shadow-sm'
-                                            : 'bg-background-subtle border-border text-foreground-muted hover:border-blue-500/50'
+                                            ? 'bg-primary border-primary text-white shadow-sm'
+                                            : 'bg-background-subtle border-border text-foreground-muted hover:border-primary/50'
                                             }`}
                                     >
                                         {t(`deposits.constraintTypes.${type}`)}
@@ -360,8 +360,8 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                         {t('deposits.notes')}
                     </label>
                     <textarea
-                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px]"
-                        placeholder={t('modals.collectibleModal.notesPlaceholder')}
+                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none min-h-[80px]"
+                        placeholder={t('deposits.notes')}
                         value={notes}
                         onChange={e => setNotes(e.target.value)}
                     />
@@ -382,7 +382,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                             <button
                                 type="button"
                                 onClick={handleDelete}
-                                className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+                                className="text-sm font-medium text-error hover:text-error/80 transition-colors"
                             >
                                 {t('common.delete')}
                             </button>
@@ -399,7 +399,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm active:scale-95"
+                            className="px-6 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary-hover transition-all flex items-center gap-2 shadow-sm active:scale-95"
                         >
                             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                             {t('common.save')}

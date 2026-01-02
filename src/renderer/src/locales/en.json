@@ -19,7 +19,11 @@
     "icon": "Icon",
     "optional": "Optional",
     "create": "Create",
-    "continue": "Continue"
+    "continue": "Continue",
+    "details": "Details",
+    "months": "months",
+    "timeline": "Timeline",
+    "type": "Type"
   },
   "nav": {
     "dashboard": "Overview",
@@ -378,6 +382,26 @@
       "semiannual": "Semiannual",
       "annual": "Annual",
       "one-time": "One-time"
+    },
+    "placeholders": {
+      "policyName": "e.g. Genertel Life",
+      "provider": "e.g. Allianz",
+      "policyNumber": "POL-123...",
+      "contactInfo": "+39 800...",
+      "insuredEntity": "Plate, Address...",
+      "coverage": "Coverage",
+      "economics": "Economics",
+      "annualized": "Annualized",
+      "next": "Next"
+    },
+    "types": {
+      "life": "Life",
+      "health": "Health",
+      "auto": "Auto / Moto",
+      "home": "Home",
+      "travel": "Travel",
+      "liability": "Liability",
+      "other": "Other"
     }
   },
   "deposits": {
@@ -413,6 +437,11 @@
       "free": "Free",
       "locked": "Locked (Non-withdrawable)",
       "flexible": "Flexible (with penalty)"
-    }
+    },
+    "placeholders": {
+      "name": "e.g. Cherry Bank Vincolato 60m"
+    },
+    "net": "net",
+    "weightedAvg": "W. Avg"
   }
 }

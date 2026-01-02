@@ -116,8 +116,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             <input
                                 type="text"
                                 required
-                                placeholder="e.g. Genertel Life"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder={t('insurance.placeholders.policyName')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                             />
@@ -128,8 +128,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="text"
-                                placeholder="e.g. Allianz"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder={t('insurance.placeholders.provider')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={provider}
                                 onChange={e => setProvider(e.target.value)}
                             />
@@ -140,8 +140,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="text"
-                                placeholder="POL-123..."
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder={t('insurance.placeholders.policyNumber')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={policyNumber}
                                 onChange={e => setPolicyNumber(e.target.value)}
                             />
@@ -152,8 +152,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="text"
-                                placeholder="+39 800..."
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder={t('insurance.placeholders.contactInfo')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={contactInfo}
                                 onChange={e => setContactInfo(e.target.value)}
                             />
@@ -166,25 +166,25 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                 {/* Section 2: Coverage */}
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <Shield className="w-4 h-4" /> Coverage
+                        <Shield className="w-4 h-4" /> {t('insurance.placeholders.coverage')}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                Type
+                                {t('common.type')}
                             </label>
                             <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={type}
                                 onChange={e => setType(e.target.value)}
                             >
-                                <option value="life">Life</option>
-                                <option value="health">Health</option>
-                                <option value="auto">Auto / Moto</option>
-                                <option value="home">Home</option>
-                                <option value="travel">Travel</option>
-                                <option value="liability">Liability</option>
-                                <option value="other">Other</option>
+                                <option value="life">{t('insurance.types.life')}</option>
+                                <option value="health">{t('insurance.types.health')}</option>
+                                <option value="auto">{t('insurance.types.auto')}</option>
+                                <option value="home">{t('insurance.types.home')}</option>
+                                <option value="travel">{t('insurance.types.travel')}</option>
+                                <option value="liability">{t('insurance.types.liability')}</option>
+                                <option value="other">{t('insurance.types.other')}</option>
                             </select>
                         </div>
                         <div>
@@ -193,8 +193,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="text"
-                                placeholder="Plate, Address..."
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder={t('insurance.placeholders.insuredEntity')}
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={insuredEntity}
                                 onChange={e => setInsuredEntity(e.target.value)}
                             />
@@ -206,7 +206,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             <input
                                 type="number"
                                 placeholder="0.00"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={coverageAmount}
                                 onChange={e => setCoverageAmount(e.target.value)}
                             />
@@ -218,7 +218,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             <input
                                 type="number"
                                 placeholder="0.00"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={deductible}
                                 onChange={e => setDeductible(e.target.value)}
                             />
@@ -231,7 +231,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                 {/* Section 3: Economics */}
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <DollarSign className="w-4 h-4" /> Economics
+                        <DollarSign className="w-4 h-4" /> {t('insurance.placeholders.economics')}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -242,7 +242,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                                 type="number"
                                 required
                                 placeholder="0.00"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={premiumAmount}
                                 onChange={e => setPremiumAmount(e.target.value)}
                             />
@@ -252,7 +252,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                                 {t('insurance.premiumPeriod')}
                             </label>
                             <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={premiumPeriod}
                                 onChange={e => setPremiumPeriod(e.target.value as InsurancePolicy['premiumPeriod'])}
                             >
@@ -269,7 +269,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="date"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={nextPaymentDate}
                                 onChange={e => setNextPaymentDate(e.target.value)}
                             />
@@ -279,7 +279,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                                 {t('accounts.linkedBroker')}
                             </label>
                             <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={accountId}
                                 onChange={e => setAccountId(e.target.value)}
                             >
@@ -297,7 +297,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                 {/* Section 4: Timeline */}
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <Calendar className="w-4 h-4" /> Timeline
+                        <Calendar className="w-4 h-4" /> {t('common.timeline')}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -307,7 +307,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             <input
                                 type="date"
                                 required
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={startDate}
                                 onChange={e => setStartDate(e.target.value)}
                             />
@@ -318,7 +318,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                             </label>
                             <input
                                 type="date"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
                                 value={endDate}
                                 onChange={e => setEndDate(e.target.value)}
                             />
@@ -328,7 +328,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                         <input
                             type="checkbox"
                             id="autoRenewal"
-                            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                            className="rounded border-border text-success focus:ring-success"
                             checked={autoRenewal}
                             onChange={e => setAutoRenewal(e.target.checked)}
                         />
@@ -341,7 +341,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
 
                 {/* Error message */}
                 {errorMessage && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-500 text-sm">
+                    <div className="p-3 bg-error/10 border border-error/20 rounded-lg flex items-center gap-2 text-error text-sm">
                         <AlertTriangle className="w-4 h-4" />
                         <span>{errorMessage}</span>
                     </div>
@@ -359,7 +359,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-4 py-2 rounded-lg bg-emerald-500 text-foreground font-medium hover:bg-emerald-600 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
                     >
                         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                         {t('common.save')}

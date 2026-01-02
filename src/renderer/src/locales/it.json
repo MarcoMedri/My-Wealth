@@ -24,7 +24,11 @@
     "icon": "Icona",
     "optional": "Opzionale",
     "create": "Crea",
-    "continue": "Continua"
+    "continue": "Continua",
+    "details": "Dettagli",
+    "months": "mesi",
+    "timeline": "Cronologia",
+    "type": "Tipo"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -382,6 +386,26 @@
       "semiannual": "Semestrale",
       "annual": "Annuale",
       "one-time": "Una Tantum"
+    },
+    "placeholders": {
+      "policyName": "es. Genertel Life",
+      "provider": "es. Allianz",
+      "policyNumber": "POL-123...",
+      "contactInfo": "+39 800...",
+      "insuredEntity": "Targa, Indirizzo...",
+      "coverage": "Massimale",
+      "economics": "Economia",
+      "annualized": "Annualizzato",
+      "next": "Prossimo"
+    },
+    "types": {
+      "life": "Vita",
+      "health": "Salute",
+      "auto": "Auto / Moto",
+      "home": "Casa",
+      "travel": "Viaggi",
+      "liability": "Responsabilità Civile",
+      "other": "Altro"
     }
   },
   "deposits": {
@@ -417,6 +441,11 @@
       "free": "Libero",
       "locked": "Vincolato (Non Svincolabile)",
       "flexible": "Svincolabile (con penale)"
-    }
+    },
+    "placeholders": {
+      "name": "es. Cherry Bank Vincolato 60m"
+    },
+    "net": "netto",
+    "weightedAvg": "Media Pesante"
   }
 }
