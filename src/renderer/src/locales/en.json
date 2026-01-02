@@ -95,7 +95,7 @@
     "confirmDelete": "Are you sure you want to delete this property?"
   },
   "accounts": {
-    "title": "Dashboard",
+    "title": "Accounts",
     "welcome": "Welcome back! Here's your financial overview.",
     "importCSV": "Import CSV",
     "addTransaction": "Add Transaction",

@@ -10,8 +10,7 @@ import {
     Pencil,
     Copy,
     Trash2,
-    Camera,
-    ChevronDown
+    Camera
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { type Transaction } from '../../../shared/schemas';
@@ -44,8 +43,7 @@ export default function Dashboard() {
     const [isDuplicateMode, setIsDuplicateMode] = useState(false);
 
     // --- Filter State ---
-    const [period, setPeriod] = useState<DashboardPeriod>('current_month');
-    // const [isPeriodMenuOpen, setIsPeriodMenuOpen] = useState(false); // Unused for now
+    const [period] = useState<DashboardPeriod>('current_month');
 
     // --- Aggregations ---
 
@@ -140,23 +138,6 @@ export default function Dashboard() {
                     <p className="text-foreground-muted mt-1">Your total wealth breakdown at a glance.</p>
                 </div>
                 <div className="flex gap-3">
-                    {/* Period Selector */}
-                    <div className="relative">
-                        <select
-                            value={period}
-                            onChange={(e) => setPeriod(e.target.value as DashboardPeriod)}
-                            className="appearance-none bg-background-card border border-border text-foreground px-4 py-2 pr-10 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 hover:bg-background-muted transition-colors text-sm font-medium cursor-pointer"
-                        >
-                            <option value="current_month">Current Month</option>
-                            <option value="last_month">Last Month</option>
-                            <option value="3m">Last 3 Months</option>
-                            <option value="6m">Last 6 Months</option>
-                            <option value="1y">Last Year</option>
-                        </select>
-                        <ChevronDown className="w-4 h-4 text-foreground-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-
-                    {/* Snapshot Button */}
                     <button
                         onClick={async () => {
                             try {
