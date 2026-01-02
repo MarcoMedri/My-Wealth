@@ -38,6 +38,7 @@ interface API {
   getImportPresets: () => Promise<ImportPreset[]>;
   previewCSV: (content: string) => Promise<{ headers: string[], preview: Record<string, string>[] }>;
   executeImport: (content: string, mapping: ColumnMapping, accountId: string) => Promise<ImportResult>;
+  selectFile: () => Promise<{ name: string; content: string; path: string } | null>;
   
   // Investments
   searchInvestments: (query: string) => Promise<{ symbol: string, name: string, type: string, currency: string, exchange: string }[]>;

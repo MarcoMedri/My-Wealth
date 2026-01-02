@@ -1,5 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
+import { readFile } from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
@@ -45,6 +46,29 @@ function registerIpcHandlers(): void {
   
   ipcMain.handle(IPC_CHANNELS.VAULT_GET_STATUS, async () => {
     return vaultManager.getStatus()
+  })
+
+
+
+  ipcMain.handle(IPC_CHANNELS.IMPORT_SELECT_FILE, async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+    });
+    
+    if (canceled || filePaths.length === 0) {
+      return null;
+    }
+
+    const path = filePaths[0];
+    try {
+      const content = await readFile(path, 'utf-8');
+      const filename = path.split('/').pop() || 'imported.csv'; // Simple filename extraction
+      return { name: filename, content, path };
+    } catch (error) {
+      console.error('Failed to read selected file:', error);
+      throw error;
+    }
   })
 
   ipcMain.handle(IPC_CHANNELS.VAULT_SELECT_PATH, async () => {

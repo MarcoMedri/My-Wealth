@@ -64,19 +64,36 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         }
     }, [selectedPresetId, presets]);
 
-    // Handle file selection
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (!selectedFile) return;
+    // Debug accounts
+    useEffect(() => {
+        console.log("[ImportModal] Accounts from store:", accounts);
+        if (accounts.length === 0) {
+            console.warn("[ImportModal] No accounts found! Check store initialization.");
+        }
+    }, [accounts]);
 
-        setFile(selectedFile);
+    // Handle file selection via Native Dialog
+    const handleUploadClick = async () => {
+        if (!accountId) return;
+
         setIsLoading(true);
-
         try {
-            const text = await selectedFile.text();
-            setContent(text);
+            // Use new IPC method
+            const result = await window.api.selectFile();
 
-            const { headers, preview } = await window.api.previewCSV(text);
+            if (!result) {
+                setIsLoading(false);
+                return;
+            }
+
+            console.log("[ImportModal] File selected:", result.name);
+
+            // Mock File object for UI compatibility
+            // We need to cast it or change state type, casting is easiest for now
+            setFile({ name: result.name } as File);
+            setContent(result.content);
+
+            const { headers, preview } = await window.api.previewCSV(result.content);
             setHeaders(headers);
             setPreviewRows(preview);
 
@@ -96,6 +113,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
 
             setStep('mapping');
         } catch (err) {
+            console.error("[ImportModal] File read error:", err);
             setError('Failed to read file');
         } finally {
             setIsLoading(false);
@@ -186,19 +204,13 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             </div>
 
             <div
+                onClick={handleUploadClick}
                 className={cn(
                     "border-2 border-dashed border-border rounded-xl p-8 text-center transition-colors relative",
                     accountId ? "hover:border-emerald-500 hover:bg-background-subtle/50 cursor-pointer" : "opacity-50 cursor-not-allowed"
                 )}
             >
-                <input
-                    type="file"
-                    accept=".csv"
-                    disabled={!accountId}
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                    id="csv-upload"
-                />
+                {/* Removed hidden input, now using IPC dialog */}
                 <div className="pointer-events-none">
                     <Upload className="w-10 h-10 text-foreground-subtle mx-auto mb-4" />
                     <p className="text-lg font-medium text-foreground-muted">

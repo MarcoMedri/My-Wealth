@@ -70,6 +70,7 @@ export const IPC_CHANNELS = {
   IMPORT_CSV_PREVIEW: 'import:csvPreview',
   IMPORT_CSV_EXECUTE: 'import:csvExecute',
   IMPORT_GET_PRESETS: 'import:getPresets',
+  IMPORT_SELECT_FILE: 'import:selectFile',
   
   // Investment operations
   INVESTMENTS_SEARCH: 'investments:search',

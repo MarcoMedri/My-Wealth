@@ -106,7 +106,12 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.IMPORT_CSV_PREVIEW, content)
   },
   executeImport: (content: string, mapping: ColumnMapping, accountId: string): Promise<ImportResult> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.IMPORT_CSV_EXECUTE, { content, mapping, accountId })
+    return ipcRenderer.invoke(IPC_CHANNELS.IMPORT_CSV_EXECUTE, content, mapping, accountId)
+  },
+
+  /** Open native file dialog to select CSV */
+  selectFile: (): Promise<{ name: string; content: string; path: string } | null> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.IMPORT_SELECT_FILE)
   },
 
   // ========== INVESTMENTS ==========
