@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
-import Modal from './Modal';
+import { Select, Modal } from './';
 import { cn } from '../lib/utils';
 import { Loader2, Upload, FileText, AlertCircle, Check } from 'lucide-react';
 import type { ImportPreset, ColumnMapping } from '../../../shared/types';
@@ -177,31 +177,29 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 <label className="block text-sm font-medium text-foreground-muted mb-2">
                     {t('import.selectAccount')}
                 </label>
-                <select
+                <Select
                     value={accountId}
                     onChange={e => setAccountId(e.target.value)}
-                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
-                >
-                    <option value="" disabled>{t('import.selectAccountPlaceholder')}</option>
-                    {accounts.map(acc => (
-                        <option key={acc.id} value={acc.id}>{acc.name}</option>
-                    ))}
-                </select>
+                    options={accounts.map(acc => ({ value: acc.id, label: acc.name }))}
+                    placeholder={t('import.selectAccountPlaceholder', 'Select an account...')}
+                />
             </div>
 
-            <div className={cn(
-                "border-2 border-dashed border-border rounded-xl p-8 text-center transition-colors",
-                accountId ? "hover:border-emerald-500 hover:bg-background-subtle/50 cursor-pointer" : "opacity-50 cursor-not-allowed"
-            )}>
+            <div
+                className={cn(
+                    "border-2 border-dashed border-border rounded-xl p-8 text-center transition-colors relative",
+                    accountId ? "hover:border-emerald-500 hover:bg-background-subtle/50 cursor-pointer" : "opacity-50 cursor-not-allowed"
+                )}
+            >
                 <input
                     type="file"
                     accept=".csv"
                     disabled={!accountId}
                     onChange={handleFileChange}
-                    className="hidden"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                     id="csv-upload"
                 />
-                <label htmlFor="csv-upload" className="cursor-pointer block">
+                <div className="pointer-events-none">
                     <Upload className="w-10 h-10 text-foreground-subtle mx-auto mb-4" />
                     <p className="text-lg font-medium text-foreground-muted">
                         {t('import.clickToUpload')}
@@ -209,22 +207,18 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     <p className="text-sm text-foreground-subtle mt-2">
                         {t('import.maxSize')}
                     </p>
-                </label>
+                </div>
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-foreground-muted mb-2">
                     {t('import.importPreset')}
                 </label>
-                <select
+                <Select
                     value={selectedPresetId}
                     onChange={e => setSelectedPresetId(e.target.value)}
-                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground outline-none"
-                >
-                    {presets.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                </select>
+                    options={presets.map(p => ({ value: p.id, label: p.name }))}
+                />
                 <p className="text-xs text-foreground-subtle mt-1">
                     {presets.find(p => p.id === selectedPresetId)?.description}
                 </p>
@@ -414,7 +408,6 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             isOpen={isOpen}
             onClose={handleClose}
             title={step === 'done' ? t('import.complete') : t('import.title')}
-            className="max-w-xl"
         >
             {error && (
                 <div className="mb-4 p-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg flex items-center gap-2">
