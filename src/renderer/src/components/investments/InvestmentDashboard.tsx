@@ -142,8 +142,7 @@ export function InvestmentDashboard() {
             datasets: [{
                 data,
                 backgroundColor: colors,
-                borderColor: '#1e293b',
-                borderWidth: 2,
+                borderWidth: 0,
             }]
         };
     };
@@ -388,9 +387,9 @@ function KpiCard({ title, value, currency, percent, isChange }: { title: string,
 
 function ChartCard({ title, data, options }: { title: string, data: any, options: any }) {
     return (
-        <div className="bg-background-card rounded-xl p-5 border border-border shadow-sm flex flex-col h-[300px]">
-            <h3 className="text-sm font-semibold text-foreground mb-4">{title}</h3>
-            <div className="flex-1 relative flex items-center justify-center">
+        <div className="bg-card rounded-xl p-6 shadow-sm border border-border flex flex-col min-h-[300px]">
+            <h3 className="text-sm font-semibold text-foreground-muted mb-4">{title}</h3>
+            <div className="flex-1 relative">
                 <Doughnut data={data} options={options} />
             </div>
         </div>

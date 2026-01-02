@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
@@ -15,6 +16,7 @@ interface ImportModalProps {
 }
 
 export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
+    const { t } = useTranslation();
     const { accounts, refreshData } = useVaultStore();
 
     // Steps: 'upload' -> 'mapping' -> 'preview' -> 'done'
@@ -173,14 +175,14 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         <div className="space-y-6">
             <div>
                 <label className="block text-sm font-medium text-foreground-muted mb-2">
-                    Select Account
+                    {t('import.selectAccount')}
                 </label>
                 <select
                     value={accountId}
                     onChange={e => setAccountId(e.target.value)}
                     className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                 >
-                    <option value="" disabled>Choose account to import into...</option>
+                    <option value="" disabled>{t('import.selectAccountPlaceholder')}</option>
                     {accounts.map(acc => (
                         <option key={acc.id} value={acc.id}>{acc.name}</option>
                     ))}
@@ -202,17 +204,17 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 <label htmlFor="csv-upload" className="cursor-pointer block">
                     <Upload className="w-10 h-10 text-foreground-subtle mx-auto mb-4" />
                     <p className="text-lg font-medium text-foreground-muted">
-                        Click to upload CSV
+                        {t('import.clickToUpload')}
                     </p>
                     <p className="text-sm text-foreground-subtle mt-2">
-                        Max 5MB • .csv only
+                        {t('import.maxSize')}
                     </p>
                 </label>
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-foreground-muted mb-2">
-                    Import Preset (Optional)
+                    {t('import.importPreset')}
                 </label>
                 <select
                     value={selectedPresetId}
@@ -323,12 +325,12 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     className="rounded border-border bg-background-subtle text-emerald-500 focus:ring-emerald-500"
                 />
                 <label htmlFor="invertSign" className="text-sm text-foreground-muted select-none">
-                    Invert amount sign (treat negative as income)
+                    {t('import.invertSign')}
                 </label>
             </div>
 
             <div className="bg-background rounded-lg p-3 overflow-x-auto">
-                <p className="text-xs text-foreground-subtle mb-2 uppercase">File Preview</p>
+                <p className="text-xs text-foreground-subtle mb-2 uppercase">{t('import.filePreview')}</p>
                 <table className="w-full text-left text-xs text-foreground-muted">
                     <thead>
                         <tr>
@@ -354,7 +356,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     onClick={() => setStep('upload')}
                     className="text-sm text-foreground-muted hover:text-foreground"
                 >
-                    Back
+                    {t('import.back')}
                 </button>
                 <button
                     onClick={executeImport}
@@ -362,7 +364,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     className="px-4 py-2 bg-emerald-500 text-foreground rounded-lg hover:bg-emerald-600 flex items-center gap-2"
                 >
                     {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Import Now
+                    {t('import.importNow')}
                 </button>
             </div>
         </div>
@@ -373,36 +375,36 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8 text-emerald-500" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">Import Successful!</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2">{t('import.importSuccessful')}</h3>
 
             <div className="flex justify-center gap-8 py-4 text-sm">
                 <div className="text-center">
                     <p className="text-2xl font-bold text-emerald-400">{importStats.imported}</p>
-                    <p className="text-foreground-subtle">Imported</p>
+                    <p className="text-foreground-subtle">{t('import.imported')}</p>
                 </div>
                 <div className="text-center">
                     <p className="text-2xl font-bold text-foreground-muted">{importStats.duplicates}</p>
-                    <p className="text-foreground-subtle">Duplicates</p>
+                    <p className="text-foreground-subtle">{t('import.duplicates')}</p>
                 </div>
                 {importStats.skipped > 0 && (
                     <div className="text-center">
                         <p className="text-2xl font-bold text-yellow-500">{importStats.skipped}</p>
-                        <p className="text-foreground-subtle">Skipped</p>
+                        <p className="text-foreground-subtle">{t('import.skipped')}</p>
                     </div>
                 )}
             </div>
 
             <p className="text-foreground-muted mb-6 text-sm">
                 {importStats.duplicates > 0
-                    ? `${importStats.duplicates} transactions were skipped because they already exist.`
-                    : 'All transactions were imported successfully.'}
+                    ? `${importStats.duplicates} ${t('import.duplicatesSkipped')}`
+                    : t('import.allImported')}
             </p>
 
             <button
                 onClick={handleClose}
                 className="px-6 py-2 bg-background-muted text-foreground rounded-lg hover:bg-background-muted"
             >
-                Done
+                {t('import.done')}
             </button>
         </div>
     );
@@ -411,7 +413,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         <Modal
             isOpen={isOpen}
             onClose={handleClose}
-            title={step === 'done' ? 'Import Complete' : 'Import CSV'}
+            title={step === 'done' ? t('import.complete') : t('import.title')}
             className="max-w-xl"
         >
             {error && (

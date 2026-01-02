@@ -108,8 +108,13 @@ export default function IncomeExpenseCharts({ transactions, categories, startDat
                 position: 'right' as const,
                 labels: {
                     usePointStyle: true,
-                    font: { family: 'Inter', size: 11 },
-                    color: '#64748b'
+                    font: {
+                        family: '-apple-system, BlinkMacSystemFont, Inter, system-ui',
+                        size: 13,
+                    },
+                    color: '#94a3b8',
+                    boxWidth: 8,
+                    padding: 15
                 }
             },
             tooltip: {

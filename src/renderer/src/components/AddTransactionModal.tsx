@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
@@ -18,6 +19,7 @@ interface AddTransactionModalProps {
 }
 
 export default function AddTransactionModal({ isOpen, onClose, transaction, isDuplicate = false }: AddTransactionModalProps) {
+    const { t } = useTranslation();
     const { accounts, categories, addTransaction, updateTransaction } = useVaultStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -108,20 +110,12 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
 
             // Update UI optimistically (or full refresh)
             if (isEditing) {
-                // Update existing
-                // We need an update API or just re-save with same ID? 
-                // The main process saveTransaction handles upsert if ID provided?
-                // Let's check main process. The ipc 'TRANSACTION_SAVE' takes Omit<Transaction, 'id' ...> & { id?: string }.
-                // So if we pass ID, it should update.
-
-                // However, window.api.saveTransaction returns the saved object.
                 const saved = await window.api.saveTransaction({
                     ...tx,
                     id: transaction.id,
                 });
                 updateTransaction(saved);
             } else {
-                // Create new
                 addTransaction(tx);
             }
 
@@ -145,8 +139,14 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
 
     const isEditing = !!transaction && !isDuplicate;
 
+    const getModalTitle = () => {
+        if (isEditing) return t('transactions.editTransaction');
+        if (isDuplicate) return t('transactions.duplicateTransaction');
+        return t('transactions.addTransaction');
+    };
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Transaction" : isDuplicate ? "Duplicate Transaction" : "Add Transaction"}>
+        <Modal isOpen={isOpen} onClose={onClose} title={getModalTitle()}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -168,7 +168,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                                     : "text-foreground-muted hover:text-foreground"
                             )}
                         >
-                            {type}
+                            {t(`transactions.${type}`)}
                         </button>
                     ))}
                 </div>
@@ -177,7 +177,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            Amount
+                            {t('transactions.amount')}
                         </label>
                         <input
                             type="number"
@@ -192,7 +192,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            Date
+                            {t('transactions.date')}
                         </label>
                         <input
                             type="date"
@@ -209,7 +209,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     {/* From Account */}
                     <div>
                         <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            {formData.type === 'income' ? 'Deposit To' : 'Payment From'}
+                            {formData.type === 'income' ? t('transactions.depositTo') : t('transactions.paymentFrom')}
                         </label>
                         <select
                             required
@@ -217,7 +217,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                             onChange={e => setFormData({ ...formData, accountId: e.target.value })}
                             className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                         >
-                            <option value="" disabled>Select Account</option>
+                            <option value="" disabled>{t('transactions.selectAccount')}</option>
                             {activeAccounts.map(account => (
                                 <option key={account.id} value={account.id}>
                                     {account.name}
@@ -234,7 +234,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                             </div>
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                    Transfer To
+                                    {t('transactions.transferTo')}
                                 </label>
                                 <select
                                     required
@@ -242,7 +242,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                                     onChange={e => setFormData({ ...formData, toAccountId: e.target.value })}
                                     className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                                 >
-                                    <option value="" disabled>Select Account</option>
+                                    <option value="" disabled>{t('transactions.selectAccount')}</option>
                                     {activeAccounts
                                         .filter(a => a.id !== formData.accountId) // Prevent transfer to same account
                                         .map(account => (
@@ -256,7 +256,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     ) : (
                         <div>
                             <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                Category
+                                {t('transactions.category')}
                             </label>
                             <select
                                 required
@@ -264,7 +264,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                                 onChange={e => setFormData({ ...formData, categoryId: e.target.value })}
                                 className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                             >
-                                <option value="" disabled>Select Category</option>
+                                <option value="" disabled>{t('transactions.selectCategory')}</option>
                                 {activeCategories.map(category => (
                                     <option key={category.id} value={category.id}>
                                         {category.name}
@@ -278,7 +278,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                 {/* Payee / Description */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        Payee / Description
+                        {t('transactions.payeeDescription')}
                     </label>
                     <input
                         type="text"
@@ -286,20 +286,20 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                         value={formData.payee}
                         onChange={e => setFormData({ ...formData, payee: e.target.value })}
                         className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
-                        placeholder={formData.type === 'income' ? 'e.g. Employer' : 'e.g. Supermarket'}
+                        placeholder={formData.type === 'income' ? t('transactions.payeePlaceholderIncome') : t('transactions.payeePlaceholderExpense')}
                     />
                 </div>
 
                 {/* Notes */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        Notes (Optional)
+                        {t('transactions.notesOptional')}
                     </label>
                     <textarea
                         value={formData.notes}
                         onChange={e => setFormData({ ...formData, notes: e.target.value })}
                         className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none resize-none h-20"
-                        placeholder="Add a note..."
+                        placeholder={t('transactions.notesPlaceholder')}
                     />
                 </div>
 
@@ -310,7 +310,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="submit"
@@ -321,7 +321,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                         )}
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {isEditing ? 'Update Transaction' : 'Save Transaction'}
+                        {isEditing ? t('transactions.updateTransaction') : t('transactions.saveTransaction')}
                     </button>
                 </div>
             </form>

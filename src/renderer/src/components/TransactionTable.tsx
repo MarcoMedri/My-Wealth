@@ -1,5 +1,6 @@
 
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     createColumnHelper,
     flexRender,
@@ -21,6 +22,7 @@ import { useFormatMoney } from '../hooks/useFormatMoney';
 const columnHelper = createColumnHelper<Transaction>();
 
 export default function TransactionTable() {
+    const { t } = useTranslation();
     const transactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
     const formatMoney = useFormatMoney();
@@ -47,13 +49,13 @@ export default function TransactionTable() {
     };
 
     const handleDelete = async (tx: Transaction) => {
-        if (confirm(`Are you sure you want to delete this transaction: ${tx.payee}?`)) {
+        if (confirm(`${t('transactions.confirmDelete')}: ${tx.payee}?`)) {
             try {
                 await window.api.deleteTransaction(tx.id);
                 await useVaultStore.getState().refreshData();
             } catch (e) {
                 console.error("Failed to delete", e);
-                alert("Failed to delete transaction");
+                alert(t('common.error'));
             }
         }
     };
@@ -67,7 +69,7 @@ export default function TransactionTable() {
     const columns = useMemo(() => [
         columnHelper.accessor('date', {
             header: ({ column }) => (
-                <SortableHeader column={column} label="Date" />
+                <SortableHeader column={column} label={t('transactions.date')} />
             ),
             cell: (info) => (
                 <span className="text-foreground-muted text-sm">
@@ -77,7 +79,7 @@ export default function TransactionTable() {
             sortingFn: 'datetime',
         }),
         columnHelper.accessor('payee', {
-            header: 'Payee',
+            header: t('transactions.payee'),
             cell: (info) => (
                 <span className="text-foreground text-sm font-medium truncate max-w-[200px] block">
                     {info.getValue() || '—'}
@@ -85,7 +87,7 @@ export default function TransactionTable() {
             ),
         }),
         columnHelper.accessor('categoryId', {
-            header: 'Category',
+            header: t('transactions.category'),
             cell: (info) => {
                 const categoryId = info.getValue();
                 const category = categoryId ? categoryMap.get(categoryId) : null;
@@ -98,7 +100,7 @@ export default function TransactionTable() {
         }),
         columnHelper.accessor('amount', {
             header: ({ column }) => (
-                <SortableHeader column={column} label="Amount" className="justify-end" />
+                <SortableHeader column={column} label={t('transactions.amount')} className="justify-end" />
             ),
             cell: (info) => {
                 const tx = info.row.original;
@@ -213,7 +215,7 @@ export default function TransactionTable() {
             >
                 {rows.length === 0 ? (
                     <div className="flex items-center justify-center h-full">
-                        <p className="text-foreground-subtle">No transactions</p>
+                        <p className="text-foreground-subtle">{t('transactions.noTransactions')}</p>
                     </div>
                 ) : (
                     <div

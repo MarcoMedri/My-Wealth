@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
@@ -15,15 +16,7 @@ interface AddAccountModalProps {
     onClose: () => void;
 }
 
-const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
-    { value: 'checking', label: 'Checking Account' },
-    { value: 'savings', label: 'Savings Account' },
-    { value: 'credit', label: 'Credit Card' },
-    { value: 'investment', label: 'Investment Portfolio' },
-    { value: 'cash', label: 'Cash Wallet' },
-    { value: 'loan', label: 'Loan / Mortgage' },
-    { value: 'other', label: 'Other' },
-];
+const ACCOUNT_TYPE_KEYS: AccountType[] = ['checking', 'savings', 'credit', 'investment', 'cash', 'loan', 'other'];
 
 const COLORS = [
     '#3b82f6', // Blue
@@ -37,6 +30,7 @@ const COLORS = [
 ];
 
 export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
+    const { t } = useTranslation();
     const { refreshData } = useVaultStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -93,7 +87,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Add New Account">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('accounts.addAccount')}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -104,7 +98,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 {/* Name */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        Account Name
+                        {t('accounts.accountName')}
                     </label>
                     <input
                         type="text"
@@ -112,23 +106,23 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                         className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
-                        placeholder="e.g. Main Bank Account"
+                        placeholder={t('accounts.accountNamePlaceholder')}
                     />
                 </div>
 
                 {/* Type */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        Account Type
+                        {t('accounts.accountType')}
                     </label>
                     <select
                         value={formData.type}
                         onChange={e => setFormData({ ...formData, type: e.target.value as AccountType })}
                         className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                     >
-                        {ACCOUNT_TYPES.map(type => (
-                            <option key={type.value} value={type.value}>
-                                {type.label}
+                        {ACCOUNT_TYPE_KEYS.map(type => (
+                            <option key={type} value={type}>
+                                {t(`accounts.types.${type}`)}
                             </option>
                         ))}
                     </select>
@@ -137,14 +131,14 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 {/* Broker (Optional) */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        Linked Broker (Optional)
+                        {t('accounts.linkedBroker')}
                     </label>
                     <select
                         value={formData.brokerId}
                         onChange={e => setFormData({ ...formData, brokerId: e.target.value })}
                         className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                     >
-                        <option value="">-- None --</option>
+                        <option value="">{t('accounts.noBroker')}</option>
                         {brokers.map(broker => (
                             <option key={broker.id} value={broker.id}>
                                 {broker.name}
@@ -157,7 +151,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            Currency
+                            {t('accounts.currency')}
                         </label>
                         <select
                             value={formData.currency}
@@ -171,7 +165,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            Initial Balance
+                            {t('accounts.initialBalance')}
                         </label>
                         <input
                             type="number"
@@ -187,7 +181,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 {/* Color Picker */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-2">
-                        Color
+                        {t('accounts.color')}
                     </label>
                     <div className="flex flex-wrap gap-2">
                         {COLORS.map(color => (
@@ -212,7 +206,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="submit"
@@ -223,7 +217,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                         )}
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        Create Account
+                        {t('accounts.createAccount')}
                     </button>
                 </div>
             </form>
