@@ -18,6 +18,7 @@ import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { AddBrokerModal } from './AddBrokerModal';
 import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
+import { ICON_MAP } from '../../lib/iconMap';
 
 // Imports for Modals
 import ImportModal from '../ImportModal';
@@ -114,9 +115,10 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                                     alt={broker.name}
                                     className="w-full h-full object-contain"
                                 />
-                            ) : (
-                                broker.icon ? <span>{broker.icon}</span> : <Building2 />
-                            )}
+                            ) : (() => {
+                                const IconComponent = broker.icon ? ICON_MAP[broker.icon] || Building2 : Building2;
+                                return <IconComponent className="w-8 h-8" />;
+                            })()}
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
