@@ -1,10 +1,10 @@
 /* Custom Shepherd.js theme matching app design */
 
 .shepherd-theme-custom {
-    background: hsl(var(--background-card));
-    border: 1px solid hsl(var(--border));
+    background: rgb(var(--background-card));
+    border: 1px solid rgb(var(--border));
     border-radius: 12px;
-    box-shadow: 0 10px 40px hsl(var(--shadow) / 0.2);
+    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.1);
     max-width: 400px;
 }
 
@@ -13,14 +13,14 @@
 }
 
 .shepherd-theme-custom .shepherd-title {
-    color: hsl(var(--foreground));
+    color: rgb(var(--foreground));
     font-weight: 600;
     font-size: 1.125rem;
     margin: 0;
 }
 
 .shepherd-theme-custom .shepherd-text {
-    color: hsl(var(--foreground-muted));
+    color: rgb(var(--foreground-muted));
     font-size: 0.875rem;
     line-height: 1.6;
     padding: 0.5rem 1rem 1rem;
@@ -34,8 +34,8 @@
 }
 
 .shepherd-theme-custom .shepherd-button {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background: rgb(var(--primary));
+    color: rgb(var(--primary-foreground));
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -46,42 +46,40 @@
 }
 
 .shepherd-theme-custom .shepherd-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    background: rgb(var(--primary-hover));
 }
 
 .shepherd-theme-custom .shepherd-button-secondary {
     background: transparent;
-    color: hsl(var(--foreground-muted));
-    border: 1px solid hsl(var(--border));
+    color: rgb(var(--foreground-muted));
+    border: 1px solid rgb(var(--border));
 }
 
 .shepherd-theme-custom .shepherd-button-secondary:hover {
-    background: hsl(var(--background-muted));
-    transform: none;
+    background: rgb(var(--background-muted));
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon {
-    color: hsl(var(--foreground-muted));
+    color: rgb(var(--foreground-muted));
     font-size: 1.5rem;
     font-weight: 300;
     transition: color 0.2s;
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon:hover {
-    color: hsl(var(--foreground));
+    color: rgb(var(--foreground));
 }
 
-/* Modal overlay - uses shadow variable for consistency */
+/* Modal overlay */
 .shepherd-modal-overlay-container {
-    background: hsl(var(--shadow) / 0.5);
+    background: rgb(var(--foreground) / 0.5);
     backdrop-filter: blur(2px);
 }
 
 /* Arrow */
 .shepherd-theme-custom .shepherd-arrow::before {
-    background: hsl(var(--background-card));
-    border: 1px solid hsl(var(--border));
+    background: rgb(var(--background-card));
+    border: 1px solid rgb(var(--border));
 }
 
 /* Highlight element */
