@@ -28,6 +28,8 @@ import {
   DepositsFileSchema,
   BrokersFileSchema,
   InsuranceFileSchema,
+  InsurancePolicySchema,
+  DepositAccountSchema,
   WorkspaceSettingsSchema,
   type AppSettings,
   type Account,
@@ -1421,12 +1423,15 @@ export class VaultManager {
       }
     }
 
+    // Validate with Zod before saving
+    const validated = InsurancePolicySchema.parse(policy);
+
     // Update or Add
-    const index = policies.findIndex(p => p.id === policy.id);
+    const index = policies.findIndex(p => p.id === validated.id);
     if (index >= 0) {
-      policies[index] = policy;
+      policies[index] = validated;
     } else {
-      policies.push(policy);
+      policies.push(validated);
     }
 
     await this.atomicWriteJson(filePath, { version: 1, policies });
@@ -1490,12 +1495,15 @@ export class VaultManager {
       }
     }
 
+    // Validate with Zod before saving
+    const validated = DepositAccountSchema.parse(deposit);
+
     // Update or Add
-    const index = deposits.findIndex(d => d.id === deposit.id);
+    const index = deposits.findIndex(d => d.id === validated.id);
     if (index >= 0) {
-      deposits[index] = deposit;
+      deposits[index] = validated;
     } else {
-      deposits.push(deposit);
+      deposits.push(validated);
     }
 
     await this.atomicWriteJson(filePath, { version: 1, deposits });

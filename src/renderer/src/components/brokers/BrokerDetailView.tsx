@@ -26,6 +26,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
     const accounts = useVaultStore(state => state.accounts);
     const holdings = useVaultStore(state => state.holdings);
     const assets = useVaultStore(state => state.assets);
+    const deposits = useVaultStore(state => state.deposits);
     const accountBalances = useVaultStore(state => state.accountBalances);
     const deleteBroker = useVaultStore(state => state.deleteBroker);
     const formatMoney = useFormatMoney();
@@ -42,8 +43,9 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
         );
     }
 
-    // Filter accounts and holdings for this broker
+    // Filter accounts, holdings, and deposits for this broker
     const brokerAccounts = accounts.filter(a => a.brokerId === brokerId);
+    const brokerDeposits = deposits.filter(d => d.brokerId === brokerId);
 
     // Holdings can be linked directly to broker OR via account linked to broker
     // Logic: 
@@ -65,7 +67,11 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
         return sum + (holding.quantity * asset.currentPrice);
     }, 0);
 
-    const totalValue = cashTotal + investmentsTotal;
+    const depositsTotal = brokerDeposits.reduce((sum, deposit) => {
+        return sum + deposit.principal;
+    }, 0);
+
+    const totalValue = cashTotal + investmentsTotal + depositsTotal;
 
     const handleDelete = async () => {
         if (confirm(t('brokers.deleteConfirm', 'Are you sure you want to delete this broker? Accounts and holdings will be unlinked (not deleted).'))) {
@@ -117,7 +123,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
 
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
                             <Wallet size={24} />
@@ -135,6 +141,16 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                         <div>
                             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('brokers.investmentsValue')}</h3>
                             <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatMoney(investmentsTotal, 'EUR')}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <PiggyBank size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('deposits.title')}</h3>
+                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatMoney(depositsTotal, 'EUR')}</p>
                         </div>
                     </div>
                 </div>
@@ -182,6 +198,42 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                         </div>
                     ) : (
                         <p className="text-gray-500 dark:text-gray-400 italic text-sm">{t('brokers.noAccounts')}</p>
+                    )}
+                </div>
+
+                {/* Deposit Accounts */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <PiggyBank size={20} className="text-gray-500" />
+                        {t('deposits.title')}
+                    </h2>
+
+                    {brokerDeposits.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {brokerDeposits.map(deposit => (
+                                <div key={deposit.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                                                <PiggyBank size={16} />
+                                            </div>
+                                            <span className="font-medium text-gray-900 dark:text-gray-100">{deposit.name}</span>
+                                        </div>
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+                                            {(deposit.grossRate / 100).toFixed(2)}%
+                                        </span>
+                                    </div>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        {formatMoney(deposit.principal, deposit.currency)}
+                                    </p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {t('deposits.maturityDate')}: {new Date(deposit.maturityDate).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-gray-500 dark:text-gray-400 italic text-sm">{t('deposits.noDeposits', 'Nessun conto deposito collegato')}</p>
                     )}
                 </div>
 

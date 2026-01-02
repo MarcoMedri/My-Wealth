@@ -8,10 +8,11 @@ import { InsurancePolicy } from '../../../../shared/schemas';
 interface AddInsuranceModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialData?: InsurancePolicy | null;
 }
 
-export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
-    const { accounts, saveInsurance, refreshData } = useVaultStore();
+export function AddInsuranceModal({ isOpen, onClose, initialData }: AddInsuranceModalProps) {
+    const { accounts, saveInsurance, deleteInsurance, refreshData } = useVaultStore();
     const { t } = useTranslation();
 
     // Identity
@@ -28,6 +29,8 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
     const [premiumPeriod, setPremiumPeriod] = useState<InsurancePolicy['premiumPeriod']>('annual');
     const [nextPaymentDate, setNextPaymentDate] = useState('');
     const [accountId, setAccountId] = useState('');
+    const [currentValue, setCurrentValue] = useState('');
+    const [notes, setNotes] = useState('');
 
     // Coverage
     const [coverageAmount, setCoverageAmount] = useState('');
@@ -40,7 +43,50 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
     const [autoRenewal, setAutoRenewal] = useState(true);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // Sync state with initialData when editing
+    React.useEffect(() => {
+        if (initialData) {
+            setName(initialData.name);
+            setProvider(initialData.provider || '');
+            setPolicyNumber(initialData.policyNumber || '');
+            setContactInfo(initialData.contactInfo || '');
+            setType(initialData.type);
+            setPremiumAmount((initialData.premiumAmount / 100).toString());
+            setPremiumPeriod(initialData.premiumPeriod);
+            setNextPaymentDate(initialData.nextPaymentDate ? initialData.nextPaymentDate.split('T')[0] : '');
+            setAccountId(initialData.accountId || '');
+            setCoverageAmount(initialData.coverageAmount ? (initialData.coverageAmount / 100).toString() : '');
+            setDeductible(initialData.deductible ? (initialData.deductible / 100).toString() : '');
+            setInsuredEntity(initialData.insuredEntity || '');
+            setStartDate(initialData.startDate.split('T')[0]);
+            setEndDate(initialData.endDate ? initialData.endDate.split('T')[0] : '');
+            setAutoRenewal(initialData.autoRenewal);
+            setCurrentValue(initialData.currentValue ? (initialData.currentValue / 100).toString() : '');
+            setNotes(initialData.notes || '');
+        } else {
+            // Reset for Add mode
+            setName('');
+            setProvider('');
+            setPolicyNumber('');
+            setContactInfo('');
+            setType('life');
+            setPremiumAmount('');
+            setPremiumPeriod('annual');
+            setNextPaymentDate('');
+            setAccountId('');
+            setCoverageAmount('');
+            setDeductible('');
+            setInsuredEntity('');
+            setStartDate(new Date().toISOString().split('T')[0]);
+            setEndDate('');
+            setAutoRenewal(true);
+            setCurrentValue('');
+            setNotes('');
+        }
+    }, [initialData, isOpen]);
 
     // Helper for robust ISO conversion to avoid timezone shifts
     const toFullISO = (dateStr: string) => {
@@ -59,7 +105,7 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
 
         try {
             const policy: InsurancePolicy = {
-                id: crypto.randomUUID(),
+                id: initialData?.id || crypto.randomUUID(),
                 name,
                 provider: provider || undefined,
                 policyNumber: policyNumber || undefined,
@@ -77,14 +123,14 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                 coverageAmount: coverageAmount ? Math.round(parseFloat(coverageAmount) * 100) : undefined,
                 deductible: deductible ? Math.round(parseFloat(deductible) * 100) : undefined,
 
-                currentValue: 0, // Default 0 for now
+                currentValue: currentValue ? Math.round(parseFloat(currentValue) * 100) : 0,
                 currency: 'EUR',
 
                 insuredEntity: insuredEntity || undefined,
                 accountId: accountId || undefined,
 
-                notes: '',
-                createdAt: new Date().toISOString(),
+                notes: notes || '',
+                createdAt: initialData?.createdAt || new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             };
 
@@ -99,8 +145,25 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!initialData) return;
+        if (!window.confirm(t('common.confirmDelete'))) return;
+
+        setIsDeleting(true);
+        try {
+            await deleteInsurance(initialData.id);
+            await refreshData();
+            onClose();
+        } catch (e) {
+            console.error("Failed to delete insurance", e);
+            setErrorMessage(e instanceof Error ? e.message : t('errors.deleteFailed'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={t('insurance.addTitle')}>
+        <Modal isOpen={isOpen} onClose={onClose} title={initialData ? t('insurance.editTitle') : t('insurance.addTitle')}>
             <form onSubmit={handleSubmit} className="space-y-6">
 
                 {/* Section 1: Identity */}
@@ -276,6 +339,18 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                {t('insurance.currentValue')}
+                            </label>
+                            <input
+                                type="number"
+                                placeholder="0.00"
+                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none font-medium"
+                                value={currentValue}
+                                onChange={e => setCurrentValue(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground-muted mb-1">
                                 {t('accounts.linkedBroker')}
                             </label>
                             <select
@@ -338,6 +413,21 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                     </div>
                 </div>
 
+                <div className="h-px bg-border/50" />
+
+                {/* Section 5: Notes */}
+                <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
+                        <FileText className="w-4 h-4" /> {t('deposits.notes') || t('common.notes')}
+                    </h3>
+                    <textarea
+                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none min-h-[80px]"
+                        placeholder="..."
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                    />
+                </div>
+
 
                 {/* Error message */}
                 {errorMessage && (
@@ -348,22 +438,37 @@ export function AddInsuranceModal({ isOpen, onClose }: AddInsuranceModalProps) {
                 )}
 
                 {/* Actions */}
-                <div className="pt-4 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
-                    >
-                        {t('common.cancel')}
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-                    >
-                        {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {t('common.save')}
-                    </button>
+                <div className="pt-4 flex justify-between items-center border-t border-border/30">
+                    <div>
+                        {initialData && (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="px-4 py-2 text-sm font-medium text-error hover:bg-error/10 rounded-lg transition-colors flex items-center gap-2"
+                            >
+                                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                                {t('common.delete')}
+                            </button>
+                        )}
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
+                        >
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm active:scale-95"
+                        >
+                            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                            {t('common.save')}
+                        </button>
+                    </div>
                 </div>
             </form>
         </Modal>

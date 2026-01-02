@@ -45,10 +45,12 @@ export const Money = z.number().int().describe('Amount in cents (integer only)')
 export const UUID = z.string().uuid().describe('Unique identifier');
 
 /**
- * ISODate - ISO 8601 datetime string
- * Example: "2024-12-31T14:30:00.000Z"
+ * ISODate - ISO 8601 date or datetime string
+ * Accepts: 
+ * - "2024-12-31" 
+ * - "2024-12-31T14:30:00.000Z"
  */
-export const ISODate = z.string().datetime().describe('ISO 8601 datetime');
+export const ISODate = z.string().regex(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z)?$/).describe('ISO 8601 date or datetime');
 
 /**
  * Currency code - ISO 4217 (3-letter code)

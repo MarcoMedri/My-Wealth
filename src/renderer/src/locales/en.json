@@ -371,6 +371,7 @@
     "deductible": "Deductible",
     "insuredEntity": "Insured Item",
     "premiumAmount": "Premium Amount",
+    "currentValue": "Current / Redemption Value",
     "premiumPeriod": "Payment Frequency",
     "nextPaymentDate": "Next Payment Date",
     "autoRenewal": "Auto Renewal",

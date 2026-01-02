@@ -40,9 +40,9 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
             setGrossRate(initialData.grossRate.toString());
             setNetRate(initialData.netRate.toString());
             setInterestPeriodicity(initialData.interestPeriodicity);
-            setActivationDate(initialData.activationDate);
+            setActivationDate(initialData.activationDate.split('T')[0]); // Use date part for input
             setDurationMonths(initialData.durationMonths.toString());
-            setMaturityDate(initialData.maturityDate);
+            setMaturityDate(initialData.maturityDate.split('T')[0]); // Use date part for input
             setConstraintType(initialData.constraintType);
             setNotes(initialData.notes || '');
         } else {
@@ -53,11 +53,16 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
             setGrossRate('');
             setNetRate('');
             setInterestPeriodicity('end');
-            setActivationDate(new Date().toISOString().split('T')[0]);
+            const today = new Date().toISOString().split('T')[0];
+            setActivationDate(today);
             setDurationMonths('12');
-            setMaturityDate('');
             setConstraintType('locked');
             setNotes('');
+
+            // Auto-calculate initial maturity date
+            const date = new Date(today);
+            date.setMonth(date.getMonth() + 12);
+            setMaturityDate(date.toISOString().split('T')[0]);
         }
     }, [initialData, isOpen]);
 

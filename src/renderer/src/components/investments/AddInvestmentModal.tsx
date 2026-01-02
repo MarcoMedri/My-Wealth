@@ -42,25 +42,33 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
     const [quoteError, setQuoteError] = useState<string | null>(null);
 
     // Debounce search
+    const [searchError, setSearchError] = useState<string | null>(null);
+
     useEffect(() => {
         const timer = setTimeout(async () => {
             if (searchQuery.length > 2 && step === 'search') {
                 setIsSearching(true);
+                setSearchError(null);
                 try {
                     const results = await window.api.searchInvestments(searchQuery);
                     setSearchResults(results);
+                    if (results.length === 0 && searchQuery.length > 0) {
+                        setSearchError(t('modals.investmentModal.noResults', 'Nessun risultato trovato. Prova con l\'inserimento manuale.'));
+                    }
                 } catch (e) {
                     console.error(e);
+                    setSearchError(t('modals.investmentModal.searchError', 'Errore nella ricerca. Yahoo Finance potrebbe essere temporaneamente non disponibile. Usa l\'inserimento manuale.'));
                 } finally {
                     setIsSearching(false);
                 }
             } else if (searchQuery.length === 0) {
                 setSearchResults([]);
+                setSearchError(null);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, step]);
+    }, [searchQuery, step, t]);
 
     const handleSelectAsset = async (assetResult: InvestmentSearchResult) => {
         setIsSearching(true);
@@ -208,6 +216,14 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
                                             </button>
                                         ))}
                                     </div>
+
+                                    {/* Search Error (e.g., rate limiting) */}
+                                    {searchError && !isSearching && (
+                                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center gap-2 text-amber-700 dark:text-amber-300 text-sm">
+                                            <AlertTriangle className="w-4 h-4" />
+                                            <span>{searchError}</span>
+                                        </div>
+                                    )}
 
                                     {/* Quote Error */}
                                     {quoteError && (

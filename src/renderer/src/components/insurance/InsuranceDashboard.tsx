@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Shield, Plus, Building, Calendar, DollarSign } from 'lucide-react';
+import { Shield, Plus, Building, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { InsurancePolicy } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { AddInsuranceModal } from './AddInsuranceModal';
 import { useFormatDate } from '../../hooks/useFormatDate';
@@ -13,6 +14,7 @@ export function InsuranceDashboard() {
     const { formatDate } = useFormatDate();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingPolicy, setEditingPolicy] = useState<InsurancePolicy | null>(null);
 
     // Total Premium Calculation (Annualized approximation)
     const totalAnnualPremium = useMemo(() => {
@@ -41,7 +43,7 @@ export function InsuranceDashboard() {
                     <Plus className="w-5 h-5" />
                     {t('insurance.addPolicy')}
                 </button>
-                <AddInsuranceModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+                <AddInsuranceModal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingPolicy(null); }} initialData={editingPolicy} />
             </div>
         );
     }
@@ -59,7 +61,7 @@ export function InsuranceDashboard() {
                 </div>
 
                 <button
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={() => { setEditingPolicy(null); setIsAddModalOpen(true); }}
                     className="bg-success text-success-foreground hover:bg-success/90 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-success/20 active:scale-95"
                 >
                     <Plus className="w-4 h-4" />
@@ -71,11 +73,11 @@ export function InsuranceDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
                     <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
-                        <DollarSign className="w-4 h-4" />
+                        <Shield className="w-4 h-4" />
                         {t('insurance.totalValue')} ({t('insurance.placeholders.annualized') || 'Annualized'})
                     </div>
                     <div className="text-3xl font-bold text-foreground tracking-tight">
-                        {formatMoney(totalAnnualPremium, 'EUR')}
+                        {formatMoney(totalAnnualPremium, insurance[0]?.currency || 'EUR')}
                     </div>
                 </div>
                 <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
@@ -99,7 +101,8 @@ export function InsuranceDashboard() {
                     {insurance.map(policy => (
                         <div
                             key={policy.id}
-                            className="group bg-background-card p-5 rounded-2xl border border-border/50 hover:border-success/30 hover:shadow-md transition-all duration-200"
+                            onClick={() => { setEditingPolicy(policy); setIsAddModalOpen(true); }}
+                            className="group bg-background-card p-5 rounded-2xl border border-border/50 hover:border-success/30 hover:shadow-md transition-all duration-200 cursor-pointer"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -160,7 +163,11 @@ export function InsuranceDashboard() {
                 </div>
             </div>
 
-            <AddInsuranceModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+            <AddInsuranceModal
+                isOpen={isAddModalOpen}
+                onClose={() => { setIsAddModalOpen(false); setEditingPolicy(null); }}
+                initialData={editingPolicy}
+            />
         </div>
     );
 }

@@ -804,13 +804,28 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   );
 
   // 4. Insurance
-  const insurance: InsurancePolicy[] = DEMO_INSURANCE.map(p => ({
-    ...p,
-    id: randomUUID(),
-    currentValue: 0,
-    createdAt: nowISO,
-    updatedAt: nowISO
-  }));
+  const insurance: InsurancePolicy[] = DEMO_INSURANCE.map(p => {
+    // Calculate current value based on policy type
+    let currentValue = 0;
+    
+    if (p.type === 'life') {
+      // Life insurance: assume it's an investment plan
+      // Calculate years since start
+      const yearsActive = (new Date().getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24 * 365);
+      // Assume 3-4% annual return on premiums
+      const totalPremiumsPaid = p.premiumAmount * yearsActive;
+      currentValue = Math.round(totalPremiumsPaid * 1.15); // 15% gain
+    }
+    // Auto, home, health, etc. have no cash/redemption value
+    
+    return {
+      ...p,
+      id: randomUUID(),
+      currentValue,
+      createdAt: nowISO,
+      updatedAt: nowISO
+    };
+  });
 
   // Write insurance.json
   await fs.writeJson(

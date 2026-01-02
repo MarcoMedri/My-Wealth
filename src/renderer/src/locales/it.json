@@ -375,6 +375,7 @@
     "deductible": "Franchigia",
     "insuredEntity": "Oggetto Assicurato",
     "premiumAmount": "Premio",
+    "currentValue": "Valore Attuale / Riscatto",
     "premiumPeriod": "Frequenza Pagamento",
     "nextPaymentDate": "Prossimo Pagamento",
     "autoRenewal": "Rinnovo Automatico",
