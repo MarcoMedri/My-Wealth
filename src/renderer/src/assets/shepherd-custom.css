@@ -4,7 +4,7 @@
     background: hsl(var(--background-card));
     border: 1px solid hsl(var(--border));
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px hsl(var(--shadow) / 0.2);
     max-width: 400px;
 }
 
@@ -35,7 +35,7 @@
 
 .shepherd-theme-custom .shepherd-button {
     background: hsl(var(--primary));
-    color: white;
+    color: hsl(var(--primary-foreground));
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -72,9 +72,9 @@
     color: hsl(var(--foreground));
 }
 
-/* Modal overlay */
+/* Modal overlay - uses shadow variable for consistency */
 .shepherd-modal-overlay-container {
-    background: rgba(0, 0, 0, 0.5);
+    background: hsl(var(--shadow) / 0.5);
     backdrop-filter: blur(2px);
 }
 
