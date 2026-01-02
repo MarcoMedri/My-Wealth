@@ -21,9 +21,16 @@
     *   **Collectibles**: Manage high-value assets like watches, art, jewelry, and vehicles.
 *   **📊 Insightful Dashboard**: A beautiful, responsive interface that gives you an at-a-glance view of your financial health.
 *   **⚡ Modern & Fast**: Built with cutting-edge web technologies for a native application experience.
-*   **🏷️ Transaction Management**:
     *   **Custom Categories**: Create, edit, and delete categories with custom icons and colors.
     *   **Demo Data**: Includes a robust seed generator for realistic historical data and exploring features.
+    *   **Recurring Transactions**: Schedule automated daily, weekly, monthly, or yearly transactions.
+    *   **Import Wizard**: Easy 4-step CSV import with column mapping and duplicate detection.
+    *   **Budgets**: Set and track spending limits by category with rollover support.
+*   **📊 Advanced Reporting**:
+    *   **Export**: Generate professional PDF reports and CSV exports of your financial status.
+    *   **Performance**: Virtual scrolling and lazy loading for smooth performance with thousands of transactions.
+    *   **Backup**: Automatic backup system with rotation to keep your data safe.
+    *   **Productivity**: Command Palette (`Cmd+K`) and keyboard shortcuts for rapid navigation.
 *   **💾 Workspace Persistence**:
     *   Remembers your dashboard filters (date ranges, toggle states) across sessions.
     *   Stores UI preferences locally in the vault (`workspace.json`).
