@@ -884,3 +884,100 @@ export function parseToCents(amount: number, currency: string): number {
   
   return isZeroDecimal ? Math.round(amount) : Math.round(amount * 100);
 }
+
+// ============================================================================
+// RECURRING TRANSACTIONS
+// ============================================================================
+
+export const RecurrenceFrequencySchema = z.enum([
+  'daily',
+  'weekly',
+  'biweekly',
+  'monthly',
+  'quarterly',
+  'yearly',
+]);
+export type RecurrenceFrequency = z.infer<typeof RecurrenceFrequencySchema>;
+
+export const RecurringTransactionSchema = z.object({
+  id: UUID,
+  /** Description of the recurring transaction */
+  description: z.string().min(1).max(200),
+  /** Amount in cents (positive for income, negative for expense) */
+  amount: Money,
+  /** Currency code */
+  currency: CurrencyCode,
+  /** Category for the transaction */
+  category: z.string().optional(),
+  /** Linked account ID */
+  accountId: UUID.optional(),
+  /** Recurrence frequency */
+  frequency: RecurrenceFrequencySchema,
+  /** Start date for recurrence */
+  startDate: ISODate,
+  /** End date for recurrence (optional, null means indefinite) */
+  endDate: ISODate.optional(),
+  /** Day of month for monthly/quarterly/yearly (1-31) */
+  dayOfMonth: z.number().int().min(1).max(31).optional(),
+  /** Day of week for weekly/biweekly (0=Sunday, 6=Saturday) */
+  dayOfWeek: z.number().int().min(0).max(6).optional(),
+  /** Last date this recurrence was executed */
+  lastExecutedDate: ISODate.optional(),
+  /** Next scheduled execution date */
+  nextExecutionDate: ISODate,
+  /** Whether this recurring transaction is active */
+  isActive: z.boolean().default(true),
+  /** Notes */
+  notes: z.string().optional(),
+  createdAt: ISODate,
+  updatedAt: ISODate,
+});
+export type RecurringTransaction = z.infer<typeof RecurringTransactionSchema>;
+
+export const RecurringTransactionsFileSchema = z.object({
+  version: z.literal(1),
+  recurringTransactions: z.array(RecurringTransactionSchema),
+});
+export type RecurringTransactionsFile = z.infer<typeof RecurringTransactionsFileSchema>;
+
+// ============================================================================
+// BUDGETS
+// ============================================================================
+
+export const BudgetPeriodSchema = z.enum([
+  'monthly',
+  'quarterly',
+  'yearly',
+]);
+export type BudgetPeriod = z.infer<typeof BudgetPeriodSchema>;
+
+export const BudgetSchema = z.object({
+  id: UUID,
+  /** Name of the budget (e.g., "Groceries", "Entertainment") */
+  name: z.string().min(1).max(100),
+  /** Category this budget tracks (optional, can track multiple via rules) */
+  category: z.string().optional(),
+  /** Budget limit in cents */
+  limitAmount: Money,
+  /** Currency code */
+  currency: CurrencyCode,
+  /** Budget period */
+  period: BudgetPeriodSchema,
+  /** Color for UI display */
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6366f1'),
+  /** Whether to rollover unused budget to next period */
+  rollover: z.boolean().default(false),
+  /** Whether this budget is active */
+  isActive: z.boolean().default(true),
+  /** Notes */
+  notes: z.string().optional(),
+  createdAt: ISODate,
+  updatedAt: ISODate,
+});
+export type Budget = z.infer<typeof BudgetSchema>;
+
+export const BudgetsFileSchema = z.object({
+  version: z.literal(1),
+  budgets: z.array(BudgetSchema),
+});
+export type BudgetsFile = z.infer<typeof BudgetsFileSchema>;

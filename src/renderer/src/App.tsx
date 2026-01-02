@@ -1,5 +1,5 @@
 // App entry point
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 // HMR trigger: 2026-01-02 14:48:51
 import {
@@ -17,10 +17,12 @@ import { CollectiblesDashboard } from './components/collectibles/CollectiblesDas
 import { InsuranceDashboard } from './components/insurance/InsuranceDashboard';
 import { DepositDashboard } from './components/deposits/DepositDashboard';
 import { BrokerDetailView } from './components/brokers/BrokerDetailView';
+import { CommandPalette, createNavigationCommands } from './components';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
 import { useVaultStore } from './store/useVaultStore';
 import { useExchangeRates } from './store/useExchangeRates';
+
 
 function App(): React.ReactElement {
     const [vaultStatus, setVaultStatus] = useState<VaultStatus | null>(null);
@@ -30,7 +32,13 @@ function App(): React.ReactElement {
     // Store
     const refreshData = useVaultStore(state => state.refreshData);
     const activeView = useVaultStore(state => state.activeView);
+    const setActiveView = useVaultStore(state => state.setActiveView);
     const theme = useSettingsStore(state => state.theme);
+
+    // Create navigation commands for CommandPalette
+    const navigationCommands = useMemo(() =>
+        createNavigationCommands((view) => setActiveView(view as typeof activeView))
+        , [setActiveView]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Theme Effect
     useEffect(() => {
@@ -182,16 +190,19 @@ function App(): React.ReactElement {
 
     // Main app with vault loaded
     return (
-        <Layout>
-            {activeView === 'dashboard' && <Dashboard />}
-            {activeView === 'accounts' && <AccountsDashboard />}
-            {activeView === 'investments' && <InvestmentDashboard />}
-            {activeView === 'properties' && <PropertiesDashboard />}
-            {activeView === 'collectibles' && <CollectiblesDashboard />}
-            {activeView === 'insurance' && <InsuranceDashboard />}
-            {activeView === 'deposits' && <DepositDashboard />}
-            {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
-        </Layout>
+        <>
+            <CommandPalette commands={navigationCommands} />
+            <Layout>
+                {activeView === 'dashboard' && <Dashboard />}
+                {activeView === 'accounts' && <AccountsDashboard />}
+                {activeView === 'investments' && <InvestmentDashboard />}
+                {activeView === 'properties' && <PropertiesDashboard />}
+                {activeView === 'collectibles' && <CollectiblesDashboard />}
+                {activeView === 'insurance' && <InsuranceDashboard />}
+                {activeView === 'deposits' && <DepositDashboard />}
+                {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
+            </Layout>
+        </>
     );
 }
 
