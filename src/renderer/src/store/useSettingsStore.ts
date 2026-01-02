@@ -9,6 +9,7 @@ interface SettingsState {
   decimals: number;
   dateFormat: DateFormat;
   timeFormat: TimeFormat;
+  hasCompletedTutorial: boolean;
   
   setCurrency: (currency: SupportedCurrency) => void;
   setLanguage: (language: SupportedLanguage) => void;
@@ -16,6 +17,7 @@ interface SettingsState {
   setDecimals: (decimals: number) => void;
   setDateFormat: (format: DateFormat) => void;
   setTimeFormat: (format: TimeFormat) => void;
+  setHasCompletedTutorial: (completed: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -27,6 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
       decimals: 2, // Default to 2 decimal places
       dateFormat: 'dd/MM/yyyy',
       timeFormat: 'HH:mm',
+      hasCompletedTutorial: false,
       
       setCurrency: (currency) => set({ currency }),
       setLanguage: (language) => set({ language }),
@@ -34,6 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       setDecimals: (decimals) => set({ decimals }),
       setDateFormat: (dateFormat) => set({ dateFormat }),
       setTimeFormat: (timeFormat) => set({ timeFormat }),
+      setHasCompletedTutorial: (hasCompletedTutorial) => set({ hasCompletedTutorial }),
     }),
     {
       name: 'my-wealth-settings',

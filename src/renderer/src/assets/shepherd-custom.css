@@ -1,0 +1,99 @@
+/* Custom Shepherd.js theme matching app design */
+
+.shepherd-theme-custom {
+    background: var(--background-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+}
+
+.shepherd-theme-custom .shepherd-header {
+    padding: 1rem 1rem 0.5rem;
+}
+
+.shepherd-theme-custom .shepherd-title {
+    color: var(--foreground);
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.shepherd-theme-custom .shepherd-text {
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    padding: 0.5rem 1rem 1rem;
+}
+
+.shepherd-theme-custom .shepherd-footer {
+    padding: 0 1rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.shepherd-theme-custom .shepherd-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shepherd-theme-custom .shepherd-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.shepherd-theme-custom .shepherd-button-secondary {
+    background: transparent;
+    color: var(--foreground-muted);
+    border: 1px solid var(--border);
+}
+
+.shepherd-theme-custom .shepherd-button-secondary:hover {
+    background: var(--background-muted);
+    transform: none;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon {
+    color: var(--foreground-muted);
+    font-size: 1.5rem;
+    font-weight: 300;
+    transition: color 0.2s;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon:hover {
+    color: var(--foreground);
+}
+
+/* Modal overlay */
+.shepherd-modal-overlay-container {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+/* Arrow */
+.shepherd-theme-custom .shepherd-arrow::before {
+    background: var(--background-card);
+    border: 1px solid var(--border);
+}
+
+/* Highlight element */
+.shepherd-element-attached-top.shepherd-element-attached-center .shepherd-arrow,
+.shepherd-element-attached-bottom.shepherd-element-attached-center .shepherd-arrow {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .shepherd-theme-custom {
+        max-width: calc(100vw - 2rem);
+    }
+}

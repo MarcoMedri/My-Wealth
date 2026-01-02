@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InsurancePolicy, DepositAccount, InvestmentTrade, Dividend, Broker, Snapshot, WorkspaceSettings } from '../../../shared/schemas';
+import { toast } from 'sonner';
 import { formatMoney } from '../../../shared/schemas';
 
 // ============================================================================

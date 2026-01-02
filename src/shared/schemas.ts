@@ -421,6 +421,7 @@ export const AppSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).default('system'),
   lastAppVersion: z.string(),
   lastModified: ISODate,
+  hasCompletedTutorial: z.boolean().default(false),
   windowBounds: z.object({
     x: z.number().optional(),
     y: z.number().optional(),

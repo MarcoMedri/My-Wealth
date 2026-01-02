@@ -230,6 +230,7 @@ export class VaultManager {
       theme: 'system',
       lastAppVersion: app.getVersion(),
       lastModified: new Date().toISOString(),
+      hasCompletedTutorial: false
     });
   }
   
