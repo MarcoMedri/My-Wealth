@@ -1,34 +1,34 @@
-import React, { useRef, useCallback, CSSProperties } from 'react';
-import { FixedSizeList, VariableSizeList } from 'react-window';
+/**
+ * VirtualList Component - Simple wrapper for now
+ * 
+ * TODO: Properly implement react-window integration
+ * For now, just rendering items directly
+ */
 
-// ============================================================================
-// FIXED SIZE VIRTUAL LIST
-// ============================================================================
+import React from 'react';
 
 export interface VirtualListProps<T> {
     /** Items to render */
     items: T[];
     /** Height of each item in pixels */
     itemHeight: number;
-    /** Height of the container */
+    /** Total height of the list container */
     height: number;
-    /** Width of the container (default: 100%) */
+    /** Optional width (default: 100%) */
     width?: number | string;
     /** Render function for each item */
-    renderItem: (item: T, index: number, style: CSSProperties) => React.ReactNode;
-    /** Key extractor for items */
-    getKey?: (item: T, index: number) => string;
-    /** Overscan count (items to render outside visible area) */
-    overscanCount?: number;
-    /** Class name for the outer container */
+    renderItem: (item: T, index: number) => React.ReactNode;
+    /** Optional key extractor */
+    getKey?: (item: T, index: number) => string | number;
+    /** Optional className */
     className?: string;
+    /** Number of items to render outside visible area */
+    overscanCount?: number;
 }
 
-interface RowProps {
-    index: number;
-    style: CSSProperties;
-}
-
+/**
+ * Simple list renderer (virtualization temporarily disabled)
+ */
 export function VirtualList<T>({
     items,
     itemHeight,
@@ -36,116 +36,75 @@ export function VirtualList<T>({
     width = '100%',
     renderItem,
     getKey,
-    overscanCount = 5,
-    className,
+    className = '',
 }: VirtualListProps<T>) {
-    const listRef = useRef<FixedSizeList>(null);
-
-    const Row = useCallback(
-        ({ index, style }: RowProps) => {
-            const item = items[index];
-            return <>{renderItem(item, index, style)}</>;
-        },
-        [items, renderItem]
-    );
-
-    if (items.length === 0) {
-        return null;
-    }
-
     return (
-        <FixedSizeList
-            ref={listRef}
-            height={height}
-            width={width}
-            itemCount={items.length}
-            itemSize={itemHeight}
-            overscanCount={overscanCount}
+        <div
             className={className}
-            itemKey={getKey ? (index: number) => getKey(items[index], index) : undefined}
+            style={{
+                height,
+                width,
+                overflow: 'auto'
+            }}
         >
-            {Row}
-        </FixedSizeList>
+            {items.map((item, index) => (
+                <div
+                    key={getKey ? getKey(item, index) : index}
+                    style={{ minHeight: itemHeight }}
+                >
+                    {renderItem(item, index)}
+                </div>
+            ))}
+        </div>
     );
 }
-
-// ============================================================================
-// VARIABLE SIZE VIRTUAL LIST
-// ============================================================================
 
 export interface VariableVirtualListProps<T> {
+    /** Items to render */
     items: T[];
-    /** Function to get height of each item */
-    getItemHeight: (index: number) => number;
-    /** Estimated average item height (for initial scroll position) */
-    estimatedItemHeight: number;
-    height: number;
+    /** Function to get height for each item */
+    getItemHeight?: (item: T, index: number) => number;
+    /** Total height of the list container */
+    height?: number;
+    /** Optional width (default: 100%) */
     width?: number | string;
-    renderItem: (item: T, index: number, style: CSSProperties) => React.ReactNode;
-    getKey?: (item: T, index: number) => string;
-    overscanCount?: number;
+    /** Render function for each item */
+    renderItem: (item: T, index: number) => React.ReactNode;
+    /** Optional key extractor */
+    getKey?: (item: T, index: number) => string | number;
+    /** Optional className */
     className?: string;
+    /** Number of items to render outside visible area */
+    overscanCount?: number;
+    /** Default row height */
+    defaultRowHeight?: number;
 }
 
+/**
+ * Simple list renderer (virtualization temporarily disabled)
+ */
 export function VariableVirtualList<T>({
     items,
-    getItemHeight,
-    estimatedItemHeight,
-    height,
-    width = '100%',
+    height = 600,
+    width,
     renderItem,
     getKey,
-    overscanCount = 5,
-    className,
+    className = '',
 }: VariableVirtualListProps<T>) {
-    const listRef = useRef<VariableSizeList>(null);
-
-    const Row = useCallback(
-        ({ index, style }: RowProps) => {
-            const item = items[index];
-            return <>{renderItem(item, index, style)}</>;
-        },
-        [items, renderItem]
-    );
-
-    if (items.length === 0) {
-        return null;
-    }
-
     return (
-        <VariableSizeList
-            ref={listRef}
-            height={height}
-            width={width}
-            itemCount={items.length}
-            itemSize={getItemHeight}
-            estimatedItemSize={estimatedItemHeight}
-            overscanCount={overscanCount}
+        <div
             className={className}
-            itemKey={getKey ? (index: number) => getKey(items[index], index) : undefined}
+            style={{
+                height,
+                width: width || '100%',
+                overflow: 'auto'
+            }}
         >
-            {Row}
-        </VariableSizeList>
+            {items.map((item, index) => (
+                <div key={getKey ? getKey(item, index) : index}>
+                    {renderItem(item, index)}
+                </div>
+            ))}
+        </div>
     );
-}
-
-// ============================================================================
-// SCROLL TO INDEX HOOK
-// ============================================================================
-
-export function useVirtualListScroll(
-    listRef: React.RefObject<FixedSizeList | VariableSizeList>
-) {
-    const scrollToIndex = useCallback(
-        (index: number, align: 'auto' | 'start' | 'center' | 'end' = 'auto') => {
-            listRef.current?.scrollToItem(index, align);
-        },
-        [listRef]
-    );
-
-    const scrollToTop = useCallback(() => {
-        listRef.current?.scrollTo(0);
-    }, [listRef]);
-
-    return { scrollToIndex, scrollToTop };
 }
