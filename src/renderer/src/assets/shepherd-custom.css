@@ -1,8 +1,8 @@
 /* Custom Shepherd.js theme matching app design */
 
 .shepherd-theme-custom {
-    background: var(--background-card);
-    border: 1px solid var(--border);
+    background: hsl(var(--background-card));
+    border: 1px solid hsl(var(--border));
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     max-width: 400px;
@@ -13,14 +13,14 @@
 }
 
 .shepherd-theme-custom .shepherd-title {
-    color: var(--foreground);
+    color: hsl(var(--foreground));
     font-weight: 600;
     font-size: 1.125rem;
     margin: 0;
 }
 
 .shepherd-theme-custom .shepherd-text {
-    color: var(--foreground-muted);
+    color: hsl(var(--foreground-muted));
     font-size: 0.875rem;
     line-height: 1.6;
     padding: 0.5rem 1rem 1rem;
@@ -34,7 +34,7 @@
 }
 
 .shepherd-theme-custom .shepherd-button {
-    background: var(--primary);
+    background: hsl(var(--primary));
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -52,24 +52,24 @@
 
 .shepherd-theme-custom .shepherd-button-secondary {
     background: transparent;
-    color: var(--foreground-muted);
-    border: 1px solid var(--border);
+    color: hsl(var(--foreground-muted));
+    border: 1px solid hsl(var(--border));
 }
 
 .shepherd-theme-custom .shepherd-button-secondary:hover {
-    background: var(--background-muted);
+    background: hsl(var(--background-muted));
     transform: none;
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon {
-    color: var(--foreground-muted);
+    color: hsl(var(--foreground-muted));
     font-size: 1.5rem;
     font-weight: 300;
     transition: color 0.2s;
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon:hover {
-    color: var(--foreground);
+    color: hsl(var(--foreground));
 }
 
 /* Modal overlay */
@@ -80,8 +80,8 @@
 
 /* Arrow */
 .shepherd-theme-custom .shepherd-arrow::before {
-    background: var(--background-card);
-    border: 1px solid var(--border);
+    background: hsl(var(--background-card));
+    border: 1px solid hsl(var(--border));
 }
 
 /* Highlight element */
