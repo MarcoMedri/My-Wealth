@@ -107,6 +107,19 @@ const api = {
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number }): Promise<{ asset: Asset, holding: Holding }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_BUY, params)
   },
+  buyInvestmentManual: (params: { 
+    symbol: string, 
+    name: string, 
+    type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other',
+    currency: string,
+    accountId: string, 
+    quantity: number, 
+    price: number, 
+    date: string, 
+    fees: number 
+  }): Promise<{ asset: Asset, holding: Holding }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_BUY_MANUAL, params)
+  },
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_SELL, params)
   },

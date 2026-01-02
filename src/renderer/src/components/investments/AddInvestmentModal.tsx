@@ -24,6 +24,13 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
     const [isSearching, setIsSearching] = useState(false);
     const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
 
+    // Manual entry mode
+    const [isManualMode, setIsManualMode] = useState(false);
+    const [manualSymbol, setManualSymbol] = useState('');
+    const [manualName, setManualName] = useState('');
+    const [manualType, setManualType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other'>('stock');
+    const [manualCurrency, setManualCurrency] = useState('USD');
+
     // Configure Form
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState(''); // Display price
@@ -96,6 +103,41 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
         }
     };
 
+    // Handler for manual entry - proceed to configure step
+    const handleProceedManual = () => {
+        if (!manualSymbol.trim() || !manualName.trim()) return;
+        setStep('configure');
+    };
+
+    // Handler for buying with manual entry
+    const handleBuyManual = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!accountId || !manualSymbol.trim()) return;
+
+        setIsSubmitting(true);
+        setErrorMessage(null);
+        try {
+            await window.api.buyInvestmentManual({
+                symbol: manualSymbol,
+                name: manualName,
+                type: manualType,
+                currency: manualCurrency,
+                accountId,
+                quantity: parseFloat(quantity),
+                price: parseFloat(price) * 100, // to cents
+                date,
+                fees: parseFloat(fees) * 100 // to cents
+            });
+            await refreshInvestments();
+            onClose();
+        } catch (e) {
+            console.error("Manual buy failed", e);
+            setErrorMessage(e instanceof Error ? e.message : 'Failed to buy investment');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -116,52 +158,133 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
                 <div className="p-6 overflow-y-auto">
                     {step === 'search' ? (
                         <div className="space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
-                                <input
-                                    type="text"
-                                    placeholder={t('modals.investmentModal.searchHint')}
-                                    className="w-full pl-10 pr-4 py-3 bg-background-muted border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
-                                    value={searchQuery}
-                                    onChange={e => setSearchQuery(e.target.value)}
-                                    autoFocus
-                                />
+                            {/* Toggle: Search vs Manual */}
+                            <div className="flex items-center justify-between p-3 bg-background-muted rounded-xl mb-4">
+                                <span className="text-sm font-medium text-foreground">{t('modals.investmentModal.manualEntry') || 'Manual Entry'}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsManualMode(!isManualMode)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isManualMode ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isManualMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
                             </div>
 
-                            {isSearching && (
-                                <div className="flex justify-center p-4">
-                                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
-                                </div>
-                            )}
+                            {!isManualMode ? (
+                                <>
+                                    {/* Search Mode */}
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
+                                        <input
+                                            type="text"
+                                            placeholder={t('modals.investmentModal.searchHint')}
+                                            className="w-full pl-10 pr-4 py-3 bg-background-muted border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
+                                            value={searchQuery}
+                                            onChange={e => setSearchQuery(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
 
-                            <div className="space-y-2">
-                                {searchResults.map((result) => (
+                                    {isSearching && (
+                                        <div className="flex justify-center p-4">
+                                            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        {searchResults.map((result) => (
+                                            <button
+                                                key={result.symbol}
+                                                onClick={() => handleSelectAsset(result)}
+                                                className="w-full flex justify-between items-center p-3 hover:bg-background-muted-subtle rounded-lg group text-left transition-colors"
+                                            >
+                                                <div>
+                                                    <div className="font-semibold text-foreground">{result.symbol}</div>
+                                                    <div className="text-sm text-foreground-subtle">{result.name}</div>
+                                                </div>
+                                                <div className="text-xs text-foreground-muted bg-background-muted px-2 py-1 rounded">
+                                                    {result.exchange}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Quote Error */}
+                                    {quoteError && (
+                                        <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg flex items-center gap-2 text-rose-700 dark:text-rose-300 text-sm">
+                                            <AlertTriangle className="w-4 h-4" />
+                                            <span>{quoteError}</span>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                /* Manual Entry Mode */
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.symbol') || 'Symbol'}</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. AAPL"
+                                            className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                            value={manualSymbol}
+                                            onChange={e => setManualSymbol(e.target.value.toUpperCase())}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.name') || 'Name'}</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Apple Inc."
+                                            className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                            value={manualName}
+                                            onChange={e => setManualName(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.type') || 'Type'}</label>
+                                            <select
+                                                className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                                value={manualType}
+                                                onChange={e => setManualType(e.target.value as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other')}
+                                            >
+                                                <option value="stock">Stock</option>
+                                                <option value="etf">ETF</option>
+                                                <option value="crypto">Crypto</option>
+                                                <option value="bond">Bond</option>
+                                                <option value="fund">Fund</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.currency') || 'Currency'}</label>
+                                            <select
+                                                className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                                value={manualCurrency}
+                                                onChange={e => setManualCurrency(e.target.value)}
+                                            >
+                                                <option value="USD">USD</option>
+                                                <option value="EUR">EUR</option>
+                                                <option value="GBP">GBP</option>
+                                                <option value="CHF">CHF</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <button
-                                        key={result.symbol}
-                                        onClick={() => handleSelectAsset(result)}
-                                        className="w-full flex justify-between items-center p-3 hover:bg-background-muted-subtle rounded-lg group text-left transition-colors"
+                                        type="button"
+                                        onClick={handleProceedManual}
+                                        disabled={!manualSymbol.trim() || !manualName.trim()}
+                                        className="w-full py-3 bg-indigo-500 text-white rounded-xl font-medium hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <div>
-                                            <div className="font-semibold text-foreground">{result.symbol}</div>
-                                            <div className="text-sm text-foreground-subtle">{result.name}</div>
-                                        </div>
-                                        <div className="text-xs text-foreground-muted bg-background-muted px-2 py-1 rounded">
-                                            {result.exchange}
-                                        </div>
+                                        {t('common.continue') || 'Continue'}
                                     </button>
-                                ))}
-                            </div>
-
-                            {/* Quote Error */}
-                            {quoteError && (
-                                <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg flex items-center gap-2 text-rose-700 dark:text-rose-300 text-sm">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    <span>{quoteError}</span>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <form onSubmit={handleBuy} className="space-y-4">
+                        <form onSubmit={isManualMode ? handleBuyManual : handleBuy} className="space-y-4">
                             <div className="bg-background-muted p-4 rounded-xl flex justify-between items-center mb-6">
                                 <div>
                                     <div className="text-sm text-foreground-subtle">Current Price</div>

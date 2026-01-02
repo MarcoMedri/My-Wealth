@@ -138,6 +138,11 @@ function registerIpcHandlers(): void {
     return investmentManager.buy(params);
   });
 
+  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_BUY_MANUAL, async (_event, params) => {
+    const { investmentManager } = await import('./investments');
+    return investmentManager.buyManual(params);
+  });
+
   ipcMain.handle(IPC_CHANNELS.INVESTMENTS_SELL, async (_event, params) => {
     const { investmentManager } = await import('./investments');
     return investmentManager.sell(params);

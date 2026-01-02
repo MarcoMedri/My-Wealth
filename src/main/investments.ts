@@ -1,8 +1,13 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
+import path from 'path';
+import fs from 'fs-extra';
 import type { Asset, Holding, AssetType, InvestmentTrade } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
+
+// Initialize Yahoo Finance v3
+const yahooFinance = new YahooFinance();
 
 export interface SellResult {
   updatedHolding: Holding | null; // null if fully sold
@@ -201,6 +206,130 @@ export class InvestmentManager {
   }
 
   /**
+   * Execute a BUY order with MANUAL asset data (no Yahoo Finance lookup):
+   * 1. Create Asset with user-provided metadata
+   * 2. Update/Create Holding
+   * 3. Create Transaction
+   */
+  async buyManual(params: {
+    symbol: string;
+    name: string;
+    type: AssetType;
+    currency: string;
+    accountId: string;
+    quantity: number;
+    price: number; // in cents
+    date: string;
+    fees: number; // in cents
+  }) {
+    const vaultManager = getVaultManager();
+    const vaultPath = vaultManager.getVaultPath();
+    if (!vaultPath) throw new Error('Vault not loaded');
+
+    // Input validation
+    if (params.quantity <= 0) throw new Error('Quantity must be positive');
+    if (params.price <= 0) throw new Error('Price must be positive');
+    if (params.fees < 0) throw new Error('Fees cannot be negative');
+    if (!params.symbol.trim()) throw new Error('Symbol is required');
+    if (!params.name.trim()) throw new Error('Name is required');
+
+    const now = new Date().toISOString();
+
+    // 1. Get or Create Asset (manually)
+    let asset = vaultManager.assets.find((a: Asset) => a.symbol.toUpperCase() === params.symbol.toUpperCase());
+    
+    if (!asset) {
+      asset = {
+        id: randomUUID(),
+        symbol: params.symbol.toUpperCase(),
+        name: params.name,
+        type: params.type,
+        currency: params.currency,
+        currentPrice: params.price,
+        previousClose: params.price, // No previous data for manual
+        lastUpdated: now,
+        createdAt: now,
+        updatedAt: now
+      };
+      await vaultManager.saveAsset(asset);
+    } else {
+      // Asset exists - optionally update price
+      asset = {
+        ...asset,
+        currentPrice: params.price,
+        lastUpdated: now,
+        updatedAt: now,
+      };
+      await vaultManager.saveAsset(asset);
+    }
+
+    // 2. Update or Create Holding (same as buy)
+    let holding = vaultManager.holdings.find((h: Holding) => h.assetId === asset!.id && h.accountId === params.accountId);
+    const assetId = asset!.id;
+    const assetCurrency = asset!.currency;
+
+    if (holding) {
+      const oldTotalCost = holding.quantity * holding.averageBuyPrice;
+      const newTotalCost = params.quantity * params.price;
+      const totalQty = holding.quantity + params.quantity;
+      const newAvgPrice = totalQty > 0 ? Math.round((oldTotalCost + newTotalCost) / totalQty) : 0;
+
+      holding = {
+        ...holding,
+        quantity: totalQty,
+        averageBuyPrice: newAvgPrice,
+        updatedAt: now
+      };
+    } else {
+      holding = {
+        id: randomUUID(),
+        accountId: params.accountId,
+        assetId: asset.id,
+        quantity: params.quantity,
+        averageBuyPrice: params.price,
+        createdAt: now,
+        updatedAt: now
+      };
+    }
+    await vaultManager.saveHolding(holding);
+
+    // 3. Create Transaction
+    const totalAmount = Math.round(params.quantity * params.price) + params.fees;
+    
+    await vaultManager.saveTransaction({
+      type: 'expense',
+      date: params.date,
+      amount: totalAmount,
+      payee: `Buy ${params.symbol}`,
+      currency: assetCurrency,
+      accountId: params.accountId,
+      categoryId: null,
+      toAccountId: null,
+      notes: `Bought ${params.quantity} of ${params.symbol} @ ${params.price/100} (Manual Entry)`,
+      status: 'cleared',
+      tags: ['investment', 'manual'],
+      splits: [],
+      isReconciled: false
+    });
+
+    // 4. Create Trade record
+    const trade: InvestmentTrade = {
+      id: randomUUID(),
+      type: 'buy',
+      assetId: assetId,
+      accountId: params.accountId,
+      quantity: params.quantity,
+      pricePerUnit: params.price,
+      fees: params.fees,
+      date: params.date,
+      createdAt: now,
+    };
+    await vaultManager.saveTrade(trade);
+
+    return { asset, holding, trade };
+  }
+
+  /**
    * Execute a SELL order (Tracking Mode):
    * 1. Validate holding has enough quantity
    * 2. Calculate realized gain/loss
@@ -261,14 +390,51 @@ export class InvestmentManager {
 
     // 4. Create income transaction (money coming back)
     const netProceeds = proceeds - params.fees;
+    
+    // Parse date to ensure valid ISO format
+    // Handle both "YYYY-MM-DD" and "YYYY-MM-DDTHH:mm:ss.sssZ" formats
+    let isoDate = params.date;
+    if (!params.date.includes('T')) {
+      // Convert YYYY-MM-DD to full ISO at noon to avoid timezone issues
+      const [year, month, day] = params.date.split('-').map(Number);
+      isoDate = new Date(year, month - 1, day, 12, 0, 0).toISOString();
+    }
+    
+    // Find an investment category or use "Investment Income" placeholder
+    let investmentCategoryId: string | null = null;
+    // Read categories from the vault JSON file directly
+    const currentVaultPath = vaultManager.getVaultPath();
+    if (currentVaultPath) {
+      try {
+        const categoriesPath = path.join(currentVaultPath, 'categories.json');
+        const categoriesExist = await fs.pathExists(categoriesPath);
+        if (categoriesExist) {
+          const categoriesData = await fs.readJson(categoriesPath) as Array<{id: string, name: string, type: string}>;
+          const investmentCategory = categoriesData.find(c => 
+            c.type === 'income' && (c.name.toLowerCase().includes('investment') || c.name.toLowerCase().includes('capital'))
+          );
+          if (investmentCategory) {
+            investmentCategoryId = investmentCategory.id;
+          } else {
+            const firstIncomeCategory = categoriesData.find(c => c.type === 'income');
+            if (firstIncomeCategory) {
+              investmentCategoryId = firstIncomeCategory.id;
+            }
+          }
+        }
+      } catch {
+        console.warn('Could not read categories for investment transaction');
+      }
+    }
+    
     await vaultManager.saveTransaction({
       type: 'income',
-      date: params.date,
+      date: isoDate,
       amount: netProceeds,
       payee: `Sell ${asset.symbol}`,
       currency: asset.currency,
       accountId: holding.accountId,
-      categoryId: null,
+      categoryId: investmentCategoryId,
       toAccountId: null,
       notes: `Sold ${params.quantity} of ${asset.symbol} @ ${params.price/100}. Gain/Loss: ${realizedGain/100}`,
       status: 'cleared',

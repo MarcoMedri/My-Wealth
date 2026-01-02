@@ -43,6 +43,7 @@ interface API {
   searchInvestments: (query: string) => Promise<{ symbol: string, name: string, type: string, currency: string, exchange: string }[]>;
   getInvestmentQuote: (symbol: string) => Promise<{ symbol: string, price: number, currency: string, name?: string }>;
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
+  buyInvestmentManual: (params: { symbol: string, name: string, type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other', currency: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }) => Promise<{ updatedHolding: Holding | null, realizedGain: number }>;
   refreshInvestmentPrices: () => Promise<Asset[]>;
   deleteAsset: (id: string) => Promise<void>;

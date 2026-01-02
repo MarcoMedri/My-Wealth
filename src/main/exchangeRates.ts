@@ -1,9 +1,11 @@
-// Workaround for ESM/CJS interop in Electron
-const yahooFinance = require('yahoo-finance2').default || require('yahoo-finance2');
+import YahooFinance from 'yahoo-finance2';
 import { app } from 'electron';
 import { join } from 'path';
 import fs from 'fs-extra';
 import { SUPPORTED_CURRENCIES } from '../shared/types';
+
+// Initialize Yahoo Finance v3
+const yahooFinance = new YahooFinance();
 
 interface ExchangeRateCache {
   base: string;
