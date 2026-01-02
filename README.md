@@ -14,6 +14,7 @@
     *   Detailed performance metrics including Day Change, Total Return, and Cost Basis.
     *   Support for buy/sell transactions with automatic P/L calculation.
 *   **🏦 Comprehensive Net Worth Tracking**:
+    *   **Brokers**: Organize assets by financial institution with automatic logo fetching (powered by Clearbit) for a visual overview.
     *   **Accounts**: Manage bank accounts, cash, and liabilities.
     *   **Conti Deposito**: Track high-yield deposit accounts with maturity tracking.
     *   **Insurance**: Manage life, auto, and health insurance policies.
@@ -21,6 +22,7 @@
     *   **Collectibles**: Manage high-value assets like watches, art, jewelry, and vehicles.
 *   **📊 Insightful Dashboard**: A beautiful, responsive interface that gives you an at-a-glance view of your financial health.
 *   **⚡ Modern & Fast**: Built with cutting-edge web technologies for a native application experience.
+    *   **Workspaces**: Collapsible sidebars and persistent layout preferences for a focused workflow.
     *   **Custom Categories**: Create, edit, and delete categories with custom icons and colors.
     *   **Demo Data**: Includes a robust seed generator for realistic historical data and exploring features.
     *   **Recurring Transactions**: Schedule automated daily, weekly, monthly, or yearly transactions.
@@ -53,6 +55,7 @@ My Wealth uses a **Vault** system - a folder on your local machine containing JS
 
 ```
 /your-vault-folder/
+├── logos/             # Broker logos (downloaded locally)
 ├── accounts.json      # Bank accounts, wallets, credit cards
 ├── transactions.json  # Income, expenses, transfers
 ├── assets.json        # Investment asset definitions (AAPL, BTC, etc.)
@@ -69,17 +72,23 @@ My Wealth uses a **Vault** system - a folder on your local machine containing JS
 ```
 
 ### Core Concepts
-
+        
 | Concept | Description |
 |---------|-------------|
-| **Broker** | A financial institution (bank, brokerage, crypto exchange) that holds your accounts and/or investments |
-| **Account** | A cash container (checking, savings, credit card) with a balance calculated from transactions |
-| **Holding** | Your position in an asset (e.g., 10 shares of AAPL) |
-| **Asset** | An investable item with real-time price tracking (stocks, ETFs, crypto) |
-| **Property** | Real estate with purchase price and current value tracking |
-| **Collectible** | High-value items (watches, art, vehicles) with appreciation tracking |
-| **Insurance** | Insurance policies (life, auto, health) |
-| **Deposit Account** | High-yield savings/deposit contracts with interest tracking |
+| **Broker** | **The Primary Container.** A financial institution (bank, brokerage, crypto exchange, etc.) that acts as the "Source of Truth". It holds your Accounts, Investments, Insurance, and Deposits. |
+| **Account** | A cash container (checking, savings, credit card) linked to a Broker. Used for liquid funds and transactions. |
+| **Holding** | Your position in an asset (e.g., 10 shares of AAPL), held within a Broker. |
+| **Asset** | An investable item with real-time price tracking (stocks, ETFs, crypto). |
+| **Deposit Account** | High-yield savings/deposit contract held at a Broker. |
+| **Insurance** | Insurance policy managed by a Broker/Provider. |
+| **Property** | Real estate holdings (Independent entity, typically linked to a Mortgage Account). |
+| **Collectible** | High-value physical items (Independent entity). |
+
+**Architectural Model:** 
+The application follows a **Broker-Centric** model. 
+- You import data into a **Broker**.
+- The **Broker View** shows everything you own at that specific institution.
+- The **Global Dashboards** (Accounts, Investments, etc.) act as **Aggregated Views**, summing up data from all brokers to give you a complete financial picture.
 
 ### Money Handling
 

@@ -1,10 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
-import { readFile } from 'fs/promises'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
 import type { Transaction, Account, Category, Broker, DepositAccount } from '../shared/schemas'
+import * as fs from 'fs'
+import * as path from 'path'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -48,26 +49,26 @@ function registerIpcHandlers(): void {
     return vaultManager.getStatus()
   })
 
-
-
   ipcMain.handle(IPC_CHANNELS.IMPORT_SELECT_FILE, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ['openFile'],
       filters: [{ name: 'CSV Files', extensions: ['csv'] }]
-    });
-    
+    })
+
     if (canceled || filePaths.length === 0) {
-      return null;
+      return null
     }
 
-    const path = filePaths[0];
     try {
-      const content = await readFile(path, 'utf-8');
-      const filename = path.split('/').pop() || 'imported.csv'; // Simple filename extraction
-      return { name: filename, content, path };
+      const content = fs.readFileSync(filePaths[0], 'utf-8')
+      return {
+        name: path.basename(filePaths[0]),
+        content,
+        path: filePaths[0]
+      }
     } catch (error) {
-      console.error('Failed to read selected file:', error);
-      throw error;
+      console.error('Failed to read file:', error)
+      throw error
     }
   })
 
@@ -78,6 +79,10 @@ function registerIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.VAULT_INITIALIZE, async (_event, vaultPath: string) => {
     await vaultManager.initializeVault(vaultPath)
     return vaultManager.getStatus()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.VAULT_RESET, async () => {
+    await vaultManager.resetVaultPath();
   })
 
   // ========== VAULT DATA ==========
@@ -130,6 +135,10 @@ function registerIpcHandlers(): void {
     return vaultManager.deleteBroker(id)
   })
 
+  ipcMain.handle(IPC_CHANNELS.BROKER_DOWNLOAD_LOGO, async (_event, domain: string, brokerId: string) => {
+    return vaultManager.downloadBrokerLogo(domain, brokerId)
+  })
+
   // ========== CSV IMPORT ==========
   ipcMain.handle(IPC_CHANNELS.IMPORT_GET_PRESETS, async () => {
     const { IMPORT_PRESETS } = await import('./csv-importer')
@@ -144,7 +153,7 @@ function registerIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle(IPC_CHANNELS.IMPORT_CSV_EXECUTE, async (_event, { content, mapping, accountId }: { content: string, mapping: ColumnMapping, accountId: string }) => {
+  ipcMain.handle(IPC_CHANNELS.IMPORT_CSV_EXECUTE, async (_event, content: string, mapping: ColumnMapping, accountId: string) => {
     const { parseCSV } = await import('./csv-importer')
     // Just parse and return transactions. The renderer handles deduplication and saving.
     return parseCSV(content, mapping, accountId)

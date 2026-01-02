@@ -15,6 +15,13 @@ import {
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { AddBrokerModal } from './AddBrokerModal';
+import { cn } from '../../lib/utils';
+
+// Imports for Modals
+import ImportModal from '../ImportModal';
+import { AddInvestmentModal } from '../investments/AddInvestmentModal';
+import { AddDepositModal } from '../deposits/AddDepositModal';
+import { Upload } from 'lucide-react';
 
 interface BrokerDetailViewProps {
     brokerId: string;
@@ -23,6 +30,7 @@ interface BrokerDetailViewProps {
 export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) => {
     const { t } = useTranslation();
     const getBroker = useVaultStore(state => state.getBroker);
+    const vaultPath = useVaultStore(state => state.vaultPath);
     const accounts = useVaultStore(state => state.accounts);
     const holdings = useVaultStore(state => state.holdings);
     const assets = useVaultStore(state => state.assets);
@@ -33,11 +41,16 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+    // Action Modals State
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
+    const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
     const broker = getBroker(brokerId);
 
     if (!broker) {
         return (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="flex items-center justify-center h-full text-foreground-muted">
                 {t('brokers.notFound', 'Broker not found')}
             </div>
         );
@@ -80,43 +93,81 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
     };
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div className="h-full flex flex-col bg-background-subtle transition-colors">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                    <div
-                        className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg"
-                        style={{ backgroundColor: broker.color }}
-                    >
-                        {broker.icon ? <span>{broker.icon}</span> : <Building2 />}
+            <div className="bg-background-card border-b border-border p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                        <div
+                            className={cn(
+                                "w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg overflow-hidden",
+                                broker.logoPath ? "bg-white p-2" : ""
+                            )}
+                            style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
+                        >
+                            {broker.logoPath && vaultPath ? (
+                                <img
+                                    src={`file://${vaultPath}/${broker.logoPath}`}
+                                    alt={broker.name}
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                broker.icon ? <span>{broker.icon}</span> : <Building2 />
+                            )}
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                                {broker.name}
+                                <span className="text-sm font-normal px-2 py-0.5 rounded-full bg-background-muted text-foreground-muted">
+                                    {t(`brokers.types.${broker.type}`, broker.type)}
+                                </span>
+                            </h1>
+                            <p className="text-foreground-muted mt-1">
+                                {t('brokers.totalValue')}: <span className="font-semibold text-foreground">{formatMoney(totalValue, 'EUR')}</span>
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            {broker.name}
-                            <span className="text-sm font-normal px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                {t(`brokers.types.${broker.type}`, broker.type)}
-                            </span>
-                        </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            {t('brokers.totalValue')}: <span className="font-semibold text-gray-900 dark:text-gray-100">{formatMoney(totalValue, 'EUR')}</span>
-                        </p>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="p-2 text-foreground-muted hover:text-primary hover:bg-background-muted rounded-lg transition-colors"
+                            title={t('common.edit')}
+                        >
+                            <Pencil size={20} />
+                        </button>
+                        <button
+                            onClick={handleDelete}
+                            className="p-2 text-foreground-muted hover:text-error hover:bg-background-muted rounded-lg transition-colors"
+                            title={t('common.delete')}
+                        >
+                            <Trash2 size={20} />
+                        </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Quick Actions Bar */}
+                <div className="flex gap-2 pt-2">
                     <button
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg transition-colors"
-                        title={t('common.edit')}
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
-                        <Pencil size={20} />
+                        <Upload size={16} className="text-blue-500" />
+                        {t('import.title', 'Importa CSV')}
                     </button>
                     <button
-                        onClick={handleDelete}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-gray-400 dark:hover:text-red-400 rounded-lg transition-colors"
-                        title={t('common.delete')}
+                        onClick={() => setIsInvestmentModalOpen(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
-                        <Trash2 size={20} />
+                        <TrendingUp size={16} className="text-purple-500" />
+                        {t('investments.addInvestment', 'Aggiungi Investimento')}
+                    </button>
+                    <button
+                        onClick={() => setIsDepositModalOpen(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
+                    >
+                        <PiggyBank size={16} className="text-emerald-500" />
+                        {t('deposits.addDeposit', 'Aggiungi Deposito')}
                     </button>
                 </div>
             </div>
@@ -124,41 +175,41 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
+                    <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                             <Wallet size={24} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('brokers.cashBalance')}</h3>
-                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatMoney(cashTotal, 'EUR')}</p>
+                            <h3 className="text-sm font-medium text-foreground-muted">{t('brokers.cashBalance')}</h3>
+                            <p className="text-xl font-bold text-foreground">{formatMoney(cashTotal, 'EUR')}</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                    <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
                             <TrendingUp size={24} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('brokers.investmentsValue')}</h3>
-                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatMoney(investmentsTotal, 'EUR')}</p>
+                            <h3 className="text-sm font-medium text-foreground-muted">{t('brokers.investmentsValue')}</h3>
+                            <p className="text-xl font-bold text-foreground">{formatMoney(investmentsTotal, 'EUR')}</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                             <PiggyBank size={24} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('deposits.title')}</h3>
-                            <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{formatMoney(depositsTotal, 'EUR')}</p>
+                            <h3 className="text-sm font-medium text-foreground-muted">{t('deposits.title')}</h3>
+                            <p className="text-xl font-bold text-foreground">{formatMoney(depositsTotal, 'EUR')}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Linked Accounts */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <Wallet size={20} className="text-gray-500" />
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <Wallet size={20} className="text-foreground-muted" />
                         {t('brokers.linkedAccounts')}
                     </h2>
 
@@ -177,19 +228,19 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                                 }[account.type] || Wallet;
 
                                 return (
-                                    <div key={account.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
+                                    <div key={account.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow cursor-pointer">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500">
+                                                <div className="p-1.5 rounded-lg bg-background-subtle text-foreground-muted">
                                                     <AccountIcon size={16} />
                                                 </div>
-                                                <span className="font-medium text-gray-900 dark:text-gray-100">{account.name}</span>
+                                                <span className="font-medium text-foreground">{account.name}</span>
                                             </div>
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500">
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-background-subtle text-foreground-muted">
                                                 {t(`accountTypes.${account.type}`)}
                                             </span>
                                         </div>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        <p className="text-2xl font-bold text-foreground">
                                             {formatMoney(accountBalances[account.id] || 0, account.currency)}
                                         </p>
                                     </div>
@@ -197,57 +248,65 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                             })}
                         </div>
                     ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic text-sm">{t('brokers.noAccounts')}</p>
+                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-background-subtle/50">
+                            <Wallet className="w-8 h-8 text-foreground-muted mb-2 opacity-50" />
+                            <p className="text-foreground-muted italic text-sm text-center">
+                                {t('brokers.noAccounts')}<br />
+                                <span className="text-xs">
+                                    Use &quot;Import CSV&quot; to create investment accounts automatically.
+                                </span>
+                            </p>
+                        </div>
                     )}
                 </div>
 
                 {/* Deposit Accounts */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <PiggyBank size={20} className="text-gray-500" />
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <PiggyBank size={20} className="text-foreground-muted" />
                         {t('deposits.title')}
                     </h2>
 
                     {brokerDeposits.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {brokerDeposits.map(deposit => (
-                                <div key={deposit.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                <div key={deposit.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                                            <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500">
                                                 <PiggyBank size={16} />
                                             </div>
-                                            <span className="font-medium text-gray-900 dark:text-gray-100">{deposit.name}</span>
+                                            <span className="font-medium text-foreground">{deposit.name}</span>
                                         </div>
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-                                            {(deposit.grossRate / 100).toFixed(2)}%
+                                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
+                                            {(deposit.grossRate).toFixed(2)}%
                                         </span>
                                     </div>
-                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    <p className="text-2xl font-bold text-foreground">
                                         {formatMoney(deposit.principal, deposit.currency)}
                                     </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs text-foreground-muted mt-1">
                                         {t('deposits.maturityDate')}: {new Date(deposit.maturityDate).toLocaleDateString()}
                                     </p>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic text-sm">{t('deposits.noDeposits', 'Nessun conto deposito collegato')}</p>
+                        <p className="text-foreground-muted italic text-sm">{t('deposits.noDeposits', 'Nessun conto deposito collegato')}</p>
                     )}
                 </div>
 
                 {/* Portfolio / Holdings */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <PieChart size={20} className="text-gray-500" />
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <PieChart size={20} className="text-foreground-muted" />
                         {t('brokers.portfolio')}
                     </h2>
 
                     {brokerHoldings.length > 0 ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden">
                             <table className="w-full text-left">
-                                <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-gray-500 font-medium">
+                                <thead className="bg-background-subtle text-xs uppercase text-foreground-muted font-medium">
                                     <tr>
                                         <th className="px-6 py-3">{t('investments.symbol')}</th>
                                         <th className="px-6 py-3 text-right">{t('investments.quantity')}</th>
@@ -255,25 +314,27 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                                         <th className="px-6 py-3 text-right">{t('investments.value')}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tbody className="divide-y divide-border">
                                     {brokerHoldings.map(holding => {
                                         const asset = assets.find(a => a.id === holding.assetId);
                                         if (!asset) return null;
-                                        const value = holding.quantity * asset.currentPrice;
+                                        // TODO: Use real-time price if available, otherwise fallback to something reasonable
+                                        const price = asset.currentPrice;
+                                        const value = holding.quantity * price;
 
                                         return (
-                                            <tr key={holding.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <tr key={holding.id} className="hover:bg-background-subtle transition-colors">
                                                 <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900 dark:text-gray-100">{asset.symbol}</div>
-                                                    <div className="text-xs text-gray-500">{asset.name}</div>
+                                                    <div className="font-medium text-foreground">{asset.symbol}</div>
+                                                    <div className="text-xs text-foreground-muted">{asset.name}</div>
                                                 </td>
-                                                <td className="px-6 py-4 text-right text-gray-600 dark:text-gray-300 font-mono">
+                                                <td className="px-6 py-4 text-right text-foreground font-mono">
                                                     {holding.quantity}
                                                 </td>
-                                                <td className="px-6 py-4 text-right text-gray-600 dark:text-gray-300 font-mono">
-                                                    {formatMoney(asset.currentPrice, asset.currency)}
+                                                <td className="px-6 py-4 text-right text-foreground font-mono">
+                                                    {formatMoney(price, asset.currency)}
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-gray-100 font-mono">
+                                                <td className="px-6 py-4 text-right font-bold text-foreground font-mono">
                                                     {formatMoney(value, asset.currency)}
                                                 </td>
                                             </tr>
@@ -283,17 +344,47 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                             </table>
                         </div>
                     ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic text-sm">{t('brokers.noHoldings')}</p>
+                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-background-subtle/50">
+                            <PieChart className="w-8 h-8 text-foreground-muted mb-2 opacity-50" />
+                            <p className="text-foreground-muted italic text-sm text-center">
+                                {t('brokers.noHoldings')}<br />
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Edit Modal (Reuse AddBrokerModal) */}
+            {/* Edit Modal */}
             {isEditModalOpen && (
                 <AddBrokerModal
                     isOpen={isEditModalOpen}
                     onClose={() => setIsEditModalOpen(false)}
                     editBrokerId={brokerId}
+                />
+            )}
+
+            {/* Context-Aware Action Modals */}
+            {isImportModalOpen && (
+                <ImportModal
+                    isOpen={isImportModalOpen}
+                    onClose={() => setIsImportModalOpen(false)}
+                    preselectedBrokerId={brokerId}
+                />
+            )}
+
+            {isInvestmentModalOpen && (
+                <AddInvestmentModal
+                    isOpen={isInvestmentModalOpen}
+                    onClose={() => setIsInvestmentModalOpen(false)}
+                    preselectedBrokerId={brokerId}
+                />
+            )}
+
+            {isDepositModalOpen && (
+                <AddDepositModal
+                    isOpen={isDepositModalOpen}
+                    onClose={() => setIsDepositModalOpen(false)}
+                    preselectedBrokerId={brokerId}
                 />
             )}
         </div>

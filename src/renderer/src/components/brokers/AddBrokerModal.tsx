@@ -27,6 +27,9 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const saveBroker = useVaultStore(state => state.saveBroker);
     const getBroker = useVaultStore(state => state.getBroker);
 
+    const [website, setWebsite] = useState('');
+    const [logoUrl, setLogoUrl] = useState('');
+    const [logoPreviewError, setLogoPreviewError] = useState(false);
     const [name, setName] = useState('');
     const [type, setType] = useState<typeof BROKER_TYPES[number]>('broker');
     const [color, setColor] = useState('#6366f1');
@@ -38,18 +41,40 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             const broker = getBroker(editBrokerId);
             if (broker) {
                 setName(broker.name);
+                setWebsite(broker.website || '');
                 setType(broker.type);
                 setColor(broker.color);
                 setIcon(broker.icon || '');
+                // If we have a website but no local logo path, try to preview from clearbit
+                if (broker.website && !broker.logoPath) {
+                    setLogoUrl(`https://logo.clearbit.com/${broker.website}`);
+                } else if (broker.logoPath) {
+                    // We don't easily preview local files in this modal without converting to file:// URL which might be tricky in renderer depending on CSP
+                    // But for now let's just stick to editing website = preview new logo
+                    // If user is editing, we show current state.
+                }
             }
         } else if (isOpen) {
             // Reset for new
             setName('');
+            setWebsite('');
+            setLogoUrl('');
+            setLogoPreviewError(false);
             setType('broker');
             setColor('#6366f1');
             setIcon('');
         }
     }, [isOpen, editBrokerId, getBroker]);
+
+    // Live preview when website changes
+    useEffect(() => {
+        if (website && website.includes('.')) {
+            setLogoUrl(`https://logo.clearbit.com/${website}`);
+            setLogoPreviewError(false);
+        } else {
+            setLogoUrl('');
+        }
+    }, [website]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,9 +82,23 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
 
         try {
             const now = new Date().toISOString();
+            const id = editBrokerId || generateId();
+
+            // Attempt to download logo if website is provided
+            let logoPath: string | null = null;
+            if (website && !logoPreviewError) {
+                try {
+                    logoPath = await window.api.downloadBrokerLogo(website, id);
+                } catch (err) {
+                    console.error('Failed to download logo during save', err);
+                }
+            }
+
             const broker = {
-                id: editBrokerId || generateId(),
+                id,
                 name,
+                website: website || undefined,
+                logoPath: logoPath || (editBrokerId ? getBroker(editBrokerId)?.logoPath : undefined),
                 type,
                 color,
                 icon: icon || undefined,
@@ -98,19 +137,55 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    {/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {t('brokers.nameLabel')}
-                        </label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder={t('brokers.namePlaceholder')}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                            required
-                        />
+                    {/* Name & Website Grid */}
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {t('brokers.nameLabel')}
+                            </label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder={t('brokers.namePlaceholder')}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                required
+                            />
+                        </div>
+
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Website <span className="text-gray-400 font-normal">(Auto-fetch Logo)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={website}
+                                    onChange={(e) => setWebsite(e.target.value)}
+                                    placeholder="e.g. revolut.com"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+
+                            {/* Logo Preview */}
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Logo
+                                </label>
+                                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center overflow-hidden relative">
+                                    {logoUrl && !logoPreviewError ? (
+                                        <img
+                                            src={logoUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-contain"
+                                            onError={() => setLogoPreviewError(true)}
+                                        />
+                                    ) : (
+                                        <span className="text-xs text-gray-400">?</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Type */}

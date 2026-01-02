@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { Select, Modal } from './';
 import { cn } from '../lib/utils';
 import { Loader2, Upload, FileText, AlertCircle, Check } from 'lucide-react';
@@ -13,14 +14,23 @@ import type { ImportPreset, ColumnMapping } from '../../../shared/types';
 interface ImportModalProps {
     isOpen: boolean;
     onClose: () => void;
+    preselectedBrokerId?: string;
 }
 
-export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
+export default function ImportModal({ isOpen, onClose, preselectedBrokerId }: ImportModalProps) {
     const { t } = useTranslation();
-    const { accounts, refreshData } = useVaultStore();
+    const { accounts, deposits, brokers, refreshData } = useVaultStore();
+    const baseCurrency = useSettingsStore(state => state.currency);
 
     // Steps: 'upload' -> 'mapping' -> 'preview' -> 'done'
     const [step, setStep] = useState<'upload' | 'mapping' | 'preview' | 'done'>('upload');
+
+    // Auto-select broker if preselected
+    useEffect(() => {
+        if (isOpen && preselectedBrokerId) {
+            setAccountId(`broker:${preselectedBrokerId}`);
+        }
+    }, [isOpen, preselectedBrokerId]);
 
     const [file, setFile] = useState<File | null>(null);
     const [content, setContent] = useState<string>('');
@@ -51,7 +61,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Load presets on mount
+    // Set initial mapping when preset changes or when presets load
     useEffect(() => {
         window.api.getImportPresets().then(setPresets);
     }, []);
@@ -64,20 +74,52 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         }
     }, [selectedPresetId, presets]);
 
-    // Debug accounts
-    useEffect(() => {
-        console.log("[ImportModal] Accounts from store:", accounts);
-        if (accounts.length === 0) {
-            console.warn("[ImportModal] No accounts found! Check store initialization.");
-        }
-    }, [accounts]);
-
     // Handle file selection via Native Dialog
     const handleUploadClick = async () => {
-        if (!accountId) return;
+        if (!accountId) {
+            // User feedback for why nothing happens
+            setError(t('import.selectAccountFirst', 'Please select an account first'));
+            return;
+        }
 
         setIsLoading(true);
         try {
+            // RESOLVE TARGET: If user selected a BROKER, find or create the account
+            let targetAccountId = accountId;
+
+            if (accountId.startsWith('broker:')) {
+                const brokerId = accountId.replace('broker:', '');
+                const linkedAccount = accounts.find(a => a.brokerId === brokerId);
+
+                if (linkedAccount) {
+                    targetAccountId = linkedAccount.id;
+                    console.log(`[ImportModal] Found existing account for broker: ${linkedAccount.name}`);
+                } else {
+                    // Create new account for this broker
+                    const broker = brokers.find(b => b.id === brokerId);
+                    if (!broker) throw new Error('Broker not found');
+
+                    console.log(`[ImportModal] Creating new account for broker: ${broker.name}`);
+                    const newAccount = await window.api.saveAccount({
+                        name: `${broker.name} Account`,
+                        type: 'investment',
+                        currency: baseCurrency, // Default to system currency
+                        initialBalance: 0,
+                        color: broker.color || '#10b981',
+                        isArchived: false,
+                        brokerId: broker.id, // Explicitly link to broker
+                        sortOrder: 0
+                    });
+
+                    targetAccountId = newAccount.id;
+                    await refreshData(); // Refresh to ensure store is consistent
+                }
+            } else if (accountId.startsWith('deposit:')) {
+                targetAccountId = accountId.replace('deposit:', '');
+            } else if (accountId.startsWith('account:')) {
+                targetAccountId = accountId.replace('account:', '');
+            }
+
             // Use new IPC method
             const result = await window.api.selectFile();
 
@@ -89,9 +131,11 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             console.log("[ImportModal] File selected:", result.name);
 
             // Mock File object for UI compatibility
-            // We need to cast it or change state type, casting is easiest for now
             setFile({ name: result.name } as File);
             setContent(result.content);
+            // Store the RESOLVED account ID for the next step (executeImport)
+            // We update the state to the real ID so executeImport uses it
+            setAccountId(targetAccountId);
 
             const { headers, preview } = await window.api.previewCSV(result.content);
             setHeaders(headers);
@@ -114,7 +158,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             setStep('mapping');
         } catch (err) {
             console.error("[ImportModal] File read error:", err);
-            setError('Failed to read file');
+            setError('Failed to read file or create account');
         } finally {
             setIsLoading(false);
         }
@@ -197,10 +241,25 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                 </label>
                 <Select
                     value={accountId}
-                    onChange={e => setAccountId(e.target.value)}
-                    options={accounts.map(acc => ({ value: acc.id, label: acc.name }))}
-                    placeholder={t('import.selectAccountPlaceholder', 'Select an account...')}
+                    onChange={e => {
+                        setAccountId(e.target.value);
+                        setError(null); // Clear error on selection
+                    }}
+                    options={[
+                        // Combine all valid targets
+                        // 1. Brokers (Preferred for investments)
+                        ...(brokers || []).map(b => ({ value: `broker:${b.id}`, label: `Broker: ${b.name}` })),
+                        // 2. Existing Accounts (Only manual ones, not linked to brokers)
+                        ...(accounts || []).filter(a => !a.brokerId).map(acc => ({ value: `account:${acc.id}`, label: acc.name })),
+                        // 3. Deposits
+                        ...(deposits || []).map(dep => ({ value: `deposit:${dep.id}`, label: `${t('accounts.types.deposit')}: ${dep.name}` }))
+                    ]}
+                    placeholder={t('import.selectAccountPlaceholder', 'Select an account or broker...')}
                 />
+
+                <div className="mt-1 text-[10px] text-foreground-subtle flex gap-2">
+                    <span>Target: {accountId ? accountId.split(':')[0] : 'None'}</span>
+                </div>
             </div>
 
             <div
@@ -235,7 +294,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     {presets.find(p => p.id === selectedPresetId)?.description}
                 </p>
             </div>
-        </div>
+        </div >
     );
 
     const renderStepMapping = () => (

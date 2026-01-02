@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Globe, Moon, Sun, DollarSign, Monitor } from 'lucide-react';
+import { X, Globe, Moon, Sun, DollarSign, Monitor, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat, type TimeFormat } from '../../../../shared/types';
@@ -43,6 +43,36 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
                             {t('settings.general')}
                         </h3>
+
+
+                        {/* Vault Location */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                                <Database className="w-4 h-4" />
+                                {t('settings.vaultLocation', 'Vault Location')}
+                            </label>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 bg-background-subtle border border-border rounded-lg px-3 py-2 text-sm text-foreground-muted truncate font-mono">
+                                    {/* Ideally we would show the path here, but we don't have it in store yet. 
+                                        We can add it to store later. For now just generic text or nothing.
+                                    */}
+                                    Current Vault
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        if (confirm(t('settings.confirmReset', 'Are you sure? This will restart the app onboarding.'))) {
+                                            await window.api.resetVaultPath();
+                                            window.location.reload();
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-error/10 hover:bg-error/20 text-error rounded-lg text-sm font-medium transition-colors"
+                                >
+                                    {t('settings.switchVault', 'Switch Vault')}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-border my-4" />
 
                         {/* Currency */}
                         <div className="space-y-2">

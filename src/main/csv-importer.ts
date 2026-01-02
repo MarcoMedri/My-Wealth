@@ -276,7 +276,11 @@ function parseDate(dateStr: string, format: string): Date | null {
     return isNaN(d.getTime()) ? null : d;
   }
 
-  const match = dateStr.match(pattern);
+  // Handle time components (e.g. "2022-01-03 14:30:00" or "2022-01-03T14:30:00")
+  // We only care about the date part for these strict patterns
+  const datePart = dateStr.split(/[ T]/)[0];
+
+  const match = datePart.match(pattern);
   if (!match) return null;
 
   let year: number, month: number, day: number;

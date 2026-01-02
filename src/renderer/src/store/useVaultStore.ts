@@ -97,6 +97,9 @@ interface VaultStore {
   getBroker: (id: string) => Broker | undefined;
   /** Get formatted balance for an account */
   getFormattedBalance: (accountId: string) => string;
+  
+  // UI Actions
+  setSidebarCollapsed: (side: 'left' | 'right', collapsed: boolean) => Promise<void>;
 }
 
 // ============================================================================
@@ -142,6 +145,7 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       const data = await window.api.getVaultData();
       get().setVaultData(data);
     } catch (error) {
+      console.error('[Store] refreshData failed:', error);
       set({ 
         error: error instanceof Error ? error.message : 'Failed to load vault data',
         isLoading: false 
@@ -190,6 +194,29 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       console.error('Failed to save workspace settings:', error);
       // Revert not implemented for simplicity, relying on eventual consistency
     }
+  },
+
+  setSidebarCollapsed: async (side, collapsed) => {
+    const { workspace, setWorkspaceSettings } = get();
+    // Default values if layout is undefined
+    const currentLayout = workspace.layout || {
+        leftSidebarCollapsed: false,
+        rightSidebarCollapsed: false
+    };
+    
+    // Check if value is actually changing to avoid infinite loops or unnecessary updates
+    const currentVal = side === 'left' ? currentLayout.leftSidebarCollapsed : currentLayout.rightSidebarCollapsed;
+    // Handle undefined cases safely
+    if (!!currentVal === collapsed) return;
+
+    const newLayout = {
+        ...currentLayout,
+        [side === 'left' ? 'leftSidebarCollapsed' : 'rightSidebarCollapsed']: collapsed
+    };
+
+    await setWorkspaceSettings({
+        layout: newLayout
+    });
   },
 
   activeView: 'dashboard',

@@ -23,7 +23,8 @@
     "details": "Details",
     "months": "months",
     "timeline": "Timeline",
-    "type": "Type"
+    "type": "Type",
+    "noData": "No data"
   },
   "nav": {
     "dashboard": "Overview",
@@ -39,6 +40,7 @@
   },
   "brokers": {
     "addBroker": "Add Broker",
+    "addTitle": "Add Broker",
     "editBroker": "Edit Broker",
     "nameLabel": "Broker / Institution Name",
     "namePlaceholder": "e.g. Interactive Brokers, Chase, Binance",
@@ -87,7 +89,8 @@
     "categories": "Categories",
     "dateTime": "Date & Time",
     "dateFormat": "Date Format",
-    "timeFormat": "Time Format"
+    "timeFormat": "Time Format",
+    "loadDefaults": "Load Defaults"
   },
   "collectibles": {
     "title": "Collectibles",
@@ -444,5 +447,15 @@
     },
     "net": "net",
     "weightedAvg": "W. Avg"
+  },
+  "accountTypes": {
+    "checking": "Checking Account",
+    "savings": "Savings Account",
+    "credit": "Credit Card",
+    "investment": "Investment Portfolio",
+    "cash": "Cash Wallet",
+    "loan": "Loan / Mortgage",
+    "deposit": "Deposit Account",
+    "other": "Other"
   }
 }

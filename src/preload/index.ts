@@ -40,6 +40,11 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.VAULT_INITIALIZE, vaultPath)
   },
 
+  /** Reset stored vault path to allow selecting a new one */
+  resetVaultPath: (): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.VAULT_RESET)
+  },
+
   // ========== VAULT DATA ==========
   
   /** Load all vault data (accounts, categories, transactions) */
@@ -94,6 +99,11 @@ const api = {
   /** Delete a broker */
   deleteBroker: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.BROKER_DELETE, id)
+  },
+
+  /** Download broker logo from domain */
+  downloadBrokerLogo: (domain: string, brokerId: string): Promise<string | null> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BROKER_DOWNLOAD_LOGO, domain, brokerId)
   },
 
   // ========== IMPORT ==========

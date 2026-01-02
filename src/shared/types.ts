@@ -48,6 +48,7 @@ export const IPC_CHANNELS = {
   VAULT_SELECT_PATH: 'vault:selectPath',
   VAULT_INITIALIZE: 'vault:initialize',
   VAULT_LOAD: 'vault:load',
+  VAULT_RESET: 'vault:reset',
   VAULT_CREATE_SNAPSHOT: 'vault:createSnapshot',
   WORKSPACE_SAVE: 'workspace:save',
   
@@ -65,6 +66,7 @@ export const IPC_CHANNELS = {
   // Broker operations
   BROKER_SAVE: 'broker:save',
   BROKER_DELETE: 'broker:delete',
+  BROKER_DOWNLOAD_LOGO: 'broker:downloadLogo',
   
   // Import operations
   IMPORT_CSV_PREVIEW: 'import:csvPreview',

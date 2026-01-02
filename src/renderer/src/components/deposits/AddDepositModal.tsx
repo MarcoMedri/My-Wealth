@@ -9,9 +9,10 @@ interface AddDepositModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialData?: DepositAccount | null;
+    preselectedBrokerId?: string;
 }
 
-export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModalProps) {
+export function AddDepositModal({ isOpen, onClose, initialData, preselectedBrokerId }: AddDepositModalProps) {
     const { brokers, saveDeposit, deleteDeposit, refreshData } = useVaultStore();
     const { t } = useTranslation();
 
@@ -48,7 +49,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
         } else {
             // Reset
             setName('');
-            setBrokerId('');
+            setBrokerId(preselectedBrokerId || '');
             setPrincipal('');
             setGrossRate('');
             setNetRate('');
@@ -64,7 +65,7 @@ export function AddDepositModal({ isOpen, onClose, initialData }: AddDepositModa
             date.setMonth(date.getMonth() + 12);
             setMaturityDate(date.toISOString().split('T')[0]);
         }
-    }, [initialData, isOpen]);
+    }, [initialData, isOpen, preselectedBrokerId]);
 
     // Auto-calculate Net Rate (approximate 26% tax for Italy)
     const handleGrossRateChange = (val: string) => {

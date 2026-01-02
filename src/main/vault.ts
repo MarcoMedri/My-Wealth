@@ -225,6 +225,20 @@ export class VaultManager {
       lastModified: new Date().toISOString(),
     });
   }
+  
+  /**
+   * Reset the vault path in settings
+   */
+  async resetVaultPath(): Promise<void> {
+    if (this.settings) {
+        await this.saveSettings({
+            ...this.settings,
+            vaultPath: null
+        });
+        // Clear in-memory state
+        this.vaultState = createEmptyVaultState();
+    }
+  }
 
   // ==========================================================================
   // READING - THE "SCAN"
@@ -242,9 +256,12 @@ export class VaultManager {
     const vaultPath = this.settings?.vaultPath;
     
     if (!vaultPath) {
+        console.warn('[VaultManager] loadVault called but no vault path configured in settings.');
         this.vaultState = createEmptyVaultState();
         return this.getSerializableState();
     }
+
+    console.log(`[VaultManager] Loading vault from path: ${vaultPath}`);
 
     try {
       // Reset state
@@ -255,14 +272,18 @@ export class VaultManager {
       const accountsPath = path.join(vaultPath, VAULT_STRUCTURE.ACCOUNTS_FILE);
       if (await fs.pathExists(accountsPath)) {
         const accountsData = await fs.readJson(accountsPath);
+        console.log(`[VaultManager] Reading accounts.json from ${accountsPath}`);
         const parsed = AccountsFileSchema.safeParse(accountsData);
         if (parsed.success) {
+          console.log(`[VaultManager] Successfully loaded ${parsed.data.accounts.length} accounts.`);
           for (const account of parsed.data.accounts) {
             this.vaultState.accounts.set(account.id, account);
           }
         } else {
-          console.error('Invalid accounts.json:', parsed.error);
+          console.error('[VaultManager] Invalid accounts.json:', parsed.error);
         }
+      } else {
+        console.warn(`[VaultManager] accounts.json NOT FOUND at ${accountsPath}`);
       }
 
       // Load categories
@@ -629,6 +650,39 @@ export class VaultManager {
     } catch (error) {
       console.error('Failed to save workspace settings:', error);
       return false;
+    }
+  }
+
+  /**
+   * Download and save a broker logo from Clearbit
+   */
+  async downloadBrokerLogo(domain: string, brokerId: string): Promise<string | null> {
+    if (!this.settings?.vaultPath) return null;
+
+    try {
+      const start = Date.now();
+      console.log(`[VaultManager] Downloading logo for ${domain}...`);
+      
+      const response = await fetch(`https://logo.clearbit.com/${domain}`);
+      if (!response.ok) {
+        console.warn(`[VaultManager] Failed to fetch logo for ${domain}: ${response.status}`);
+        return null;
+      }
+
+      const buffer = await response.arrayBuffer();
+      const logosDir = path.join(this.settings.vaultPath, 'logos');
+      await fs.ensureDir(logosDir);
+
+      const fileName = `${brokerId}.png`;
+      const filePath = path.join(logosDir, fileName);
+      
+      await fs.writeFile(filePath, Buffer.from(buffer));
+      console.log(`[VaultManager] Logo saved to ${filePath} in ${Date.now() - start}ms`);
+
+      return `logos/${fileName}`;
+    } catch (error) {
+      console.error('[VaultManager] Failed to download logo:', error);
+      return null;
     }
   }
 

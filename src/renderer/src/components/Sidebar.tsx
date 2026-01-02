@@ -1,6 +1,6 @@
 /**
  * Sidebar Component
- * Shows accounts list and navigation
+ * Shows main navigation and app status
  */
 
 import { useState } from 'react';
@@ -9,66 +9,40 @@ import {
     TrendingUp,
     Building,
     LayoutDashboard,
-    Plus,
     Home,
     Settings,
     Database,
     Trash2,
     Loader2,
-    Building2,
-    CandlestickChart,
-    Bitcoin,
-    Landmark,
-    Banknote,
+    Shield,
     PiggyBank,
     Watch,
-    Shield,
-    Briefcase
+    PanelLeftClose
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { formatMoney } from '../../../shared/schemas';
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
-// import AddAccountModal from './AddAccountModal'; // Removed in favor of Brokers
-import { AddBrokerModal } from './brokers/AddBrokerModal';
 import { useTranslation } from 'react-i18next';
-
 import { SettingsModal } from './settings/SettingsModal';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 
-// Account icons mapping removed as we now show Brokers in sidebar
-// import { SettingsModal } from './settings/SettingsModal'; 
-// Icon mapping for Broker/Account icons
-const ICON_MAP: Record<string, React.ElementType> = {
-    'wallet': Wallet,
-    'building-2': Building2,
-    'candlestick-chart': CandlestickChart,
-    'bitcoin': Bitcoin,
-    'landmark': Landmark, // Bank
-    'banknote': Banknote, // Cash
-    'piggy-bank': PiggyBank, // Savings
-    'briefcase': Briefcase, // Portfolio
-    // Add more as necessary matches lucide-react names
-};
-
 export default function Sidebar() {
     const { t } = useTranslation();
-    const brokers = useVaultStore(state => state.brokers);
-    const refreshData = useVaultStore(state => state.refreshData);
     const activeView = useVaultStore(state => state.activeView);
     const setActiveView = useVaultStore(state => state.setActiveView);
     const { netWorth, baseCurrency } = useNetWorth();
+    const refreshData = useVaultStore(state => state.refreshData);
+    const workspace = useVaultStore(state => state.workspace);
+    const setSidebarCollapsed = useVaultStore(state => state.setSidebarCollapsed);
+
+    // Default to false if undefined
+    const isCollapsed = workspace.layout?.leftSidebarCollapsed ?? false;
 
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [isSeeding, setIsSeeding] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
-    const [isAddBrokerOpen, setIsAddBrokerOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-    // Group active brokers
-    // Sort brokers by custom sortOrder or name
-    const sortedBrokers = [...brokers].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name));
-
 
     const handleGenerateDemoData = async () => {
         setIsSeeding(true);
@@ -100,14 +74,12 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className="w-64 bg-background-subtle border-r border-border flex flex-col">
+        <aside className={cn(
+            "bg-background-subtle border-r border-border flex flex-col transition-all duration-300 ease-in-out",
+            isCollapsed ? "w-16" : "w-64"
+        )}>
             {/* Drag region for macOS */}
-            <div className="h-8 app-drag-region" />
-
-            <AddBrokerModal
-                isOpen={isAddBrokerOpen}
-                onClose={() => setIsAddBrokerOpen(false)}
-            />
+            <div className="h-12 app-drag-region" />
 
             <SettingsModal
                 isOpen={isSettingsOpen}
@@ -115,190 +87,139 @@ export default function Sidebar() {
             />
 
             {/* Logo */}
-            <div className="px-4 pb-4">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
+            <div className={cn("px-4 pb-4", isCollapsed ? "flex justify-center px-2" : "")}>
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shrink-0">
                         <Wallet className="w-5 h-5 text-foreground" />
                     </div>
-                    <span className="font-semibold text-foreground">MyWealth</span>
+                    {!isCollapsed && <span className="font-semibold text-foreground whitespace-nowrap">MyWealth</span>}
                 </div>
             </div>
 
             {/* Net Worth */}
-            <div className="px-4 py-3 mx-3 mb-4 rounded-xl bg-background-muted border border-border">
-                <p className="text-xs text-foreground-muted uppercase tracking-wide">{t('dashboard.netWorth')}</p>
-                <p className="text-2xl font-bold text-foreground mt-1">
-                    {formatMoney(netWorth, baseCurrency)}
-                </p>
-                <div className="mt-2">
-                    <ExchangeRateIndicator showLabel={false} />
+            {!isCollapsed ? (
+                <div className="px-4 py-3 mx-3 mb-4 rounded-xl bg-background-muted border border-border">
+                    <p className="text-xs text-foreground-muted uppercase tracking-wide">{t('dashboard.netWorth')}</p>
+                    <p className="text-2xl font-bold text-foreground mt-1 truncate">
+                        {formatMoney(netWorth, baseCurrency)}
+                    </p>
+                    <div className="mt-2">
+                        <ExchangeRateIndicator showLabel={false} />
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="px-2 mb-4 flex flex-col items-center gap-1 group relative">
+                    {/* Placeholder for collapsed state if needed */}
+                </div>
+            )}
 
             {/* Navigation */}
-            <nav className="px-3 mb-4 space-y-1">
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
                 <button
                     onClick={() => setActiveView('dashboard')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'dashboard'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('nav.dashboard') : undefined}
                 >
-                    <Home className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('nav.dashboard')}</span>
+                    <Home className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.dashboard')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('accounts')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'accounts'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('nav.accounts') : undefined}
                 >
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('nav.accounts')}</span>
+                    <LayoutDashboard className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.accounts')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('investments')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'investments'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('nav.investments') : undefined}
                 >
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('nav.investments')}</span>
+                    <TrendingUp className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.investments')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('properties')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'properties'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('nav.properties') : undefined}
                 >
-                    <Building className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('nav.properties')}</span>
+                    <Building className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.properties')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('collectibles')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'collectibles'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('nav.collectibles') : undefined}
                 >
-                    <Watch className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('nav.collectibles')}</span>
+                    <Watch className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.collectibles')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('insurance')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'insurance'
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('insurance.title') : undefined}
                 >
-                    <Shield className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('insurance.title')}</span>
+                    <Shield className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('insurance.title')}</span>}
                 </button>
 
                 <button
                     onClick={() => setActiveView('deposits')}
                     className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
                         activeView === 'deposits'
                             ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
                     )}
+                    title={isCollapsed ? t('deposits.title') : undefined}
                 >
-                    <PiggyBank className="w-4 h-4" />
-                    <span className="text-sm font-medium">{t('deposits.title')}</span>
+                    <PiggyBank className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('deposits.title')}</span>}
                 </button>
             </nav>
-
-            {/* Brokers List */}
-            <div className="flex-1 overflow-y-auto px-3">
-                <div className="flex items-center justify-between px-3 py-2">
-                    <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">
-                        {t('nav.brokers')}
-                    </h3>
-                    <button
-                        onClick={() => setIsAddBrokerOpen(true)}
-                        className="p-1 rounded hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors"
-                    >
-                        <Plus className="w-4 h-4" />
-                    </button>
-                </div>
-
-                <div className="space-y-1">
-                    {sortedBrokers.length === 0 ? (
-                        <p className="px-3 py-2 text-sm text-foreground-subtle">{t('brokers.noAccounts')}</p>
-                        /* Reusing noAccounts string or add a new one "No Brokers" */
-                    ) : (
-                        sortedBrokers.map((broker) => {
-                            // const balance = getBrokerBalance(broker.id);
-                            // Determine currency from first account or default to system base? 
-                            // For sidebar summary we might just show base currency or mixed.
-                            // Let's assume EUR or USD for now, or just not show balance if complex.
-                            // OR: Broker usually belongs to a country/currency.
-                            // For now, let's just show the name.
-
-                            const isActive = activeView === `broker:${broker.id}`;
-
-                            return (
-                                <button
-                                    key={broker.id}
-                                    onClick={() => setActiveView(`broker:${broker.id}`)}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
-                                        isActive
-                                            ? "bg-background-muted text-foreground font-medium"
-                                            : "hover:bg-background-muted text-foreground-muted hover:text-foreground"
-                                    )}
-                                >
-                                    <div
-                                        className="p-1.5 rounded-lg flex items-center justify-center"
-                                        style={{ backgroundColor: `${broker.color}20` }}
-                                    >
-                                        {(() => {
-                                            const IconComponent = broker.icon ? ICON_MAP[broker.icon] : Building2;
-                                            return IconComponent ? (
-                                                <IconComponent
-                                                    className="w-4 h-4"
-                                                    style={{ color: broker.color }}
-                                                />
-                                            ) : (
-                                                <Building2
-                                                    className="w-4 h-4"
-                                                    style={{ color: broker.color }}
-                                                />
-                                            );
-                                        })()}
-                                    </div>
-                                    <div className="flex-1 text-left min-w-0">
-                                        <p className="text-sm truncate">
-                                            {broker.name}
-                                        </p>
-                                    </div>
-                                </button>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
 
             {/* Footer with Settings & Dev */}
             <div className="p-3 border-t border-border space-y-2">
@@ -307,9 +228,10 @@ export default function Sidebar() {
                 <button
                     onClick={() => setIsSettingsOpen(true)}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors"
+                    title={isCollapsed ? t('nav.settings') : undefined}
                 >
-                    <Settings className="w-4 h-4" />
-                    <span className="text-sm">{t('nav.settings')}</span>
+                    <Settings className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm">{t('nav.settings')}</span>}
                 </button>
 
                 {/* Dev Menu Toggle */}
@@ -319,13 +241,14 @@ export default function Sidebar() {
                         "w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors",
                         showDevMenu && "bg-background-muted text-foreground"
                     )}
+                    title={isCollapsed ? t('nav.developer') : undefined}
                 >
-                    <Database className="w-4 h-4" />
-                    <span className="text-sm">{t('nav.developer')}</span>
+                    <Database className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm">{t('nav.developer')}</span>}
                 </button>
 
                 {/* Dev Menu */}
-                {showDevMenu && (
+                {showDevMenu && !isCollapsed && (
                     <div className="space-y-1 px-2 pt-1 border-t border-border/50 mt-2">
                         <button
                             onClick={handleGenerateDemoData}
@@ -338,11 +261,11 @@ export default function Sidebar() {
                             )}
                         >
                             {isSeeding ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                             ) : (
-                                <Database className="w-4 h-4" />
+                                <Database className="w-4 h-4 shrink-0" />
                             )}
-                            <span>Generate Demo Data</span>
+                            <span className="truncate">Generate Demo Data</span>
                         </button>
 
                         <button
@@ -356,18 +279,29 @@ export default function Sidebar() {
                             )}
                         >
                             {isClearing ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                             ) : (
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 shrink-0" />
                             )}
-                            <span>Clear All Data</span>
+                            <span className="truncate">Clear All Data</span>
                         </button>
                     </div>
                 )}
 
-                <p className="text-xs text-foreground-subtle text-center pt-2">
-                    MyWealth Desktop v0.1.0
-                </p>
+                {/* Collapse Toggle */}
+                <button
+                    onClick={() => setSidebarCollapsed('left', !isCollapsed)}
+                    className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors mt-2"
+                    title={isCollapsed ? "Expand" : "Collapse"}
+                >
+                    <PanelLeftClose className={cn("w-4 h-4 transition-transform", isCollapsed && "rotate-180")} />
+                </button>
+
+                {!isCollapsed && (
+                    <p className="text-xs text-foreground-subtle text-center pt-2">
+                        MyWealth Desktop v0.1.0
+                    </p>
+                )}
             </div>
         </aside>
     );

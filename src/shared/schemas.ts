@@ -123,6 +123,8 @@ export const BrokerSchema = z.object({
   type: BrokerTypeSchema,
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6366f1'),
   icon: z.string().optional(),
+  website: z.string().optional(),
+  logoPath: z.string().optional(), // Relative path in vault, e.g. "logos/<uuid>.png"
   sortOrder: z.number().int().default(0),
   createdAt: ISODate,
   updatedAt: ISODate,
@@ -656,10 +658,11 @@ export const TransactionSchema = z.object({
   (tx) => {
     if (tx.type === 'transfer') return true;
     if (tx.splits.length > 0) return true;
+    if (tx.tags && tx.tags.includes('imported')) return true; // Allow uncategorized imported txs
     return tx.categoryId !== null;
   },
   {
-    message: 'Non-transfer transactions must have a categoryId or splits',
+    message: 'Non-transfer transactions must have a categoryId or splits (unless imported)',
     path: ['categoryId'],
   }
 );
@@ -786,6 +789,10 @@ export const WorkspaceSettingsSchema = z.object({
   }).optional(),
   global: z.object({
     // potentially theme, language, etc in future?
+  }).optional(),
+  layout: z.object({
+    leftSidebarCollapsed: z.boolean().default(false),
+    rightSidebarCollapsed: z.boolean().default(false),
   }).optional()
 });
 

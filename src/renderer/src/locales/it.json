@@ -28,7 +28,8 @@
     "details": "Dettagli",
     "months": "mesi",
     "timeline": "Cronologia",
-    "type": "Tipo"
+    "type": "Tipo",
+    "noData": "Nessun dato"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -69,7 +70,8 @@
     "categories": "Categorie",
     "dateTime": "Data & Ora",
     "dateFormat": "Formato Data",
-    "timeFormat": "Formato Ora"
+    "timeFormat": "Formato Ora",
+    "loadDefaults": "Carica Default"
   },
   "collectibles": {
     "title": "Collezionabili",
@@ -135,6 +137,7 @@
   },
   "brokers": {
     "addBroker": "Aggiungi Broker",
+    "addTitle": "Aggiungi Broker",
     "editBroker": "Modifica Broker",
     "nameLabel": "Nome Broker / Istituzione",
     "namePlaceholder": "es. Interactive Brokers, Fineco, Binance",
@@ -448,5 +451,15 @@
     },
     "net": "netto",
     "weightedAvg": "Media Pesante"
+  },
+  "accountTypes": {
+    "checking": "Conto Corrente",
+    "savings": "Conto Risparmio",
+    "credit": "Carta di Credito",
+    "investment": "Portafoglio Investimenti",
+    "cash": "Contanti",
+    "loan": "Prestito / Mutuo",
+    "deposit": "Conto Deposito",
+    "other": "Altro"
   }
 }

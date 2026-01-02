@@ -20,6 +20,7 @@ interface API {
   getVaultStatus: () => Promise<VaultStatus>
   selectVaultLocation: () => Promise<string | null>
   initializeVault: (vaultPath: string) => Promise<VaultStatus>
+  resetVaultPath: () => Promise<void>
   
   // Vault data
   getVaultData: () => Promise<SerializableVaultState>
@@ -33,6 +34,7 @@ interface API {
   deleteCategory: (id: string) => Promise<void>
   saveBroker: (broker: Broker) => Promise<Broker>
   deleteBroker: (id: string) => Promise<void>
+  downloadBrokerLogo: (domain: string, brokerId: string) => Promise<string | null>
   
   // Import
   getImportPresets: () => Promise<ImportPreset[]>;

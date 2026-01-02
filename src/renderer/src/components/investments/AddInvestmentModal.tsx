@@ -13,9 +13,10 @@ interface SelectedAsset extends InvestmentSearchResult {
 interface AddInvestmentModalProps {
     isOpen: boolean;
     onClose: () => void;
+    preselectedBrokerId?: string;
 }
 
-export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps) {
+export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: AddInvestmentModalProps) {
     const { accounts, refreshInvestments } = useVaultStore();
     const { t } = useTranslation();
     const [step, setStep] = useState<'search' | 'configure'>('search');
@@ -23,6 +24,11 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
     const [searchResults, setSearchResults] = useState<InvestmentSearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
+
+    // Filter accounts if broker preselected
+    const availableAccounts = preselectedBrokerId
+        ? accounts.filter(a => a.brokerId === preselectedBrokerId && !a.isArchived)
+        : accounts.filter(a => !a.isArchived);
 
     // Manual entry mode
     const [isManualMode, setIsManualMode] = useState(false);
@@ -43,6 +49,13 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
 
     // Debounce search
     const [searchError, setSearchError] = useState<string | null>(null);
+
+    // Auto-select account if only one available
+    useEffect(() => {
+        if (isOpen && availableAccounts.length > 0 && !accountId) {
+            setAccountId(availableAccounts[0].id);
+        }
+    }, [isOpen, availableAccounts, accountId]);
 
     useEffect(() => {
         const timer = setTimeout(async () => {
@@ -366,7 +379,7 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
                                     onChange={e => setAccountId(e.target.value)}
                                 >
                                     <option value="">Select Account</option>
-                                    {accounts.map(acc => (
+                                    {availableAccounts.map(acc => (
                                         <option key={acc.id} value={acc.id}>{acc.name} ({formatMoney(0, acc.currency)})</option>
                                     ))}
                                 </select>
