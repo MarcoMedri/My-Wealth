@@ -230,10 +230,18 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
   refreshAllPrices: async () => {
     set({ isLoading: true });
     try {
-      await window.api.refreshInvestmentPrices();
-      await get().refreshData(); // Reload to get updated prices
+      const result = await window.api.refreshInvestmentPrices();
+      await get().refreshData();
+      
+      // Show success toast with statistics
+      if (result.failed === 0) {
+        toast.success(`✅ ${result.updated} prices updated successfully`);
+      } else {
+        toast.warning(`⚠️ Updated ${result.updated} prices (${result.failed} failed)`);
+      }
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to refresh prices' });
+      console.error('Failed to refresh prices:', error);
+      toast.error('❌ Failed to update prices');
     } finally {
       set({ isLoading: false });
     }

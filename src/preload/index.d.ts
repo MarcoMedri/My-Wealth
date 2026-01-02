@@ -51,7 +51,7 @@ interface API {
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
   buyInvestmentManual: (params: { symbol: string, name: string, type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other', currency: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }) => Promise<{ updatedHolding: Holding | null, realizedGain: number }>;
-  refreshInvestmentPrices: () => Promise<Asset[]>;
+  refreshInvestmentPrices: () => Promise<{ updated: number; failed: number; total: number }>;
   deleteAsset: (id: string) => Promise<void>;
   deleteHolding: (id: string) => Promise<void>;
   saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>) => Promise<boolean>;
