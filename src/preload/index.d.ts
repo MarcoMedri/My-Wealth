@@ -10,7 +10,9 @@ import type {
   Collectible,
   Broker,
   Snapshot,
-  WorkspaceSettings
+  WorkspaceSettings,
+  InsurancePolicy,
+  DepositAccount
 } from '../shared/schemas';
 
 interface API {
@@ -41,7 +43,7 @@ interface API {
   searchInvestments: (query: string) => Promise<{ symbol: string, name: string, type: string, currency: string, exchange: string }[]>;
   getInvestmentQuote: (symbol: string) => Promise<{ symbol: string, price: number, currency: string, name?: string }>;
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
-  buyInvestmentManual: (params: { symbol: string, name: string, type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other', currency: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
+  buyInvestmentManual: (params: { symbol: string, name: string, type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other', currency: string, accountId: string, quantity: number, price: number, date: string, fees: number }) => Promise<{ asset: Asset, holding: Holding }>;
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }) => Promise<{ updatedHolding: Holding | null, realizedGain: number }>;
   refreshInvestmentPrices: () => Promise<Asset[]>;
   deleteAsset: (id: string) => Promise<void>;
@@ -55,6 +57,14 @@ interface API {
   // Collectibles
   saveCollectible: (collectible: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Collectible>;
   deleteCollectible: (id: string) => Promise<void>;
+  
+  // Insurance
+  saveInsurance: (policy: InsurancePolicy) => Promise<InsurancePolicy>;
+  deleteInsurance: (id: string) => Promise<void>;
+
+  // Deposit Accounts
+  saveDeposit: (deposit: DepositAccount) => Promise<DepositAccount>;
+  deleteDeposit: (id: string) => Promise<void>;
 
   // Exchange Rates
   getExchangeRates: (baseCurrency: string) => Promise<Record<string, number>>;

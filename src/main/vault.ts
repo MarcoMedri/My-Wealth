@@ -24,8 +24,10 @@ import {
   DividendsFileSchema,
   PropertiesFileSchema,
   CollectiblesFileSchema,
-  BrokersFileSchema,
   SnapshotsFileSchema,
+  DepositsFileSchema,
+  BrokersFileSchema,
+  InsuranceFileSchema,
   WorkspaceSettingsSchema,
   type AppSettings,
   type Account,
@@ -37,6 +39,8 @@ import {
   type Dividend,
   type Property,
   type Collectible,
+  type InsurancePolicy,
+  type DepositAccount,
   type Broker,
   type Snapshot,
   type SnapshotsFile,
@@ -354,6 +358,38 @@ export class VaultManager {
         }
       }
 
+      // Load Insurance
+      const insurancePath = path.join(vaultPath, VAULT_STRUCTURE.INSURANCE_FILE);
+      if (await fs.pathExists(insurancePath)) {
+        try {
+            const data = await fs.readJson(insurancePath);
+            const parsed = InsuranceFileSchema.safeParse(data);
+            if (parsed.success) {
+                this.vaultState.insurance = parsed.data.policies;
+            } else {
+                console.error('Invalid insurance.json:', parsed.error);
+            }
+        } catch (e) {
+            console.error('Failed to load insurance:', e);
+        }
+      }
+
+      // Load Deposits
+      const depositsPath = path.join(vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE);
+      if (await fs.pathExists(depositsPath)) {
+        try {
+            const data = await fs.readJson(depositsPath);
+            const parsed = DepositsFileSchema.safeParse(data);
+            if (parsed.success) {
+                this.vaultState.deposits = parsed.data.deposits;
+            } else {
+                console.error('Invalid deposits.json:', parsed.error);
+            }
+        } catch (e) {
+            console.error('Failed to load deposits:', e);
+        }
+      }
+
       // Load Trades (Investment history)
       const tradesPath = path.join(vaultPath, 'trades.json');
       if (await fs.pathExists(tradesPath)) {
@@ -627,6 +663,8 @@ export class VaultManager {
       holdings: this.vaultState.holdings,
       properties: this.vaultState.properties,
       collectibles: this.vaultState.collectibles,
+      insurance: this.vaultState.insurance,
+      deposits: this.vaultState.deposits,
       trades: this.vaultState.trades,
       dividends: this.vaultState.dividends,
       brokers: this.vaultState.brokers,
@@ -1360,6 +1398,151 @@ export class VaultManager {
   }
   
   // ==========================================================================
+  // INSURANCE
+  // ==========================================================================
+
+  /**
+   * Save an insurance policy to disk
+   */
+  async saveInsurance(policy: InsurancePolicy): Promise<InsurancePolicy> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.INSURANCE_FILE);
+    let policies = [] as InsurancePolicy[];
+
+    if (await fs.pathExists(filePath)) {
+      try {
+        const data = await fs.readJson(filePath);
+        if (Array.isArray(data.policies)) {
+          policies = data.policies;
+        }
+      } catch (e) {
+        console.warn('Failed to read insurance.json', e);
+      }
+    }
+
+    // Update or Add
+    const index = policies.findIndex(p => p.id === policy.id);
+    if (index >= 0) {
+      policies[index] = policy;
+    } else {
+      policies.push(policy);
+    }
+
+    await this.atomicWriteJson(filePath, { version: 1, policies });
+    
+    // Update in-memory state
+    this.vaultState.insurance = policies;
+    
+    return policy;
+  }
+
+  /**
+   * Delete an insurance policy from disk
+   */
+  async deleteInsurance(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.INSURANCE_FILE);
+    let policies = [] as InsurancePolicy[];
+
+    if (await fs.pathExists(filePath)) {
+      try {
+        const data = await fs.readJson(filePath);
+        if (Array.isArray(data.policies)) {
+          policies = data.policies;
+        }
+      } catch (e) {
+        console.warn('Failed to read insurance.json', e);
+      }
+    }
+
+    const initialLength = policies.length;
+    policies = policies.filter(p => p.id !== id);
+
+    if (policies.length === initialLength) return;
+
+    await this.atomicWriteJson(filePath, { version: 1, policies });
+    this.vaultState.insurance = policies;
+  }
+
+  // ==========================================================================
+  // DEPOSIT ACCOUNTS (Conti Deposito)
+  // ==========================================================================
+
+  /**
+   * Save a deposit account to disk
+   */
+  async saveDeposit(deposit: DepositAccount): Promise<DepositAccount> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE);
+    let deposits = [] as DepositAccount[];
+
+    if (await fs.pathExists(filePath)) {
+      try {
+        const data = await fs.readJson(filePath);
+        if (Array.isArray(data.deposits)) {
+          deposits = data.deposits;
+        }
+      } catch (e) {
+        console.warn('Failed to read deposits.json', e);
+      }
+    }
+
+    // Update or Add
+    const index = deposits.findIndex(d => d.id === deposit.id);
+    if (index >= 0) {
+      deposits[index] = deposit;
+    } else {
+      deposits.push(deposit);
+    }
+
+    await this.atomicWriteJson(filePath, { version: 1, deposits });
+    
+    // Update in-memory state
+    this.vaultState.deposits = deposits;
+    
+    return deposit;
+  }
+
+  /**
+   * Delete a deposit account from disk
+   */
+  async deleteDeposit(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE);
+    let deposits = [] as DepositAccount[];
+
+    if (await fs.pathExists(filePath)) {
+      try {
+        const data = await fs.readJson(filePath);
+        if (Array.isArray(data.deposits)) {
+          deposits = data.deposits;
+        }
+      } catch (e) {
+        console.warn('Failed to read deposits.json', e);
+      }
+    }
+
+    const initialLength = deposits.length;
+    deposits = deposits.filter(d => d.id !== id);
+
+    if (deposits.length !== initialLength) {
+      await this.atomicWriteJson(filePath, { version: 1, deposits });
+      this.vaultState.deposits = deposits;
+    }
+  }
+
+  /**
+   * Get insurance array
+   */
+  get insurance(): InsurancePolicy[] {
+    return this.vaultState.insurance;
+  }
+  
+  // ==========================================================================
   // BROKER OPERATIONS
   // ==========================================================================
 
@@ -1473,7 +1656,19 @@ export class VaultManager {
           collectiblesTotal += collectible.currentValue;
       }
 
-      const totalNetWorth = cashTotal + investmentsTotal + realEstateTotal + collectiblesTotal;
+      // 5. Calculate Insurance (Current Value)
+      let insuranceTotal = 0;
+      for (const policy of this.vaultState.insurance) {
+          insuranceTotal += policy.currentValue;
+      }
+
+      // 6. Calculate Deposits (Principal)
+      let depositsTotal = 0;
+      for (const deposit of this.vaultState.deposits) {
+          depositsTotal += deposit.principal;
+      }
+
+      const totalNetWorth = cashTotal + investmentsTotal + realEstateTotal + collectiblesTotal + insuranceTotal + depositsTotal;
 
       const snapshot: Snapshot = {
           id: randomUUID(),
@@ -1485,6 +1680,8 @@ export class VaultManager {
               investments: Math.round(investmentsTotal),
               realEstate: Math.round(realEstateTotal),
               collectibles: Math.round(collectiblesTotal),
+              insurance: Math.round(insuranceTotal),
+              deposits: Math.round(depositsTotal),
           }
       };
 

@@ -5,22 +5,19 @@ import {
     TrendingUp,
     Building,
     Watch,
-    ArrowUpRight,
-    ArrowDownRight,
-    Pencil,
-    Copy,
-    Trash2,
-    Camera
+    Camera,
+    Shield,
+    PiggyBank
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
-import { type Transaction } from '../../../shared/schemas';
+
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
-import AddTransactionModal from './AddTransactionModal';
 import DashboardCharts, { DashboardPeriod } from './DashboardCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 
+// Force HMR update
 export default function Dashboard() {
     const { t } = useTranslation();
     const {
@@ -29,6 +26,8 @@ export default function Dashboard() {
         holdings,
         properties,
         collectibles,
+        insurance,
+        deposits,
         transactions,
         accounts,
         snapshots,
@@ -38,13 +37,8 @@ export default function Dashboard() {
     const { netWorth, convert, baseCurrency } = useNetWorth();
     const formatMoney = useFormatMoney();
 
-    // --- Modal State ---
-    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-    const [isDuplicateMode, setIsDuplicateMode] = useState(false);
-
     // --- Filter State ---
-    const [period, setPeriod] = useState<DashboardPeriod>('1y');
+    const [period] = useState<DashboardPeriod>('1y');
 
     // --- Aggregations ---
 
@@ -78,57 +72,26 @@ export default function Dashboard() {
         }, 0);
     }, [collectibles, convert]);
 
+    const insuranceTotal = useMemo(() => {
+        return insurance.reduce((sum, p) => {
+            const val = p.currentValue || 0;
+            return sum + convert(val, p.currency);
+        }, 0);
+    }, [insurance, convert]);
+
+    const depositsTotal = useMemo(() => {
+        return deposits.reduce((sum, d) => {
+            return sum + convert(d.principal, d.currency);
+        }, 0);
+    }, [deposits, convert]);
+
     // --- Chart Data ---
 
-    // --- Recent Activity ---
-    const recentActivity = useMemo(() => {
-        return [...transactions]
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 10); // Show more since we have full width
-    }, [transactions]);
+
 
     // --- User Actions ---
 
-    const handleEdit = (tx: Transaction) => {
-        setSelectedTransaction(tx);
-        setIsDuplicateMode(false);
-        setIsTransactionModalOpen(true);
-    };
 
-    const handleDuplicate = (tx: Transaction) => {
-        setSelectedTransaction(tx);
-        setIsDuplicateMode(true);
-        setIsTransactionModalOpen(true);
-    };
-
-    const handleDelete = async (tx: Transaction) => {
-        if (confirm(`Are you sure you want to delete this transaction: ${tx.payee}?`)) {
-            // Optimistic / Store update
-            // We need to call API first? useVaultStore usually just calls internal state, 
-            // but we likely need an async action in store that calls API too for persistence.
-            // Checking useVaultStore implementation: it doesn't seem to have deleteTransaction exposed as async API call wrapper?
-            // Actually I checked useVaultStore earlier but maybe missed it.
-            // Let's check if window.api has deleteTransaction. Typically yes.
-            try {
-                // Assuming logic: call API then refresh store
-                // Currently useVaultStore doesn't expose deleteTransaction? 
-                // Check Sidebar or TransactionTable... 
-                // If useVaultStore doesn't have it, we might need to add it or call window.api directly + refreshData.
-                // Let's assume window.api.deleteTransaction exists, if not we'll catch it.
-                // Actually I don't recall seeing deleteTransaction in store. I should verify.
-                // SAFE FALLBACK: call window.api directly then refreshData.
-                await window.api.deleteTransaction(tx.id);
-                await useVaultStore.getState().refreshData();
-            } catch (e) {
-                console.error("Failed to delete", e);
-                alert("Failed to delete transaction");
-            }
-        }
-    };
-
-    // Note: I'll use window.api.deleteTransaction if it exists, otherwise I might need to add it to main process in a separate step if missing.
-    // Based on previous tool outputs, TransactionTable seemingly doesn't delete?
-    // Let's assume for now. If it fails, I'll fix in next step.
 
     return (
         <div className="h-full flex flex-col overflow-y-auto">
@@ -178,8 +141,8 @@ export default function Dashboard() {
                     <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
                 </div>
 
-                {/* Summary Cards Grid (4 cols) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Summary Cards Grid (6 cols) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                     <SummaryCard
                         title={t('dashboard.cashAccounts')}
                         value={cashTotal}
@@ -220,6 +183,26 @@ export default function Dashboard() {
                         currency={baseCurrency}
                         onClick={() => setActiveView('collectibles')}
                     />
+                    <SummaryCard
+                        title={t('insurance.title')}
+                        value={insuranceTotal}
+                        icon={Shield}
+                        color="text-rose-400"
+                        bg="bg-rose-500/10"
+                        borderColor="border-rose-500/20"
+                        currency={baseCurrency}
+                        onClick={() => setActiveView('insurance')}
+                    />
+                    <SummaryCard
+                        title={t('deposits.title')}
+                        value={depositsTotal}
+                        icon={PiggyBank}
+                        color="text-blue-400"
+                        bg="bg-blue-500/10"
+                        borderColor="border-blue-500/20"
+                        currency={baseCurrency}
+                        onClick={() => setActiveView('deposits')}
+                    />
                 </div>
 
                 {/* Charts Row */}
@@ -229,87 +212,11 @@ export default function Dashboard() {
                     snapshots={snapshots}
                 />
 
-                {/* Bottom Section: Recent Activity - Full Width */}
-                <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-lg">
-                    <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                        <h3 className="font-semibold text-foreground">{t('dashboard.recentTransactions')}</h3>
-                    </div>
-                    <div className="divide-y divide-border">
-                        {recentActivity.length > 0 ? (
-                            recentActivity.map(tx => (
-                                <div key={tx.id} className="px-6 py-4 flex items-center justify-between hover:bg-background-muted transition-colors group">
-                                    {/* Left: Icon & Details */}
-                                    <div className="flex items-center gap-4">
-                                        <div className={cn(
-                                            "p-2 rounded-lg",
-                                            tx.type === 'income' ? "bg-emerald-500/20 text-emerald-400" :
-                                                tx.type === 'expense' ? "bg-error/20 text-error" :
-                                                    "bg-background-muted text-foreground-muted"
-                                        )}>
-                                            {tx.type === 'income' ? <ArrowDownRight className="w-5 h-5" /> :
-                                                tx.type === 'expense' ? <ArrowUpRight className="w-5 h-5" /> :
-                                                    <Wallet className="w-5 h-5" />}
-                                        </div>
-                                        <div>
-                                            <p className="text-foreground font-medium">{tx.payee || "No Payee"}</p>
-                                            <p className="text-sm text-foreground-muted">{new Date(tx.date).toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
 
-                                    {/* Right: Actions & Amount */}
-                                    <div className="flex items-center gap-6">
-                                        {/* Actions (Visible on Hover) */}
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => handleDuplicate(tx)}
-                                                className="p-1.5 text-foreground-muted hover:text-foreground hover:bg-background-subtle rounded-md transition-colors"
-                                                title="Duplicate"
-                                            >
-                                                <Copy className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(tx)}
-                                                className="p-1.5 text-foreground-muted hover:text-blue-400 hover:bg-blue-400/10 rounded-md transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(tx)}
-                                                className="p-1.5 text-foreground-muted hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-
-                                        <span className={cn(
-                                            "font-semibold w-24 text-right",
-                                            tx.type === 'income' ? "text-success" :
-                                                tx.type === 'expense' ? "text-foreground" : "text-foreground-muted"
-                                        )}>
-                                            {tx.type === 'expense' ? '-' : '+'}{formatMoney(tx.amount, tx.currency)}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="px-6 py-8 text-center text-foreground-muted text-sm">
-                                No recent activity
-                            </div>
-                        )}
-                    </div>
-                </div>
 
             </div>
 
-            {/* Modals */}
-            <AddTransactionModal
-                isOpen={isTransactionModalOpen}
-                onClose={() => setIsTransactionModalOpen(false)}
-                transaction={selectedTransaction}
-                isDuplicate={isDuplicateMode}
-            />
+
         </div>
     );
 }

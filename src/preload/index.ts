@@ -13,7 +13,9 @@ import type {
   Account,
   Category,
   Broker,
-  Snapshot
+  Snapshot,
+  InsurancePolicy,
+  DepositAccount
 } from '../shared/schemas'
 
 // ============================================================================
@@ -122,7 +124,7 @@ const api = {
   buyInvestmentManual: (params: { 
     symbol: string, 
     name: string, 
-    type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other',
+    type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other',
     currency: string,
     accountId: string, 
     quantity: number, 
@@ -168,6 +170,28 @@ const api = {
   },
   deleteCollectible: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.COLLECTIBLE_DELETE, id)
+  },
+
+  // ========== INSURANCE ==========
+
+  /** Save an insurance policy (creates new or updates existing) */
+  saveInsurance: (policy: InsurancePolicy): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.INSURANCE_SAVE, policy)
+  },
+  /** Delete an insurance policy */
+  deleteInsurance: (id: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.INSURANCE_DELETE, id)
+  },
+
+  // ========== DEPOSIT ACCOUNTS ==========
+
+  /** Save a deposit account (creates new or updates existing) */
+  saveDeposit: (deposit: DepositAccount): Promise<DepositAccount> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.DEPOSIT_SAVE, deposit)
+  },
+  /** Delete a deposit account */
+  deleteDeposit: (id: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.DEPOSIT_DELETE, id)
   },
 
   // ========== EXCHANGE RATES ==========

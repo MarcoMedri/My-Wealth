@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InvestmentTrade, Dividend, Broker, Snapshot, WorkspaceSettings } from '../../../shared/schemas';
+import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InsurancePolicy, DepositAccount, InvestmentTrade, Dividend, Broker, Snapshot, WorkspaceSettings } from '../../../shared/schemas';
 import { formatMoney } from '../../../shared/schemas';
 
 // ============================================================================
@@ -25,6 +25,8 @@ interface VaultStore {
   holdings: Holding[];
   properties: Property[];
   collectibles: Collectible[];
+  insurance: InsurancePolicy[];
+  deposits: DepositAccount[];
   trades: InvestmentTrade[];
   dividends: Dividend[];
   brokers: Broker[];
@@ -66,6 +68,18 @@ interface VaultStore {
   sellInvestment: (holdingId: string, quantity: number, price: number, fees: number, date: string) => Promise<void>;
   deleteHolding: (holdingId: string) => Promise<void>; // Snapshot mode
   
+  // Collectible Actions
+  saveCollectible: (collectible: Collectible) => Promise<void>;
+  deleteCollectible: (collectibleId: string) => Promise<void>;
+
+  // Insurance Actions
+  saveInsurance: (policy: InsurancePolicy) => Promise<void>;
+  deleteInsurance: (policyId: string) => Promise<void>;
+
+  // Deposit Actions
+  saveDeposit: (deposit: DepositAccount) => Promise<void>;
+  deleteDeposit: (depositId: string) => Promise<void>;
+  
   // Broker Actions
   saveBroker: (broker: Broker) => Promise<void>;
   deleteBroker: (brokerId: string) => Promise<void>;
@@ -103,6 +117,8 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
   holdings: [],
   properties: [],
   collectibles: [],
+  insurance: [],
+  deposits: [],
   trades: [],
   dividends: [],
   brokers: [],
@@ -146,6 +162,8 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       holdings: data.holdings,
       properties: data.properties,
       collectibles: data.collectibles,
+      insurance: data.insurance,
+      deposits: data.deposits,
       trades: data.trades,
       dividends: data.dividends,
       brokers: data.brokers,
@@ -215,6 +233,90 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to delete holding' });
       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // ========== COLLECTIBLE ACTIONS ==========
+
+  saveCollectible: async (collectible) => {
+      set({ isLoading: true });
+      try {
+        await window.api.saveCollectible(collectible);
+        await get().refreshData();
+      } catch (error) {
+         set({ error: error instanceof Error ? error.message : 'Failed to save collectible' });
+         throw error;
+      } finally {
+        set({ isLoading: false });
+      }
+  },
+
+  deleteCollectible: async (collectibleId) => {
+      set({ isLoading: true });
+      try {
+        await window.api.deleteCollectible(collectibleId);
+        await get().refreshData();
+      } catch (error) {
+         set({ error: error instanceof Error ? error.message : 'Failed to delete collectible' });
+         throw error;
+      } finally {
+        set({ isLoading: false });
+      }
+  },
+
+  // ========== INSURANCE ACTIONS ==========
+
+  saveInsurance: async (policy) => {
+    set({ isLoading: true });
+    try {
+      await window.api.saveInsurance(policy);
+      await get().refreshData();
+    } catch (error) {
+       set({ error: error instanceof Error ? error.message : 'Failed to save insurance' });
+       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteInsurance: async (policyId) => {
+    set({ isLoading: true });
+    try {
+      await window.api.deleteInsurance(policyId);
+      await get().refreshData();
+    } catch (error) {
+       set({ error: error instanceof Error ? error.message : 'Failed to delete insurance' });
+       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // ========== DEPOSIT ACTIONS ==========
+
+  saveDeposit: async (deposit) => {
+    set({ isLoading: true });
+    try {
+      await window.api.saveDeposit(deposit);
+      await get().refreshData();
+    } catch (error) {
+       set({ error: error instanceof Error ? error.message : 'Failed to save deposit' });
+       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteDeposit: async (depositId) => {
+    set({ isLoading: true });
+    try {
+      await window.api.deleteDeposit(depositId);
+      await get().refreshData();
+    } catch (error) {
+       set({ error: error instanceof Error ? error.message : 'Failed to delete deposit' });
+       throw error;
     } finally {
       set({ isLoading: false });
     }

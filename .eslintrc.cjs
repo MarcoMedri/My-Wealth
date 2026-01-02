@@ -14,6 +14,9 @@ module.exports = {
       version: 'detect',
     },
   },
+  parserOptions: {
+    warnOnUnsupportedTypeScriptVersion: false,
+  },
   rules: {
     'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

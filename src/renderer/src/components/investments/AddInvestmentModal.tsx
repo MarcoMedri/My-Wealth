@@ -28,7 +28,7 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
     const [isManualMode, setIsManualMode] = useState(false);
     const [manualSymbol, setManualSymbol] = useState('');
     const [manualName, setManualName] = useState('');
-    const [manualType, setManualType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other'>('stock');
+    const [manualType, setManualType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other'>('stock');
     const [manualCurrency, setManualCurrency] = useState('USD');
 
     // Configure Form
@@ -248,14 +248,15 @@ export function AddInvestmentModal({ isOpen, onClose }: AddInvestmentModalProps)
                                             <select
                                                 className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
                                                 value={manualType}
-                                                onChange={e => setManualType(e.target.value as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'other')}
+                                                onChange={e => setManualType(e.target.value as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other')}
                                             >
-                                                <option value="stock">Stock</option>
-                                                <option value="etf">ETF</option>
-                                                <option value="crypto">Crypto</option>
-                                                <option value="bond">Bond</option>
-                                                <option value="fund">Fund</option>
-                                                <option value="other">Other</option>
+                                                <option value="stock">{t('modals.investmentModal.types.stock')}</option>
+                                                <option value="etf">{t('modals.investmentModal.types.etf')}</option>
+                                                <option value="crypto">{t('modals.investmentModal.types.crypto')}</option>
+                                                <option value="bond">{t('modals.investmentModal.types.bond')}</option>
+                                                <option value="fund">{t('modals.investmentModal.types.fund')}</option>
+                                                <option value="insurance">{t('modals.investmentModal.types.insurance')}</option>
+                                                <option value="other">{t('modals.investmentModal.types.other')}</option>
                                             </select>
                                         </div>
                                         <div className="space-y-1">

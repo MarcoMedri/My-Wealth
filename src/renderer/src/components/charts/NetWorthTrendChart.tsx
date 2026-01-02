@@ -50,6 +50,7 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate }: Ne
         const investmentsData = filteredSnapshots.map(s => (s.breakdown?.investments || 0) / 100);
         const realEstateData = filteredSnapshots.map(s => (s.breakdown?.realEstate || 0) / 100);
         const collectiblesData = filteredSnapshots.map(s => (s.breakdown?.collectibles || 0) / 100);
+        const insuranceData = filteredSnapshots.map(s => (s.breakdown?.insurance || 0) / 100);
 
         return {
             labels: filteredSnapshots.map(s => formatDate(s.date)),
@@ -76,6 +77,12 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate }: Ne
                     label: t('nav.collectibles') || 'Collectibles',
                     data: collectiblesData,
                     backgroundColor: '#8b5cf6', // violet-500
+                    stack: 'Stack 0',
+                },
+                {
+                    label: t('insurance.title') || 'Insurance',
+                    data: insuranceData,
+                    backgroundColor: '#fb7185', // rose-400
                     stack: 'Stack 0',
                 }
             ]

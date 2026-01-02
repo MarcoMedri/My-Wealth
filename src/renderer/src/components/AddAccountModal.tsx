@@ -16,7 +16,7 @@ interface AddAccountModalProps {
     onClose: () => void;
 }
 
-const ACCOUNT_TYPE_KEYS: AccountType[] = ['checking', 'savings', 'credit', 'investment', 'cash', 'loan', 'other'];
+const ACCOUNT_TYPE_KEYS: AccountType[] = ['checking', 'savings', 'credit', 'investment', 'cash', 'loan', 'deposit', 'other'];
 
 const COLORS = [
     '#3b82f6', // Blue

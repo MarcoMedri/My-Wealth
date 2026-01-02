@@ -66,6 +66,7 @@ export const AssetTypeSchema = z.enum([
   'crypto',
   'bond',
   'fund',
+  'insurance',
   'other'
 ]);
 export type AssetType = z.infer<typeof AssetTypeSchema>;
@@ -263,8 +264,10 @@ export const SnapshotSchema = z.object({
   breakdown: z.object({
     cash: Money,
     investments: Money,
-    realEstate: Money,
-    collectibles: Money,
+    realEstate: Money.default(0),
+    collectibles: Money.default(0),
+    insurance: Money.default(0),
+    deposits: Money.default(0),
     // Add liabilities if implemented later
   }),
 });
@@ -320,6 +323,92 @@ export const CollectiblesFileSchema = z.object({
 export type CollectiblesFile = z.infer<typeof CollectiblesFileSchema>;
 
 // ============================================================================
+// INSURANCE
+// ============================================================================
+
+export const InsurancePolicySchema = z.object({
+  id: UUID,
+  name: z.string().min(1).max(100),
+  provider: z.string().optional(),     // e.g. Allianz, Generali
+  policyNumber: z.string().optional(),
+  contactInfo: z.string().optional(),  // Emergency contacts
+  
+  type: z.string(),                    // 'life', 'auto', 'health', 'home', 'other'
+  
+  // Values
+  premiumAmount: Money,                // cents (annual/monthly premium)
+  premiumPeriod: z.enum(['monthly', 'quarterly', 'semiannual', 'annual', 'one-time']),
+  nextPaymentDate: ISODate.optional(),
+  
+  startDate: ISODate,
+  endDate: ISODate.optional(),
+  autoRenewal: z.boolean().default(false),
+  
+  coverageAmount: Money.optional(),    // 'Massimale' - cents (max coverage)
+  deductible: Money.optional(),        // 'Franchigia' - cents
+  
+  currentValue: Money.default(0),      // cents (for investment-linked policies)
+  currency: CurrencyCode,
+  
+  insuredEntity: z.string().optional(), // Targa, Indirizzo, Beneficiario
+  
+  notes: z.string().optional(),
+  accountId: UUID.optional(),          // Link to broker/account (IBAN source)
+  
+  createdAt: ISODate,
+  updatedAt: ISODate,
+});
+export type InsurancePolicy = z.infer<typeof InsurancePolicySchema>;
+
+export const InsuranceFileSchema = z.object({
+  version: z.literal(1),
+  policies: z.array(InsurancePolicySchema),
+});
+export type InsuranceFile = z.infer<typeof InsuranceFileSchema>;
+
+// ============================================================================
+// DEPOSIT ACCOUNTS (Conti Deposito)
+// ============================================================================
+
+export const InterestPeriodicitySchema = z.enum(['end', 'monthly', 'quarterly', 'semiannual', 'annual']);
+export type InterestPeriodicity = z.infer<typeof InterestPeriodicitySchema>;
+
+export const ConstraintTypeSchema = z.enum(['free', 'locked', 'flexible']);
+export type ConstraintType = z.infer<typeof ConstraintTypeSchema>;
+
+export const DepositAccountSchema = z.object({
+  id: UUID,
+  name: z.string().min(1).max(100),
+  brokerId: z.string().optional(),     // Linked broker/bank
+
+  // Financials
+  principal: Money,                    // Initial amount (cents)
+  grossRate: z.number(),               // e.g. 4.5
+  netRate: z.number(),                 // e.g. 3.33 (after 26% tax)
+  interestPeriodicity: InterestPeriodicitySchema,
+  
+  // Timing
+  activationDate: ISODate,
+  durationMonths: z.number().int().positive(),
+  maturityDate: ISODate,
+  
+  // Liquidity
+  constraintType: ConstraintTypeSchema,
+  
+  currency: CurrencyCode,
+  notes: z.string().optional(),
+  createdAt: ISODate,
+  updatedAt: ISODate,
+});
+export type DepositAccount = z.infer<typeof DepositAccountSchema>;
+
+export const DepositsFileSchema = z.object({
+  version: z.literal(1),
+  deposits: z.array(DepositAccountSchema),
+});
+export type DepositsFile = z.infer<typeof DepositsFileSchema>;
+
+// ============================================================================
 // APP SETTINGS SCHEMA
 // ============================================================================
 
@@ -346,6 +435,7 @@ export const AccountTypeSchema = z.enum([
   'investment', // Investment/brokerage account
   'cash',       // Physical cash wallet
   'loan',       // Loan account (mortgage, car loan, etc.)
+  'deposit',    // Deposit account (CDs, high yield savings)
   'other',      // Custom account type
 ]);
 
@@ -649,6 +739,12 @@ export interface VaultState {
    collectibles: Collectible[];
  
    /**
+    * Insurance Policies
+    */
+   insurance: InsurancePolicy[];
+    deposits: DepositAccount[];
+
+   /**
     * Investment trades history (buy/sell records)
     */
    trades: InvestmentTrade[];
@@ -709,6 +805,8 @@ export function createEmptyVaultState(): VaultState {
     holdings: [],
     properties: [],
     collectibles: [],
+    insurance: [],
+    deposits: [],
     trades: [],
     dividends: [],
     brokers: [],
@@ -733,6 +831,8 @@ export interface SerializableVaultState {
   holdings: Holding[];
   properties: Property[];
   collectibles: Collectible[];
+  insurance: InsurancePolicy[];
+  deposits: DepositAccount[];
   trades: InvestmentTrade[];
   dividends: Dividend[];
   brokers: Broker[];

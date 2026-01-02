@@ -21,8 +21,9 @@ import {
     Landmark,
     Banknote,
     PiggyBank,
-    Briefcase,
-    Watch
+    Watch,
+    Shield,
+    Briefcase
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { formatMoney } from '../../../shared/schemas';
@@ -199,6 +200,32 @@ export default function Sidebar() {
                 >
                     <Watch className="w-4 h-4" />
                     <span className="text-sm font-medium">{t('nav.collectibles')}</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveView('insurance')}
+                    className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        activeView === 'insurance'
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
+                    )}
+                >
+                    <Shield className="w-4 h-4" />
+                    <span className="text-sm font-medium">{t('insurance.title')}</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveView('deposits')}
+                    className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        activeView === 'deposits'
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                            : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
+                    )}
+                >
+                    <PiggyBank className="w-4 h-4" />
+                    <span className="text-sm font-medium">{t('deposits.title')}</span>
                 </button>
             </nav>
 

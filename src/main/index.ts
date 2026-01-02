@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
-import type { Transaction, Account, Category, Broker } from '../shared/schemas'
+import type { Transaction, Account, Category, Broker, DepositAccount } from '../shared/schemas'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -191,6 +191,24 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.COLLECTIBLE_DELETE, async (_event, id) => {
     return vaultManager.deleteCollectible(id);
+  });
+
+  // ========== INSURANCE ==========
+  ipcMain.handle(IPC_CHANNELS.INSURANCE_SAVE, async (_event, policy) => {
+    return vaultManager.saveInsurance(policy);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.INSURANCE_DELETE, async (_event, id) => {
+    return vaultManager.deleteInsurance(id);
+  });
+
+  // ========== DEPOSIT ACCOUNTS ==========
+  ipcMain.handle(IPC_CHANNELS.DEPOSIT_SAVE, async (_event, deposit: DepositAccount) => {
+    return vaultManager.saveDeposit(deposit);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.DEPOSIT_DELETE, async (_event, id: string) => {
+    return vaultManager.deleteDeposit(id);
   });
 
   // ========== EXCHANGE RATES ==========

@@ -1,6 +1,7 @@
 // App entry point
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+// HMR trigger: 2026-01-02 14:48:51
 import {
     Wallet,
     FolderOpen,
@@ -13,6 +14,8 @@ import AccountsDashboard from './components/AccountsDashboard';
 import { InvestmentDashboard } from './components/investments/InvestmentDashboard';
 import { PropertiesDashboard } from './components/properties/PropertiesDashboard';
 import { CollectiblesDashboard } from './components/collectibles/CollectiblesDashboard';
+import { InsuranceDashboard } from './components/insurance/InsuranceDashboard';
+import { DepositDashboard } from './components/deposits/DepositDashboard';
 import { BrokerDetailView } from './components/brokers/BrokerDetailView';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
@@ -185,6 +188,8 @@ function App(): React.ReactElement {
             {activeView === 'investments' && <InvestmentDashboard />}
             {activeView === 'properties' && <PropertiesDashboard />}
             {activeView === 'collectibles' && <CollectiblesDashboard />}
+            {activeView === 'insurance' && <InsuranceDashboard />}
+            {activeView === 'deposits' && <DepositDashboard />}
             {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
         </Layout>
     );

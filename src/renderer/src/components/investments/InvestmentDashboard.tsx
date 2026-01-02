@@ -71,9 +71,13 @@ export function InvestmentDashboard() {
     const filteredHoldings = useMemo(() => {
         return holdings.filter(h => {
             if (includeClosed) return true;
+            // Exclude insurance from this view
+            const asset = assets.find(a => a.id === h.assetId);
+            if (asset?.type === 'insurance') return false;
+
             return h.quantity > 0; // Only show open positions by default
         });
-    }, [holdings, includeClosed]);
+    }, [holdings, includeClosed, assets]);
 
     // --- Metrics ---
     const metrics = useMemo(() => {
@@ -87,7 +91,7 @@ export function InvestmentDashboard() {
             if (holding.quantity === 0) return;
 
             const asset = assets.find(a => a.id === holding.assetId);
-            if (!asset) return;
+            if (!asset || asset.type === 'insurance') return;
 
             const value = holding.quantity * asset.currentPrice;
             const cost = holding.quantity * holding.averageBuyPrice;
@@ -119,10 +123,19 @@ export function InvestmentDashboard() {
         holdings.forEach(h => {
             if (h.quantity === 0) return; // Exclude closed from charts
             const asset = assets.find(a => a.id === h.assetId);
-            if (!asset) return;
+            if (!asset || asset.type === 'insurance') return; // Exclude insurance
             const val = convert(h.quantity * asset.currentPrice, asset.currency);
-            const type = asset.type === 'crypto' ? 'Crypto' : asset.type === 'etf' ? 'ETF' : 'Stock';
-            dist[type] = (dist[type] || 0) + val;
+            let typeLabel = 'Stock';
+            switch (asset.type) {
+                case 'crypto': typeLabel = 'Crypto'; break;
+                case 'etf': typeLabel = 'ETF'; break;
+                case 'bond': typeLabel = 'Bond'; break;
+                case 'fund': typeLabel = 'Fund'; break;
+                // case 'insurance': typeLabel = 'Insurance'; break; // Handled separately
+                case 'other': typeLabel = 'Other'; break;
+                default: typeLabel = 'Stock';
+            }
+            dist[typeLabel] = (dist[typeLabel] || 0) + val;
         });
         return dist;
     }, [holdings, assets, convert]);

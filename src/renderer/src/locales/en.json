@@ -14,7 +14,12 @@
     "uncategorized": "Uncategorized",
     "transfer": "Transfer",
     "noCategoriesFound": "No categories found",
-    "notEnoughData": "Not enough data"
+    "notEnoughData": "Not enough data",
+    "color": "Color",
+    "icon": "Icon",
+    "optional": "Optional",
+    "create": "Create",
+    "continue": "Continue"
   },
   "nav": {
     "dashboard": "Overview",
@@ -23,6 +28,7 @@
     "investments": "Investments",
     "properties": "Real Estate",
     "collectibles": "Collectibles",
+    "deposits": "Deposit Accounts",
     "settings": "Settings",
     "developer": "Developer",
     "noAccounts": "No accounts yet"
@@ -137,6 +143,7 @@
       "investment": "Investment Portfolio",
       "cash": "Cash Wallet",
       "loan": "Loan / Mortgage",
+      "deposit": "Deposit Account",
       "other": "Other"
     }
   },
@@ -279,13 +286,26 @@
     },
     "investmentModal": {
       "addTitle": "Add Investment",
+      "manualEntry": "Manual Entry",
       "symbol": "Ticker Symbol",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
       "symbolPlaceholder": "AAPL, BTC-USD, VWCE.DE",
       "searchHint": "Search by symbol or name",
       "quantity": "Quantity",
       "buyPrice": "Buy Price (per unit)",
       "buyDate": "Purchase Date",
-      "addToPortfolio": "Add to Portfolio"
+      "addToPortfolio": "Add to Portfolio",
+      "types": {
+        "stock": "Stock",
+        "etf": "ETF",
+        "crypto": "Crypto",
+        "bond": "Bond",
+        "fund": "Fund",
+        "insurance": "Insurance",
+        "other": "Other"
+      }
     }
   },
   "filters": {
@@ -323,5 +343,76 @@
     "education": "Education",
     "kids": "Kids",
     "pets": "Pets"
+  },
+  "errors": {
+    "saveFailed": "Save failed"
+  },
+  "insurance": {
+    "title": "Insurance",
+    "subtitle": "Manage your insurance policies and savings plans.",
+    "startTracking": "Start tracking your policies",
+    "trackDescription": "Keep track of all your life, health, car insurance and more in one place.",
+    "addTitle": "Add Policy",
+    "addPolicy": "Add Policy",
+    "policyName": "Policy Name",
+    "policyNumber": "Policy Number",
+    "value": "Value / Premium Paid",
+    "startDate": "Start Date",
+    "totalValue": "Total Value",
+    "policiesCount": "Number of Policies",
+    "yourPolicies": "Your Policies",
+    "premiumPaid": "Premium Paid",
+    "provider": "Insurance Provider",
+    "contactInfo": "Emergency Contact",
+    "deductible": "Deductible",
+    "insuredEntity": "Insured Item",
+    "premiumAmount": "Premium Amount",
+    "premiumPeriod": "Payment Frequency",
+    "nextPaymentDate": "Next Payment Date",
+    "autoRenewal": "Auto Renewal",
+    "coverageLimit": "Coverage Limit",
+    "endDate": "End Date",
+    "premiumPeriods": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Semiannual",
+      "annual": "Annual",
+      "one-time": "One-time"
+    }
+  },
+  "deposits": {
+    "title": "Deposit Accounts",
+    "subtitle": "Manage your locked and free savings.",
+    "startTracking": "Start tracking your deposit accounts",
+    "trackDescription": "Monitor returns on your deposit accounts, track maturity dates, and plan cash flows from interest payments.",
+    "addTitle": "Add Deposit Account",
+    "editTitle": "Edit Deposit Account",
+    "addDeposit": "Add Account",
+    "name": "Account Name",
+    "principal": "Principal Amount",
+    "grossRate": "Gross Annual Rate",
+    "netRate": "Net Rate",
+    "interestPeriodicity": "Interest Frequency",
+    "activationDate": "Activation Date",
+    "duration": "Duration (Months)",
+    "maturityDate": "Maturity Date",
+    "constraintType": "Constraint Type",
+    "totalValue": "Total Capital",
+    "depositsCount": "Number of Accounts",
+    "yourDeposits": "Your Deposit Accounts",
+    "brokerLink": "Provider / Bank",
+    "notes": "Notes",
+    "interestPeriodicityTypes": {
+      "end": "At Maturity",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Semiannual",
+      "annual": "Annual"
+    },
+    "constraintTypes": {
+      "free": "Free",
+      "locked": "Locked (Non-withdrawable)",
+      "flexible": "Flexible (with penalty)"
+    }
   }
 }

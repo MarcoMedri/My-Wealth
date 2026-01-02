@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { VAULT_STRUCTURE } from '../shared/types';
 import type { 
-  Account, Category, Transaction, Asset, Holding, Property, Collectible, Broker, Snapshot,
+  Account, Category, Transaction, Asset, Holding, Property, Collectible, Broker, Snapshot, InsurancePolicy, DepositAccount,
   AccountsFile, CategoriesFile, TransactionsFile, BrokersFile, SnapshotsFile
 } from '../shared/schemas';
 
@@ -202,6 +202,8 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
   }
 ];
 
+
+
 const EXPENSE_PAYEES = [
   'Supermarket', 'Restaurant', 'Gas Station', 'Amazon', 'Netflix', 
   'Electricity Co', 'Water Services', 'Phone Provider', 'Gym Membership',
@@ -228,6 +230,8 @@ export interface SeedResult {
   assets: number;
   brokers: number;
   snapshots: number;
+  insurance: number;
+  deposits: number;
 }
 
 /**
@@ -238,6 +242,54 @@ export interface SeedResult {
 export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   const now = new Date();
   const nowISO = now.toISOString();
+
+  const DEMO_INSURANCE: Omit<InsurancePolicy, 'id' | 'createdAt' | 'updatedAt' | 'currentValue'>[] = [
+    {
+      name: 'Generali Life Premium',
+      provider: 'Generali',
+      type: 'life',
+      policyNumber: 'GEN-LIFE-2024-8833',
+      premiumAmount: 120000, // €1,200
+      premiumPeriod: 'annual',
+      startDate: '2020-01-15T00:00:00.000Z',
+      currency: 'EUR',
+      coverageAmount: 25000000, // €250,000
+      contactInfo: '+39 800 112233',
+      autoRenewal: true,
+      notes: 'Life insurance policy',
+    },
+    {
+      name: 'Allianz Auto',
+      provider: 'Allianz',
+      type: 'auto',
+      policyNumber: 'ALL-CAR-9922',
+      premiumAmount: 85000, // €850
+      premiumPeriod: 'semiannual',
+      startDate: '2023-05-20T00:00:00.000Z',
+      nextPaymentDate: '2024-05-20T09:00:00.000Z',
+      currency: 'EUR',
+      insuredEntity: 'Tesla Model 3 - AB123CD',
+      deductible: 50000, // €500
+      contactInfo: 'Roadside: 800 999 999',
+      autoRenewal: true,
+    }
+  ];
+
+  const DEMO_DEPOSITS: Omit<DepositAccount, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    {
+      name: 'Cherry Bank Recall',
+      principal: 2500000, // €25,000
+      grossRate: 4.00,
+      netRate: 2.96,
+      interestPeriodicity: 'quarterly',
+      activationDate: '2023-10-01T08:00:00.000Z',
+      durationMonths: 60,
+      maturityDate: '2028-10-01T08:00:00.000Z',
+      constraintType: 'flexible',
+      currency: 'EUR',
+      notes: 'Recallable deposit account',
+    }
+  ];
 
   // 1. Generate BROKERS first so we can link accounts
   const brokers: Broker[] = DEMO_BROKERS.map(b => ({
@@ -468,10 +520,12 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       totalNetWorth: total,
       currency: 'EUR',
       breakdown: {
-        cash: Math.round(total * 0.2),
-        investments: Math.round(total * 0.5),
+        cash: Math.round(total * 0.15),
+        investments: Math.round(total * 0.45),
         realEstate: Math.round(total * 0.25),
         collectibles: Math.round(total * 0.05),
+        insurance: Math.round(total * 0.05),
+        deposits: Math.round(total * 0.05),
       }
     });
   }
@@ -564,6 +618,22 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     { spaces: 2 }
   );
 
+  // 4. Insurance
+  const insurance: InsurancePolicy[] = DEMO_INSURANCE.map(p => ({
+    ...p,
+    id: randomUUID(),
+    currentValue: 0,
+    createdAt: nowISO,
+    updatedAt: nowISO
+  }));
+
+  // Write insurance.json
+  await fs.writeJson(
+    path.join(vaultPath, VAULT_STRUCTURE.INSURANCE_FILE),
+    { version: 1, policies: insurance }, // Note: Schema uses 'policies' key
+    { spaces: 2 }
+  );
+
   // Write assets.json
   await fs.writeJson(
     path.join(vaultPath, 'assets.json'),
@@ -575,6 +645,29 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   await fs.writeJson(
     path.join(vaultPath, 'holdings.json'),
     { version: 1, holdings },
+    { spaces: 2 }
+  );
+
+  // Write insurance.json
+  await fs.writeJson(
+    path.join(vaultPath, 'insurance.json'),
+    { version: 1, insurance },
+    { spaces: 2 }
+  );
+
+  // 5. Deposits
+  const deposits: DepositAccount[] = DEMO_DEPOSITS.map(d => ({
+    ...d,
+    id: randomUUID(),
+    brokerId: getBrokerId('Fineco Bank'), // Link to some bank
+    createdAt: nowISO,
+    updatedAt: nowISO
+  }));
+
+  // Write deposits.json
+  await fs.writeJson(
+    path.join(vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE),
+    { version: 1, deposits },
     { spaces: 2 }
   );
 
@@ -597,7 +690,9 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     collectibles: collectibles.length,
     assets: assets.length,
     brokers: brokers.length,
-    snapshots: snapshots.length
+    snapshots: snapshots.length,
+    insurance: insurance.length,
+    deposits: deposits.length
   };
 }
 
@@ -689,6 +784,8 @@ export async function clearVaultData(vaultPath: string): Promise<void> {
   await fs.remove(path.join(vaultPath, 'collectibles.json'));
   await fs.remove(path.join(vaultPath, 'assets.json'));
   await fs.remove(path.join(vaultPath, 'holdings.json'));
+  await fs.remove(path.join(vaultPath, 'insurance.json'));
+  await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE));
   await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.BROKERS_FILE));
   await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE));
 }

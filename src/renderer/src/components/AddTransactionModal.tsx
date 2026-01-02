@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-// Force HMR update - Deployment finalized
+// Force HMR update - Tab selection bug fixed
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';

@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Globe, Moon, Sun, DollarSign, Monitor } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme } from '../../../../shared/types';
+import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat, type TimeFormat } from '../../../../shared/types';
 import { cn } from '../../lib/utils';
 import { CategoryManager } from './CategoryManager';
 
@@ -133,7 +133,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 </label>
                                 <select
                                     value={dateFormat}
-                                    onChange={(e) => setDateFormat(e.target.value as any)}
+                                    onChange={(e) => setDateFormat(e.target.value as DateFormat)}
                                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option value="dd/MM/yyyy">DD/MM/YYYY (31/12/2023)</option>
@@ -150,7 +150,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 </label>
                                 <select
                                     value={timeFormat}
-                                    onChange={(e) => setTimeFormat(e.target.value as any)}
+                                    onChange={(e) => setTimeFormat(e.target.value as TimeFormat)}
                                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option value="HH:mm">24-hour (14:30)</option>

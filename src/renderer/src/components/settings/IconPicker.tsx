@@ -5,7 +5,7 @@ import {
     Dumbbell, Gift, Smartphone, Wifi, Anchor, Camera, Hammer, Wrench,
     Scissors, CreditCard, Banknote, Landmark, PiggyBank, Bitcoin, Wallet,
     Baby, Dog, Cat, Flower2, TreeDeciduous, Palmtree, Sun, Moon,
-    Umbrella, Ticket, Map, Globe, Flag, Star, Heart, Smile
+    Umbrella, Ticket, Map, Globe, Flag, Star, Heart, Smile, Shield, Settings
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -58,8 +58,10 @@ export const ICON_MAP = {
     'globe': Globe,
     'flag': Flag,
     'star': Star,
+    'settings': Settings,
     'heart': Heart,
-    'smile': Smile
+    'smile': Smile,
+    'shield': Shield
 };
 
 export type IconName = keyof typeof ICON_MAP;

@@ -15,6 +15,8 @@
     *   Support for buy/sell transactions with automatic P/L calculation.
 *   **🏦 Comprehensive Net Worth Tracking**:
     *   **Accounts**: Manage bank accounts, cash, and liabilities.
+    *   **Conti Deposito**: Track high-yield deposit accounts with maturity tracking.
+    *   **Insurance**: Manage life, auto, and health insurance policies.
     *   **Real Estate**: Track property values and mortgages.
     *   **Collectibles**: Manage high-value assets like watches, art, jewelry, and vehicles.
 *   **📊 Insightful Dashboard**: A beautiful, responsive interface that gives you an at-a-glance view of your financial health.
@@ -54,6 +56,8 @@ My Wealth uses a **Vault** system - a folder on your local machine containing JS
 ├── brokers.json       # Financial institutions
 ├── categories.json    # Transaction categories
 ├── snapshots.json     # Historical net worth snapshots
+├── insurance.json     # Insurance policies
+├── deposits.json      # Deposit accounts
 └── workspace.json     # UI preferences and workspace settings
 ```
 
@@ -67,6 +71,8 @@ My Wealth uses a **Vault** system - a folder on your local machine containing JS
 | **Asset** | An investable item with real-time price tracking (stocks, ETFs, crypto) |
 | **Property** | Real estate with purchase price and current value tracking |
 | **Collectible** | High-value items (watches, art, vehicles) with appreciation tracking |
+| **Insurance** | Insurance policies (life, auto, health) |
+| **Deposit Account** | High-yield savings/deposit contracts with interest tracking |
 
 ### Money Handling
 

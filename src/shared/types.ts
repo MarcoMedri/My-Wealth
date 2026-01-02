@@ -13,6 +13,8 @@ export const VAULT_STRUCTURE = {
   TRANSACTIONS_DIR: 'transactions',
   SETTINGS_FILE: 'settings.json',
   BROKERS_FILE: 'brokers.json',
+  INSURANCE_FILE: 'insurance.json',
+  DEPOSITS_FILE: 'deposits.json',
   SNAPSHOTS_FILE: 'snapshots.json',
   WORKSPACE_FILE: 'workspace.json',
 } as const;
@@ -92,6 +94,13 @@ export const IPC_CHANNELS = {
   // Collectible operations
   COLLECTIBLE_SAVE: 'collectible:save',
   COLLECTIBLE_DELETE: 'collectible:delete',
+
+  INSURANCE_SAVE: 'insurance:save',
+  INSURANCE_DELETE: 'insurance:delete',
+
+  // Deposit operations
+  DEPOSIT_SAVE: 'deposit:save',
+  DEPOSIT_DELETE: 'deposit:delete',
   
   // Settings operations
   SETTINGS_GET: 'settings:get',

@@ -9,7 +9,9 @@ export function useNetWorth() {
         assets,
         holdings,
         properties,
-        collectibles
+        collectibles,
+        insurance,
+        deposits
     } = useVaultStore();
 
     // Use the separated currency converter hook
@@ -54,6 +56,17 @@ export function useNetWorth() {
              total += convert(value, c.currency);
         });
 
+        // 5. Insurance (Life/Investment policies)
+        insurance.forEach(p => {
+            const value = p.currentValue || 0;
+            total += convert(value, p.currency);
+        });
+        
+        // 6. Deposits
+        deposits.forEach(d => {
+            total += convert(d.principal, d.currency);
+        });
+
         return total;
     }, [
         accountBalances, 
@@ -61,7 +74,9 @@ export function useNetWorth() {
         holdings, 
         assets, 
         properties, 
-        collectibles, 
+        collectibles,
+        insurance,
+        deposits,
         convert
     ]);
 

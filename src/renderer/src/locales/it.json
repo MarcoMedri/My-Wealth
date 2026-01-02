@@ -19,7 +19,12 @@
     "uncategorized": "Non categorizzato",
     "transfer": "Trasferimento",
     "noCategoriesFound": "Nessuna categoria trovata",
-    "notEnoughData": "Dati insufficienti"
+    "notEnoughData": "Dati insufficienti",
+    "color": "Colore",
+    "icon": "Icona",
+    "optional": "Opzionale",
+    "create": "Crea",
+    "continue": "Continua"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -39,6 +44,7 @@
     "investments": "Investimenti",
     "properties": "Immobili",
     "collectibles": "Collezionabili",
+    "deposits": "Conti Deposito",
     "settings": "Impostazioni",
     "developer": "Sviluppatore",
     "noAccounts": "Nessun conto ancora"
@@ -119,6 +125,7 @@
       "investment": "Portafoglio Investimenti",
       "cash": "Contanti",
       "loan": "Prestito / Mutuo",
+      "deposit": "Conto Deposito",
       "other": "Altro"
     }
   },
@@ -283,13 +290,26 @@
     },
     "investmentModal": {
       "addTitle": "Aggiungi Investimento",
+      "manualEntry": "Inserimento Manuale",
       "symbol": "Simbolo Ticker",
+      "name": "Nome",
+      "type": "Tipo",
+      "currency": "Valuta",
       "symbolPlaceholder": "AAPL, BTC-USD, VWCE.DE",
       "searchHint": "Cerca per simbolo o nome",
       "quantity": "Quantità",
       "buyPrice": "Prezzo Acquisto (per unità)",
       "buyDate": "Data Acquisto",
-      "addToPortfolio": "Aggiungi al Portafoglio"
+      "addToPortfolio": "Aggiungi al Portafoglio",
+      "types": {
+        "stock": "Azione",
+        "etf": "ETF",
+        "crypto": "Criptovaluta",
+        "bond": "Obbligazione",
+        "fund": "Fondo",
+        "insurance": "Assicurazione",
+        "other": "Altro"
+      }
     }
   },
   "filters": {
@@ -327,5 +347,76 @@
     "education": "Istruzione",
     "kids": "Bambini",
     "pets": "Animali Domestici"
+  },
+  "errors": {
+    "saveFailed": "Salvataggio fallito"
+  },
+  "insurance": {
+    "title": "Assicurazioni",
+    "subtitle": "Gestisci le tue polizze assicurative e piani di accumulo.",
+    "startTracking": "Inizia a tracciare le tue polizze",
+    "trackDescription": "Tieni traccia di tutte le tue assicurazioni vita, salute, auto e altro in un unico posto.",
+    "addTitle": "Aggiungi Polizza",
+    "addPolicy": "Aggiungi Polizza",
+    "policyName": "Nome Polizza",
+    "policyNumber": "Numero Polizza",
+    "value": "Valore / Premio Versato",
+    "startDate": "Data Inizio",
+    "totalValue": "Valore Totale",
+    "policiesCount": "Numero Polizze",
+    "yourPolicies": "Le tue Polizze",
+    "premiumPaid": "Premio Versato",
+    "provider": "Compagnia Assicurativa",
+    "contactInfo": "Contatti Emergenza",
+    "deductible": "Franchigia",
+    "insuredEntity": "Oggetto Assicurato",
+    "premiumAmount": "Premio",
+    "premiumPeriod": "Frequenza Pagamento",
+    "nextPaymentDate": "Prossimo Pagamento",
+    "autoRenewal": "Rinnovo Automatico",
+    "coverageLimit": "Massimale",
+    "endDate": "Data Scadenza",
+    "premiumPeriods": {
+      "monthly": "Mensile",
+      "quarterly": "Trimestrale",
+      "semiannual": "Semestrale",
+      "annual": "Annuale",
+      "one-time": "Una Tantum"
+    }
+  },
+  "deposits": {
+    "title": "Conti Deposito",
+    "subtitle": "Gestisci i tuoi risparmi vincolati e liberi.",
+    "startTracking": "Inizia a tracciare i tuoi conti deposito",
+    "trackDescription": "Monitora i rendimenti dei tuoi conti deposito, traccia le scadenze e pianifica i flussi di cassa dalle cedole.",
+    "addTitle": "Aggiungi Conto Deposito",
+    "editTitle": "Modifica Conto Deposito",
+    "addDeposit": "Aggiungi Conto",
+    "name": "Nome Conto",
+    "principal": "Importo Vincolato",
+    "grossRate": "Tasso Lordo Annuo",
+    "netRate": "Tasso Netto",
+    "interestPeriodicity": "Periodicità Cedole",
+    "activationDate": "Data Attivazione",
+    "duration": "Durata (Mesi)",
+    "maturityDate": "Data Scadenza",
+    "constraintType": "Tipo Vincolo",
+    "totalValue": "Capitale Totale",
+    "depositsCount": "Numero Conti",
+    "yourDeposits": "I tuoi Conti Deposito",
+    "brokerLink": "Fornitore / Banca",
+    "notes": "Note",
+    "interestPeriodicityTypes": {
+      "end": "A Scadenza",
+      "monthly": "Mensile",
+      "quarterly": "Trimestrale",
+      "semiannual": "Semestrale",
+      "annual": "Annuale"
+    },
+    "constraintTypes": {
+      "free": "Libero",
+      "locked": "Vincolato (Non Svincolabile)",
+      "flexible": "Svincolabile (con penale)"
+    }
   }
 }
