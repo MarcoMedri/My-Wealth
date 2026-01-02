@@ -15,7 +15,7 @@
     *   Support for buy/sell transactions with automatic P/L calculation.
 *   **🏦 Comprehensive Net Worth Tracking**:
     *   **Brokers**: Organize assets by financial institution with automatic logo fetching (powered by Clearbit) for a visual overview.
-    *   **Accounts**: Manage bank accounts, cash, and liabilities.
+    *   **Accounts**: Manage bank accounts, cash, and liabilities with manual balance override for reconciliation.
     *   **Conti Deposito**: Track high-yield deposit accounts with maturity tracking.
     *   **Insurance**: Manage life, auto, and health insurance policies.
     *   **Real Estate**: Track property values and mortgages.
@@ -36,6 +36,7 @@
 *   **💾 Workspace Persistence**:
     *   Remembers your dashboard filters (date ranges, toggle states) across sessions.
     *   Stores UI preferences locally in the vault (`workspace.json`).
+    *   Automatically saves and restores window size, position, and maximized state.
 
 ## 🛠️ Tech Stack
 

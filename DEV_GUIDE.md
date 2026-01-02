@@ -126,6 +126,34 @@ npm run build:mac   # or :win, :linux
 
 ---
 
+## 🎯 Recent Features
+
+### Manual Balance Adjustment
+Accounts support manual balance override to handle:
+- Incomplete transaction history (e.g., starting mid-year)
+- Dividends/interest without creating individual transactions
+- Reconciliation with real bank statements
+
+**Implementation:**
+- `Account.manualBalance` (optional field in schema)
+- If set, overrides calculated balance from transactions
+- UI: Edit button on account cards in BrokerDetailView
+- Component: `EditBalanceModal.tsx`
+
+### Window Size Persistence
+Window dimensions and position are automatically saved:
+- Stored in `AppSettings.windowBounds`
+- Debounced saves (500ms) on resize/move events
+- Immediate save on window close
+- Restores size, position, and maximized state on app restart
+
+**Implementation:**
+- Schema: `AppSettingsSchema.windowBounds`
+- Main process: `createWindow()` in `src/main/index.ts`
+- Methods: `VaultManager.getSettings()`, `VaultManager.updateSettings()`
+
+---
+
 ## 🧩 Adding New Features
 
 1.  **Define Schema**: Add data models to `src/shared/schemas.ts`.
