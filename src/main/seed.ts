@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import { VAULT_STRUCTURE } from '../shared/types';
 import type { 
-  Account, Category, Transaction, Asset, Holding, Property, Collectible, Broker, Snapshot, InsurancePolicy, DepositAccount,
+  Account, Category, Transaction, Asset, Holding, Property, Collectible, Broker, Snapshot, InsurancePolicy, DepositAccount, InvestmentTrade, Dividend,
   AccountsFile, CategoriesFile, TransactionsFile, BrokersFile, SnapshotsFile
 } from '../shared/schemas';
 
@@ -73,6 +73,26 @@ const DEMO_ACCOUNTS: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>[] = [
     icon: 'piggy-bank',
     isArchived: false,
     sortOrder: 2,
+  },
+  {
+    name: 'AMEX Gold',
+    type: 'credit',
+    currency: 'EUR',
+    initialBalance: -125000, // -€1,250.00
+    color: '#f59e0b',
+    icon: 'credit-card',
+    isArchived: false,
+    sortOrder: 4,
+  },
+  {
+    name: 'Personal Loan',
+    type: 'loan',
+    currency: 'EUR',
+    initialBalance: -2500000, // -€25,000.00
+    color: '#ef4444',
+    icon: 'landmark',
+    isArchived: false,
+    sortOrder: 5,
   },
 ];
 
@@ -141,6 +161,39 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 85,
     notes: 'Summer getaway',
     imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Rental Apartment - Berlin',
+    type: 'rental',
+    address: 'Mitte, Berlin, Germany',
+    purchasePrice: 32000000, // €320k
+    purchaseDate: '2022-05-10T00:00:00.000Z',
+    currency: 'EUR',
+    squareMeters: 65,
+    notes: 'Long-term rental property',
+    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Agricultural Land - Tuscany',
+    type: 'land',
+    address: 'Siena, Tuscany',
+    purchasePrice: 15000000, // €150k
+    purchaseDate: '2020-03-20T00:00:00.000Z',
+    currency: 'EUR',
+    squareMeters: 50000,
+    notes: 'Vineyard land',
+    imageUrl: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Office Space - Milan',
+    type: 'commercial',
+    address: 'Porta Nuova, Milan',
+    purchasePrice: 65000000, // €650k
+    purchaseDate: '2021-02-15T00:00:00.000Z',
+    currency: 'EUR',
+    squareMeters: 150,
+    notes: 'Commercial office space',
+    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80',
   }
 ];
 
@@ -171,6 +224,51 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2020-01-15T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1610375461246-83648bfd149c?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Rare Wine Collection',
+    type: 'wine',
+    description: 'Bordeaux and Barolo vertical tastings',
+    purchasePrice: 1500000, // €15,000
+    purchaseDate: '2021-06-12T00:00:00.000Z',
+    currency: 'EUR',
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Contemporary Art Piece',
+    type: 'art',
+    description: 'Abstract painting by local artist',
+    purchasePrice: 850000, // €8,500
+    purchaseDate: '2023-01-30T00:00:00.000Z',
+    currency: 'EUR',
+    imageUrl: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Vintage Porsche 911',
+    type: 'vehicle',
+    description: '1984 Carrera 3.2, guards red',
+    purchasePrice: 6500000, // €65,000
+    purchaseDate: '2021-08-10T00:00:00.000Z',
+    currency: 'EUR',
+    imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Engagement Ring',
+    type: 'jewelry',
+    description: 'Diamond solitaire, 1.5 carat',
+    purchasePrice: 1200000, // €12,000
+    purchaseDate: '2019-12-20T00:00:00.000Z',
+    currency: 'EUR',
+    imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
+  },
+  {
+    name: 'Charizard First Edition',
+    type: 'trading_card',
+    description: 'PSA 9 graded holographic',
+    purchasePrice: 250000, // €2,500
+    purchaseDate: '2020-05-15T00:00:00.000Z',
+    currency: 'EUR',
+    imageUrl: 'https://images.unsplash.com/photo-1613771404721-1f92d799e49f?auto=format&fit=crop&w=1000&q=80',
   }
 ];
 
@@ -199,6 +297,32 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     currency: 'EUR',
     currentPrice: 4250000, // €42,500.00
     metadata: { exchange: 'Coinbase' }
+  },
+  {
+    symbol: 'BTP-2030',
+    name: 'BTP 3.50% Oct 2030',
+    type: 'bond',
+    currency: 'EUR',
+    currentPrice: 9850, // €98.50
+    isin: 'IT0005514473',
+    metadata: { exchange: 'MOT', region: 'Italy' }
+  },
+  {
+    symbol: 'AMUNDI-MSCI-WORLD',
+    name: 'Amundi Index MSCI World',
+    type: 'fund',
+    currency: 'EUR',
+    currentPrice: 24500, // €245.00
+    isin: 'LU1437016972',
+    metadata: { exchange: 'Euronext', region: 'Global' }
+  },
+  {
+    symbol: 'GOLD-PRIVATE',
+    name: 'Private Gold Vault',
+    type: 'other',
+    currency: 'EUR',
+    currentPrice: 500000, // €5,000.00 (unit)
+    metadata: { exchange: 'Private', region: 'Switzerland' }
   }
 ];
 
@@ -272,6 +396,19 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       deductible: 50000, // €500
       contactInfo: 'Roadside: 800 999 999',
       autoRenewal: true,
+    },
+    {
+      name: 'Zurich Home Protect',
+      provider: 'Zurich',
+      type: 'home',
+      policyNumber: 'ZUR-HOME-5544',
+      premiumAmount: 45000, // €450
+      premiumPeriod: 'annual',
+      startDate: '2021-11-01T00:00:00.000Z',
+      currency: 'EUR',
+      insuredEntity: 'Via Roma 123, Milan',
+      notes: 'Home insurance including theft and fire',
+      autoRenewal: true,
     }
   ];
 
@@ -288,6 +425,19 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       constraintType: 'flexible',
       currency: 'EUR',
       notes: 'Recallable deposit account',
+    },
+    {
+      name: 'CA Auto Bank - Tempo',
+      principal: 1000000, // €10,000
+      grossRate: 3.80,
+      netRate: 2.81,
+      interestPeriodicity: 'monthly',
+      activationDate: '2024-01-15T09:00:00.000Z',
+      durationMonths: 12,
+      maturityDate: '2025-01-15T09:00:00.000Z',
+      constraintType: 'locked',
+      currency: 'EUR',
+      notes: 'Locked deposit for 12 months',
     }
   ];
 
@@ -446,6 +596,8 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   }));
 
   const holdings: Holding[] = [];
+  const trades: InvestmentTrade[] = [];
+  const dividends: Dividend[] = [];
   
   // Create holdings for the investment account
   assets.forEach(asset => {
@@ -477,6 +629,7 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     // Pick a valid category for the expense (required by schema)
     const expenseCat = categories.find(c => c.type === 'expense') || categories[0];
 
+    // 1. Add Transaction
     transactions.push({
       id: randomUUID(),
       type: 'expense',
@@ -495,6 +648,38 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       createdAt: nowISO,
       updatedAt: nowISO,
     });
+
+    // 2. Add Trade
+    trades.push({
+      id: randomUUID(),
+      type: 'buy',
+      assetId: asset.id,
+      accountId: investmentAccount.id,
+      quantity,
+      pricePerUnit: averageBuyPrice,
+      fees: 100 + faker.number.int({ min: 0, max: 400 }), // €1 - €5 fees
+      date: buyDate.toISOString(),
+      createdAt: nowISO
+    });
+
+    // 3. Add Dividends for stocks/etfs (randomly)
+    if (asset.type === 'stock' || asset.type === 'etf') {
+      const dividendDate = new Date();
+      dividendDate.setMonth(dividendDate.getMonth() - 2);
+      
+      const divAmount = faker.number.int({ min: 50, max: 200 }); // €0.50 - €2.00
+      
+      dividends.push({
+        id: randomUUID(),
+        assetId: asset.id,
+        accountId: investmentAccount.id,
+        date: dividendDate.toISOString(),
+        amountPerShare: divAmount,
+        totalAmount: Math.round(quantity * divAmount),
+        currency: asset.currency,
+        createdAt: nowISO
+      });
+    }
   });
   
   // ===========================================
@@ -648,12 +833,20 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
     { spaces: 2 }
   );
 
-  // Write insurance.json
+  // Write trades.json
   await fs.writeJson(
-    path.join(vaultPath, 'insurance.json'),
-    { version: 1, insurance },
+    path.join(vaultPath, 'trades.json'),
+    { version: 1, trades },
     { spaces: 2 }
   );
+
+  // Write dividends.json
+  await fs.writeJson(
+    path.join(vaultPath, 'dividends.json'),
+    { version: 1, dividends },
+    { spaces: 2 }
+  );
+
 
   // 5. Deposits
   const deposits: DepositAccount[] = DEMO_DEPOSITS.map(d => ({
@@ -785,6 +978,8 @@ export async function clearVaultData(vaultPath: string): Promise<void> {
   await fs.remove(path.join(vaultPath, 'assets.json'));
   await fs.remove(path.join(vaultPath, 'holdings.json'));
   await fs.remove(path.join(vaultPath, 'insurance.json'));
+  await fs.remove(path.join(vaultPath, 'trades.json'));
+  await fs.remove(path.join(vaultPath, 'dividends.json'));
   await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.DEPOSITS_FILE));
   await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.BROKERS_FILE));
   await fs.remove(path.join(vaultPath, VAULT_STRUCTURE.SNAPSHOTS_FILE));
