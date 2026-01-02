@@ -19,6 +19,7 @@ import { cn, formatDate } from '../lib/utils';
 import AddTransactionModal from './AddTransactionModal';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { type DateRange, getDateRangeBounds } from './DateRangeFilter';
+import { useCategoryName } from '../hooks/useCategoryName';
 
 const columnHelper = createColumnHelper<Transaction>();
 
@@ -31,6 +32,7 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
     const allTransactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
     const formatMoney = useFormatMoney();
+    const { getCategoryName } = useCategoryName();
     const [sorting, setSorting] = useState<SortingState>([
         { id: 'date', desc: true }
     ]);
@@ -109,7 +111,7 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
                 const category = categoryId ? categoryMap.get(categoryId) : null;
                 return (
                     <span className="text-foreground-muted text-sm">
-                        {category?.name || '—'}
+                        {category ? getCategoryName(category.name) : '—'}
                     </span>
                 );
             },
@@ -164,7 +166,7 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
             ),
 
         })
-    ], [categoryMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate]);
+    ], [categoryMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate, getCategoryName]);
 
     // Sort transactions
     const sortedData = useMemo(() => {

@@ -6,9 +6,11 @@ import { ICON_MAP } from './IconPicker';
 import { Plus, Pencil, Trash2, Tag, Loader2, RotateCcw } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Category } from '../../../../shared/schemas';
+import { useCategoryName } from '../../hooks/useCategoryName';
 
 export function CategoryManager() {
     const { t } = useTranslation();
+    const { getCategoryName } = useCategoryName();
     const { categories, getCategoriesByType, deleteCategory } = useVaultStore(); // Note: addCategory used for seeding defaults
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -127,7 +129,7 @@ export function CategoryManager() {
                                         >
                                             <Icon className="w-4 h-4" />
                                         </div>
-                                        <span className="font-medium text-foreground">{category.name}</span>
+                                        <span className="font-medium text-foreground">{getCategoryName(category.name)}</span>
                                     </div>
                                     <div className="flex gap-1">
                                         <button

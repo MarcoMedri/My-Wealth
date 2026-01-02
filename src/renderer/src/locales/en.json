@@ -73,7 +73,11 @@
       "dark": "Dark",
       "system": "System"
     },
-    "decimals": "Decimal Places"
+    "decimals": "Decimal Places",
+    "categories": "Categories",
+    "dateTime": "Date & Time",
+    "dateFormat": "Date Format",
+    "timeFormat": "Time Format"
   },
   "collectibles": {
     "title": "Collectibles",
@@ -138,11 +142,13 @@
   },
   "transactions": {
     "addTransaction": "Add Transaction",
+    "addTransactionShort": "Add",
     "editTransaction": "Edit Transaction",
     "duplicateTransaction": "Duplicate Transaction",
     "amount": "Amount",
     "date": "Date",
     "payee": "Payee",
+    "payer": "Payer / Source",
     "category": "Category",
     "depositTo": "Deposit To",
     "paymentFrom": "Payment From",
@@ -288,5 +294,34 @@
     "last6Months": "Last 6 Months",
     "lastYear": "Last Year",
     "allTime": "All Time"
+  },
+  "categories": {
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "investments": "Investments",
+    "gifts": "Gifts",
+    "dividends": "Dividends",
+    "rent": "Rent",
+    "mortgage": "Mortgage",
+    "utilities": "Utilities",
+    "internetPhone": "Internet & Phone",
+    "maintenance": "Maintenance",
+    "groceries": "Groceries",
+    "diningOut": "Dining Out",
+    "coffee": "Coffee",
+    "transportation": "Transportation",
+    "fuel": "Fuel",
+    "entertainment": "Entertainment",
+    "shopping": "Shopping",
+    "travel": "Travel",
+    "subscription": "Subscription",
+    "hobbies": "Hobbies",
+    "gaming": "Gaming",
+    "healthcare": "Healthcare",
+    "fitness": "Fitness",
+    "personalCare": "Personal Care",
+    "education": "Education",
+    "kids": "Kids",
+    "pets": "Pets"
   }
 }

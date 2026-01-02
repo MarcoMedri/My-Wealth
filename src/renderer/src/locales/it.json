@@ -54,7 +54,12 @@
       "light": "Chiaro",
       "dark": "Scuro",
       "system": "Sistema"
-    }
+    },
+    "decimals": "Decimali",
+    "categories": "Categorie",
+    "dateTime": "Data & Ora",
+    "dateFormat": "Formato Data",
+    "timeFormat": "Formato Ora"
   },
   "collectibles": {
     "title": "Collezionabili",
@@ -141,13 +146,15 @@
   },
   "transactions": {
     "addTransaction": "Aggiungi Transazione",
+    "addTransactionShort": "Aggiungi",
     "editTransaction": "Modifica Transazione",
     "duplicateTransaction": "Duplica Transazione",
     "amount": "Importo",
     "date": "Data",
     "payee": "Beneficiario",
+    "payer": "Fonte / Pagante",
     "category": "Categoria",
-    "depositTo": "Deposita Su",
+    "depositTo": "Pagamento A",
     "paymentFrom": "Pagamento Da",
     "transferTo": "Trasferisci A",
     "selectAccount": "Seleziona Conto",
@@ -291,5 +298,34 @@
     "last6Months": "Ultimi 6 Mesi",
     "lastYear": "Ultimo Anno",
     "allTime": "Tutto"
+  },
+  "categories": {
+    "salary": "Stipendio",
+    "freelance": "Freelance",
+    "investments": "Investimenti",
+    "gifts": "Regali",
+    "dividends": "Dividendi",
+    "rent": "Affitto",
+    "mortgage": "Mutuo",
+    "utilities": "Utenze (Bollette)",
+    "internetPhone": "Internet & Telefono",
+    "maintenance": "Manutenzione",
+    "groceries": "Spesa",
+    "diningOut": "Ristoranti",
+    "coffee": "Caffè/Bar",
+    "transportation": "Trasporti",
+    "fuel": "Carburante",
+    "entertainment": "Intrattenimento",
+    "shopping": "Shopping",
+    "travel": "Viaggi",
+    "subscription": "Abbonamenti",
+    "hobbies": "Hobby",
+    "gaming": "Gaming",
+    "healthcare": "Salute",
+    "fitness": "Sport & Fitness",
+    "personalCare": "Cura Personale",
+    "education": "Istruzione",
+    "kids": "Bambini",
+    "pets": "Animali Domestici"
   }
 }

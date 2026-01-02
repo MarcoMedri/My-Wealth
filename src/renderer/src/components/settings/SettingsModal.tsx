@@ -122,14 +122,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     {/* Date & Time */}
                     <section className="space-y-4">
                         <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
-                            Date & Time
+                            {t('settings.dateTime')}
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Date Format */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">
-                                    Date Format
+                                    {t('settings.dateFormat')}
                                 </label>
                                 <select
                                     value={dateFormat}
@@ -146,7 +146,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             {/* Time Format */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">
-                                    Time Format
+                                    {t('settings.timeFormat')}
                                 </label>
                                 <select
                                     value={timeFormat}

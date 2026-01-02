@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+// Force HMR update
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
@@ -12,6 +13,7 @@ import { Loader2, ArrowRight, Check, ChevronDown, Tag } from 'lucide-react';
 import type { Transaction, TransactionType, Category } from '../../../shared/schemas';
 import { ICON_MAP } from './settings/IconPicker';
 import { DEFAULT_CATEGORY_COLOR } from '../lib/constants';
+import { useCategoryName } from '../hooks/useCategoryName';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
@@ -166,7 +168,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                             className={cn(
                                 "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors capitalize",
                                 formData.type === type
-                                    ? "bg-background-muted text-foreground shadow"
+                                    ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
                                     : "text-foreground-muted hover:text-foreground"
                             )}
                         >
@@ -274,7 +276,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                 {/* Payee / Description - MOVED INSIDE */}
                 <div>
                     <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        {t('transactions.payeeDescription')}
+                        {formData.type === 'income' ? t('transactions.payer') : t('transactions.payeeDescription')}
                     </label>
                     <input
                         type="text"
@@ -336,6 +338,7 @@ function CategorySelect({
     placeholder: string;
 }) {
     const { t } = useTranslation();
+    const { getCategoryName } = useCategoryName();
     const [isOpen, setIsOpen] = useState(false);
     const selectedCategory = categories.find(c => c.id === value);
 
@@ -367,7 +370,7 @@ function CategorySelect({
                                 </div>
                             );
                         })()}
-                        <span>{selectedCategory.name}</span>
+                        <span>{getCategoryName(selectedCategory.name)}</span>
                     </div>
                 ) : (
                     <span className="text-foreground-muted">{placeholder}</span>
@@ -406,7 +409,7 @@ function CategorySelect({
                                         >
                                             <IconComp className="w-3.5 h-3.5" />
                                         </div>
-                                        <span>{category.name}</span>
+                                        <span>{getCategoryName(category.name)}</span>
                                     </div>
                                     {isSelected && <Check className="w-4 h-4" />}
                                 </button>
