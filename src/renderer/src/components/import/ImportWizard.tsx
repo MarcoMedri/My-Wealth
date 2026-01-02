@@ -29,14 +29,21 @@ interface ParsedRow {
     amount: number;
     category?: string;
     notes?: string;
+    accountId: string;  // Target account for import
     isValid: boolean;
     error?: string;
+}
+
+export interface Account {
+    id: string;
+    name: string;
 }
 
 interface ImportWizardProps {
     isOpen: boolean;
     onClose: () => void;
     onImport: (transactions: ParsedRow[]) => Promise<void>;
+    accounts: Account[];  // List of available accounts
 }
 
 type WizardStep = 'upload' | 'mapping' | 'preview' | 'complete';
@@ -45,10 +52,11 @@ type WizardStep = 'upload' | 'mapping' | 'preview' | 'complete';
 // COMPONENT
 // ============================================================================
 
-export function ImportWizard({ isOpen, onClose, onImport }: ImportWizardProps) {
+export function ImportWizard({ isOpen, onClose, onImport, accounts }: ImportWizardProps) {
     const { t } = useTranslation();
 
     const [step, setStep] = useState<WizardStep>('upload');
+    const [selectedAccountId, setSelectedAccountId] = useState<string>('');
     const [csvContent, setCsvContent] = useState<string>('');
     const [headers, setHeaders] = useState<string[]>([]);
     const [previewRows, setPreviewRows] = useState<string[][]>([]);
@@ -195,6 +203,7 @@ export function ImportWizard({ isOpen, onClose, onImport }: ImportWizardProps) {
                     date,
                     description: description || 'Imported',
                     amount,
+                    accountId: selectedAccountId,
                     category: columnMap.category !== undefined ? values[columnMap.category] : undefined,
                     notes: columnMap.notes !== undefined ? values[columnMap.notes] : undefined,
                     isValid: true,
@@ -204,6 +213,7 @@ export function ImportWizard({ isOpen, onClose, onImport }: ImportWizardProps) {
                     date: '',
                     description: 'Error parsing row',
                     amount: 0,
+                    accountId: selectedAccountId,
                     isValid: false,
                     error: error instanceof Error ? error.message : 'Unknown error',
                 });
@@ -212,7 +222,7 @@ export function ImportWizard({ isOpen, onClose, onImport }: ImportWizardProps) {
 
         setParsedRows(parsed);
         setStep('preview');
-    }, [csvContent, mapping, settings]);
+    }, [csvContent, mapping, settings, selectedAccountId]);
 
     const parseDate = (dateStr: string, format: string): string => {
         const cleaned = dateStr.trim();
@@ -303,18 +313,46 @@ export function ImportWizard({ isOpen, onClose, onImport }: ImportWizardProps) {
     );
 
     const renderUploadStep = () => (
-        <div className="text-center py-12">
-            <div className="w-20 h-20 bg-background-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileSpreadsheet className="w-10 h-10 text-foreground-muted" />
+        <div className="space-y-6">
+            {/* Account Selector */}
+            <div>
+                <label className="block text-sm font-medium mb-2">
+                    {t('import.selectAccount', 'Seleziona Conto')} *
+                </label>
+                <Select
+                    value={selectedAccountId}
+                    onChange={(e) => setSelectedAccountId(e.target.value)}
+                    options={accounts.map(acc => ({ value: acc.id, label: acc.name }))}
+                    placeholder={t('import.chooseAccount', 'Scegli il conto in cui importare...')}
+                />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t('import.selectFile', 'Select CSV File')}</h3>
-            <p className="text-foreground-muted mb-6">{t('import.dragOrClick', 'Drag and drop or click to browse')}</p>
 
-            <label className="btn bg-primary text-white px-6 py-3 rounded-lg cursor-pointer inline-flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                {t('import.browse', 'Browse Files')}
-                <input type="file" accept=".csv" onChange={handleFileSelect} className="hidden" />
-            </label>
+            {/* File Upload */}
+            <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+                <div className="w-20 h-20 bg-background-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileSpreadsheet className="w-10 h-10 text-foreground-muted" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{t('import.selectFile', 'Clicca per caricare CSV')}</h3>
+                <p className="text-foreground-muted text-sm mb-6">Max 5MB • solo .csv</p>
+
+                <label className="btn bg-primary text-white px-6 py-3 rounded-lg cursor-pointer inline-flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    {t('import.browse', 'Browse Files')}
+                    <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        disabled={!selectedAccountId}
+                    />
+                </label>
+
+                {!selectedAccountId && (
+                    <p className="text-sm text-error mt-2">
+                        {t('import.selectAccountFirst', 'Seleziona prima un conto')}
+                    </p>
+                )}
+            </div>
         </div>
     );
 
