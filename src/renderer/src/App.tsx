@@ -60,13 +60,20 @@ function App(): React.ReactElement {
         }
     }, [theme]);
 
-    // Exchange Rates Effect
+    // Exchange Rates Effect - only fetch if cache is stale (>7 days)
     const fetchRates = useExchangeRates(state => state.fetchRates);
+    const lastUpdated = useExchangeRates(state => state.lastUpdated);
     const currency = useSettingsStore(state => state.currency);
 
     useEffect(() => {
-        fetchRates();
-    }, [fetchRates, currency]);
+        const SEVEN_DAYS = 1000 * 60 * 60 * 24 * 7;
+        const isStale = Date.now() - lastUpdated > SEVEN_DAYS;
+
+        if (isStale || lastUpdated === 0) {
+            console.log('[App] Exchange rates cache is stale, fetching...');
+            fetchRates();
+        }
+    }, [fetchRates, currency, lastUpdated]);
 
     // Language Effect
     const { i18n } = useTranslation();

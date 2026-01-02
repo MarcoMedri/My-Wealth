@@ -462,40 +462,66 @@ export class InvestmentManager {
       createdAt: now,
     };
     await vaultManager.saveTrade(trade);
-
     return { updatedHolding, realizedGain, trade };
   }
 
   /**
-   * Refresh all asset prices (Batch Update)
+   * Refresh all asset prices (Batch Update with Rate Limiting)
    * Fetches current price and previousClose from Yahoo Finance
+   * Returns statistics about the update operation
    */
-  async refreshAllPrices(): Promise<Asset[]> {
+  async refreshAllPrices(): Promise<{ updated: number; failed: number; total: number }> {
     const vaultManager = getVaultManager();
-    const assets = vaultManager.assets;
+    const assets = vaultManager.assets; // Direct property access
+    
+    let updated = 0;
+    let failed = 0;
+    const total = assets.length;
+    
+    // Process in batches to avoid rate limiting
+    const BATCH_SIZE = 5;
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
+    
+    console.log(`[InvestmentManager] Refreshing prices for ${total} assets...`);
+    
+    for (let i = 0; i < assets.length; i += BATCH_SIZE) {
+      const batch = assets.slice(i, i + BATCH_SIZE);
+      
+      // Process batch in parallel
+      await Promise.all(
+        batch.map(async (asset) => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const quote = await yahooFinance.quote(asset.symbol) as any;
+            const now = new Date().toISOString();
 
-    for (const asset of assets) {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const quote = await yahooFinance.quote(asset.symbol) as any;
-        const now = new Date().toISOString();
+            const updatedAsset: Asset = {
+              ...asset,
+              previousClose: Math.round((quote.regularMarketPreviousClose || 0) * 100),
+              currentPrice: Math.round((quote.regularMarketPrice || 0) * 100),
+              lastUpdated: now,
+              updatedAt: now,
+            };
 
-        const updatedAsset: Asset = {
-          ...asset,
-          previousClose: Math.round((quote.regularMarketPreviousClose || 0) * 100),
-          currentPrice: Math.round((quote.regularMarketPrice || 0) * 100),
-          lastUpdated: now,
-          updatedAt: now,
-        };
-
-        await vaultManager.saveAsset(updatedAsset);
-      } catch (error) {
-        console.error(`[InvestmentManager] Failed to refresh ${asset.symbol}:`, error);
-        // Continue with other assets even if one fails
+            await vaultManager.saveAsset(updatedAsset);
+            updated++;
+            console.log(`[InvestmentManager] Updated ${asset.symbol}: $${(updatedAsset.currentPrice / 100).toFixed(2)}`);
+          } catch (error) {
+            console.error(`[InvestmentManager] Failed to refresh ${asset.symbol}:`, error);
+            failed++;
+          }
+        })
+      );
+      
+      // Wait between batches (except after the last batch)
+      if (i + BATCH_SIZE < assets.length) {
+        console.log(`[InvestmentManager] Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    return vaultManager.assets; // Return the updated list from the manager
+    console.log(`[InvestmentManager] Price refresh complete: ${updated} updated, ${failed} failed, ${total} total`);
+    return { updated, failed, total };
   }
 
   /**

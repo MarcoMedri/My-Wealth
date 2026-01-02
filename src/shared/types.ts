@@ -80,10 +80,10 @@ export const IPC_CHANNELS = {
   // Investment operations
   INVESTMENTS_SEARCH: 'investments:search',
   INVESTMENTS_GET_QUOTE: 'investments:getQuote',
-  INVESTMENTS_BUY: 'investments:buy', // Creates Asset(if missing) + Holding + Transaction
-  INVESTMENTS_BUY_MANUAL: 'investments:buyManual', // Manual asset entry without Yahoo lookup
-  INVESTMENTS_SELL: 'investments:sell', // Sell holding, create income transaction, track gain/loss
-  INVESTMENTS_REFRESH_PRICES: 'investments:refreshPrices', // Batch update all asset prices
+  INVESTMENT_BUY: 'investment:buy', // Creates Asset(if missing) + Holding + Transaction
+  INVESTMENT_BUY_MANUAL: 'investment:buyManual', // Manual asset entry without Yahoo lookup
+  INVESTMENT_SELL: 'investment:sell', // Sell holding, create income transaction, track gain/loss
+  INVESTMENT_REFRESH_PRICES: 'investment:refreshPrices', // Batch update all asset prices
   
   // Asset & Holding operations
   ASSET_DELETE: 'asset:delete',

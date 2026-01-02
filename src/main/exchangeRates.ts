@@ -23,7 +23,7 @@ interface YahooQuote {
 }
 
 const CACHE_FILE = 'exchange_rates.json';
-const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_TTL = 1000 * 60 * 60 * 24 * 7; // 7 days (reduced API calls)
 
 export class ExchangeRateManager {
   private cachePath: string;
@@ -75,7 +75,7 @@ export class ExchangeRateManager {
     }
   }
 
-  private async fetchRates(base: string): Promise<Record<string, number>> {
+  private async fetchRates(base: string, retries = 3): Promise<Record<string, number>> {
     const rates: Record<string, number> = {};
     
     // Yahoo Finance quotes for currencies usually look like "EURUSD=X" (EUR to USD)
@@ -88,35 +88,48 @@ export class ExchangeRateManager {
     
     if (symbols.length === 0) return { [base]: 1 };
 
-    try {
-      const results = await yahooFinance.quote(symbols);
-      
-      // Initialize with base = 1
-      rates[base] = 1;
+    // Retry logic with exponential backoff
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const results = await yahooFinance.quote(symbols);
+        
+        // Initialize with base = 1
+        rates[base] = 1;
 
-      // Ensure results is array
-      const quotes = (Array.isArray(results) ? results : [results]) as YahooQuote[];
+        // Ensure results is array
+        const quotes = (Array.isArray(results) ? results : [results]) as YahooQuote[];
 
-      quotes.forEach(quote => {
-        // Symbol is like "EURUSD=X"
-        const target = quote.symbol.replace(base, '').replace('=X', '');
-        if (typeof quote.regularMarketPrice === 'number') {
-          rates[target] = quote.regularMarketPrice;
+        quotes.forEach(quote => {
+          if (!quote.symbol || !quote.regularMarketPrice) return;
+          
+          // Extract target currency from symbol (e.g. "EURUSD=X" -> "USD")
+          const match = quote.symbol.match(/^[A-Z]{3}([A-Z]{3})=X$/);
+          if (match) {
+            const targetCurrency = match[1];
+            rates[targetCurrency] = quote.regularMarketPrice;
+          }
+        });
+
+        console.log(`[ExchangeRateManager] Fetched ${Object.keys(rates).length} rates for ${base}`);
+        return rates;
+        
+      } catch (error) {
+        const isLastAttempt = attempt === retries - 1;
+        
+        if (isLastAttempt) {
+          console.error('[ExchangeRateManager] All retry attempts failed:', error);
+          throw error;
         }
-      });
-      
-      // Fill in any missing with 1 (or handle error)
-      SUPPORTED_CURRENCIES.forEach(c => {
-        if (!rates[c.code]) rates[c.code] = 1;
-      });
-
-      return rates;
-
-    } catch (e) {
-      console.error('Yahoo Finance rate fetch error:', e);
-      // If batch fails, maybe try individual? For now rethrow
-      throw e;
+        
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, attempt) * 1000;
+        console.warn(`[ExchangeRateManager] Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
+
+    // This should never be reached due to throw in loop, but TypeScript needs it
+    return rates;
   }
 
   private async readCache(): Promise<ExchangeRateCache | null> {

@@ -245,22 +245,22 @@ function registerIpcHandlers(): void {
     return investmentManager.getQuote(symbol);
   });
 
-  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_BUY, async (_event, params) => {
+  ipcMain.handle(IPC_CHANNELS.INVESTMENT_BUY, async (_event, params) => {
     const { investmentManager } = await import('./investments');
     return investmentManager.buy(params);
   });
 
-  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_BUY_MANUAL, async (_event, params) => {
+  ipcMain.handle(IPC_CHANNELS.INVESTMENT_BUY_MANUAL, async (_event, params) => {
     const { investmentManager } = await import('./investments');
     return investmentManager.buyManual(params);
   });
 
-  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_SELL, async (_event, params) => {
+  ipcMain.handle(IPC_CHANNELS.INVESTMENT_SELL, async (_event, params) => {
     const { investmentManager } = await import('./investments');
     return investmentManager.sell(params);
   });
 
-  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_REFRESH_PRICES, async () => {
+  ipcMain.handle(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES, async () => {
     const { investmentManager } = await import('./investments');
     return investmentManager.refreshAllPrices();
   });

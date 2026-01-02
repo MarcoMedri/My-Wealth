@@ -147,7 +147,7 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_GET_QUOTE, symbol)
   },
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number }): Promise<{ asset: Asset, holding: Holding }> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_BUY, params)
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_BUY, params)
   },
   buyInvestmentManual: (params: { 
     symbol: string, 
@@ -160,13 +160,13 @@ const api = {
     date: string, 
     fees: number 
   }): Promise<{ asset: Asset, holding: Holding }> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_BUY_MANUAL, params)
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_BUY_MANUAL, params)
   },
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_SELL, params)
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_SELL, params)
   },
   refreshInvestmentPrices: (): Promise<Asset[]> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_REFRESH_PRICES)
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES)
   },
   deleteAsset: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.ASSET_DELETE, id)
