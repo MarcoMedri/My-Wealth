@@ -421,6 +421,13 @@ export const AppSettingsSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).default('system'),
   lastAppVersion: z.string(),
   lastModified: ISODate,
+  windowBounds: z.object({
+    x: z.number().optional(),
+    y: z.number().optional(),
+    width: z.number().min(800).default(1200),
+    height: z.number().min(600).default(800),
+    isMaximized: z.boolean().default(false)
+  }).optional()
 });
 
 export type AppSettings = z.infer<typeof AppSettingsSchema>;
@@ -459,6 +466,10 @@ export const AccountSchema = z.object({
   currency: CurrencyCode,
   /** Starting balance in cents when account was created */
   initialBalance: Money.default(0),
+  /** Manual balance override - if set, this takes precedence over calculated balance */
+  manualBalance: Money.optional(),
+  /** Date when manual balance was set */
+  manualBalanceDate: ISODate.optional(),
   /** Hex color for UI display */
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#6366f1'),
   /** Lucide icon name (optional) */

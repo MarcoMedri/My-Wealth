@@ -52,11 +52,21 @@ export class ExchangeRateManager {
       
       return rates;
     } catch (error) {
-      console.error('Failed to get exchange rates:', error);
+      console.warn('Failed to get exchange rates (using defaults):', error instanceof Error ? error.message : String(error));
       // Fallback to cache if available even if stale
       const cached = await this.readCache();
       if (cached && cached.base === baseCurrency) {
         return cached.rates;
+      }
+      // Fallback to defaults if API fails (e.g. 429 Too Many Requests) and no cache, or cache is for a different base
+      if (baseCurrency === 'EUR') {
+        return {
+          EUR: 1,
+          USD: 1.05, // Approximate fallback
+          GBP: 0.85,
+          CHF: 0.95,
+          JPY: 160
+        };
       }
       // Ultimate fallback: 1:1 rates
       const fallback: Record<string, number> = {};

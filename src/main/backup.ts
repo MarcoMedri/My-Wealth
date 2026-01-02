@@ -84,8 +84,6 @@ export class BackupService {
 
         const stats = await fs.stat(backupFolder);
         
-        console.log(`[Backup] Created backup: ${formattedDate}`);
-
         return {
             filename: formattedDate,
             path: backupFolder,
@@ -165,7 +163,6 @@ export class BackupService {
         
         for (const backup of toDelete) {
             await fs.remove(backup.path);
-            console.log(`[Backup] Deleted old backup: ${backup.filename}`);
         }
     }
 
@@ -195,8 +192,6 @@ export class BackupService {
                 await fs.copy(srcPath, destPath, { overwrite: true });
             }
         }
-
-        console.log(`[Backup] Restored from backup: ${backupName}`);
     }
 
     /**
@@ -207,7 +202,6 @@ export class BackupService {
         
         if (await fs.pathExists(backupFolder)) {
             await fs.remove(backupFolder);
-            console.log(`[Backup] Deleted backup: ${backupName}`);
         }
     }
 }

@@ -24,7 +24,11 @@
     "months": "months",
     "timeline": "Timeline",
     "type": "Type",
-    "noData": "No data"
+    "noData": "No data",
+    "account": "Account",
+    "date": "Date",
+    "saving": "Saving...",
+    "error": "An error occurred"
   },
   "nav": {
     "dashboard": "Overview",
@@ -36,7 +40,11 @@
     "deposits": "Deposit Accounts",
     "settings": "Settings",
     "developer": "Developer",
-    "noAccounts": "No accounts yet"
+    "noAccounts": "No accounts yet",
+    "generateDemoData": "Generate Demo Data",
+    "clearAllData": "Clear All Data",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "brokers": {
     "addBroker": "Add Broker",
@@ -54,6 +62,11 @@
     "noHoldings": "No investment holdings with this broker",
     "deleteConfirm": "Are you sure you want to delete this broker?",
     "notFound": "Broker not found",
+    "website": "Website",
+    "autoFetchLogo": "(Auto-fetch Logo)",
+    "logo": "Logo",
+    "preview": "Anteprima",
+    "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
     "types": {
         "bank": "Bank",
         "broker": "Broker",
@@ -139,6 +152,12 @@
     "accountType": "Account Type",
     "linkedBroker": "Linked Broker (Optional)",
     "noBroker": "-- None --",
+    "editBalance": "Edit Balance",
+    "manualBalance": "Manual Balance",
+    "calculatedBalance": "Calculated Balance",
+    "manualBalanceWarning": "This will override the balance calculated from transactions",
+    "clearManualBalance": "Revert to Calculated",
+    "balanceUpdated": "Balance updated successfully",
     "currency": "Currency",
     "initialBalance": "Initial Balance",
     "color": "Color",

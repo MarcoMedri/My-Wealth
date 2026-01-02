@@ -19,6 +19,7 @@ import {
     Watch,
     PanelLeftClose
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
 import { formatMoney } from '../../../shared/schemas';
 import { cn } from '../lib/utils';
@@ -26,6 +27,7 @@ import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import { SettingsModal } from './settings/SettingsModal';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
+import { ConfirmationModal } from './ui/ConfirmationModal';
 
 export default function Sidebar() {
     const { t } = useTranslation();
@@ -41,34 +43,18 @@ export default function Sidebar() {
 
     const [showDevMenu, setShowDevMenu] = useState(false);
     const [isSeeding, setIsSeeding] = useState(false);
-    const [isClearing, setIsClearing] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isClearDataOpen, setIsClearDataOpen] = useState(false);
 
     const handleGenerateDemoData = async () => {
         setIsSeeding(true);
         try {
-            const result = await window.api.generateDemoData();
-            console.log('Generated demo data:', result);
+            await window.api.generateDemoData();
             await refreshData();
         } catch (error) {
             console.error('Failed to generate demo data:', error);
         } finally {
             setIsSeeding(false);
-            setShowDevMenu(false);
-        }
-    };
-
-    const handleClearData = async () => {
-        if (!confirm('Are you sure you want to clear ALL data?')) return;
-
-        setIsClearing(true);
-        try {
-            await window.api.clearVaultData();
-            await refreshData();
-        } catch (error) {
-            console.error('Failed to clear data:', error);
-        } finally {
-            setIsClearing(false);
             setShowDevMenu(false);
         }
     };
@@ -265,25 +251,15 @@ export default function Sidebar() {
                             ) : (
                                 <Database className="w-4 h-4 shrink-0" />
                             )}
-                            <span className="truncate">Generate Demo Data</span>
+                            <span className="truncate">{t('nav.generateDemoData')}</span>
                         </button>
 
                         <button
-                            onClick={handleClearData}
-                            disabled={isClearing}
-                            className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left",
-                                "bg-red-500/10 text-red-400 hover:bg-red-500/20",
-                                "transition-colors text-sm",
-                                isClearing && "opacity-50 cursor-not-allowed"
-                            )}
+                            onClick={() => setIsClearDataOpen(true)}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 dark:text-red-400 text-sm font-medium transition-colors"
                         >
-                            {isClearing ? (
-                                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                            ) : (
-                                <Trash2 className="w-4 h-4 shrink-0" />
-                            )}
-                            <span className="truncate">Clear All Data</span>
+                            <Trash2 className="w-4 h-4 shrink-0" />
+                            <span className="truncate">{t('nav.clearAllData')}</span>
                         </button>
                     </div>
                 )}
@@ -292,7 +268,7 @@ export default function Sidebar() {
                 <button
                     onClick={() => setSidebarCollapsed('left', !isCollapsed)}
                     className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors mt-2"
-                    title={isCollapsed ? "Expand" : "Collapse"}
+                    title={isCollapsed ? t('nav.expand') : t('nav.collapse')}
                 >
                     <PanelLeftClose className={cn("w-4 h-4 transition-transform", isCollapsed && "rotate-180")} />
                 </button>
@@ -303,6 +279,21 @@ export default function Sidebar() {
                     </p>
                 )}
             </div>
+
+            <ConfirmationModal
+                isOpen={isClearDataOpen}
+                onClose={() => setIsClearDataOpen(false)}
+                onConfirm={async () => {
+                    await window.api.clearVaultData();
+                    toast.success(t('common.dataCleared', 'Data cleared successfully'));
+                    setIsClearDataOpen(false);
+                    setTimeout(() => window.location.reload(), 1000);
+                }}
+                title={t('nav.clearAllData')}
+                description={t('common.confirmClear', 'Are you sure you want to clear ALL data? This action cannot be undone.')}
+                confirmText={t('common.delete')}
+                variant="danger"
+            />
         </aside>
     );
 }

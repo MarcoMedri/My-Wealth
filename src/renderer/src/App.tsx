@@ -17,7 +17,7 @@ import { CollectiblesDashboard } from './components/collectibles/CollectiblesDas
 import { InsuranceDashboard } from './components/insurance/InsuranceDashboard';
 import { DepositDashboard } from './components/deposits/DepositDashboard';
 import { BrokerDetailView } from './components/brokers/BrokerDetailView';
-import { CommandPalette, createNavigationCommands } from './components';
+import { CommandPalette, createNavigationCommands, Toaster } from './components';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
 import { useVaultStore } from './store/useVaultStore';
@@ -191,6 +191,7 @@ function App(): React.ReactElement {
     // Main app with vault loaded
     return (
         <>
+            <Toaster />
             <CommandPalette commands={navigationCommands} />
             <Layout>
                 {activeView === 'dashboard' && <Dashboard />}

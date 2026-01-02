@@ -30,6 +30,7 @@ interface API {
   saveTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Transaction>
   deleteTransaction: (id: string) => Promise<void>
   saveAccount: (account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Account>
+  setAccountManualBalance: (accountId: string, balance: number | null, date: string) => Promise<Account>
   saveCategory: (category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => Promise<Category>
   deleteCategory: (id: string) => Promise<void>
   saveBroker: (broker: Broker) => Promise<Broker>

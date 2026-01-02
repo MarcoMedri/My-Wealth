@@ -7,10 +7,18 @@ import type { Transaction, Account, Category, Broker, DepositAccount } from '../
 import * as fs from 'fs'
 import * as path from 'path'
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
+  const vaultManager = getVaultManager();
+  
+  // Load saved window bounds
+  const settings = vaultManager.getSettings();
+  const savedBounds = settings?.windowBounds;
+  
   const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: savedBounds?.width || 1200,
+    height: savedBounds?.height || 800,
+    x: savedBounds?.x,
+    y: savedBounds?.y,
     minWidth: 800,
     minHeight: 600,
     show: false,
@@ -21,21 +29,65 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
-  })
+  });
+
+  // Restore maximized state
+  if (savedBounds?.isMaximized) {
+    mainWindow.maximize();
+  }
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
+    mainWindow.show();
+  });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
+    shell.openExternal(details.url);
+    return { action: 'deny' };
+  });
+
+  // Save window bounds on resize/move (debounced)
+  let saveTimeout: NodeJS.Timeout;
+  const saveBounds = async () => {
+    if (mainWindow.isDestroyed()) return;
+    
+    const bounds = mainWindow.getBounds();
+    const isMaximized = mainWindow.isMaximized();
+    
+    const currentSettings = vaultManager.getSettings();
+    if (!currentSettings) return; // Can't save if no settings exist
+    
+    await vaultManager.updateSettings({
+      ...currentSettings,
+      windowBounds: {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height,
+        isMaximized
+      }
+    });
+  };
+
+  mainWindow.on('resize', () => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveBounds, 500);
+  });
+
+  mainWindow.on('move', () => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveBounds, 500);
+  });
+
+  // Save immediately on close
+  mainWindow.on('close', () => {
+    clearTimeout(saveTimeout);
+    saveBounds();
+  });
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 }
 
@@ -113,6 +165,10 @@ function registerIpcHandlers(): void {
   
   ipcMain.handle(IPC_CHANNELS.ACCOUNT_SAVE, async (_event, account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
     return vaultManager.saveAccount(account)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.ACCOUNT_SET_MANUAL_BALANCE, async (_event, accountId: string, balance: number | null, date: string) => {
+    return vaultManager.setAccountManualBalance(accountId, balance, date)
   })
 
   // ========== CATEGORIES ==========

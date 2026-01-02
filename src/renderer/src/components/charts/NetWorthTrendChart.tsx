@@ -134,7 +134,7 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate }: Ne
             },
             y: {
                 stacked: true,
-                grid: { color: '#f1f5f9' },
+                grid: { color: '#334155' },
                 ticks: {
                     font: { size: 10 },
                     color: '#94a3b8',

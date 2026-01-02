@@ -181,6 +181,13 @@ export class VaultManager {
   }
 
   /**
+   * Get all categories
+   */
+  get categories(): Category[] {
+    return Array.from(this.vaultState.categories.values());
+  }
+
+  /**
    * Open a folder selection dialog
    */
   async selectVaultPath(): Promise<string | null> {
@@ -261,7 +268,7 @@ export class VaultManager {
         return this.getSerializableState();
     }
 
-    console.log(`[VaultManager] Loading vault from path: ${vaultPath}`);
+    // Load vault
 
     try {
       // Reset state
@@ -272,10 +279,8 @@ export class VaultManager {
       const accountsPath = path.join(vaultPath, VAULT_STRUCTURE.ACCOUNTS_FILE);
       if (await fs.pathExists(accountsPath)) {
         const accountsData = await fs.readJson(accountsPath);
-        console.log(`[VaultManager] Reading accounts.json from ${accountsPath}`);
         const parsed = AccountsFileSchema.safeParse(accountsData);
         if (parsed.success) {
-          console.log(`[VaultManager] Successfully loaded ${parsed.data.accounts.length} accounts.`);
           for (const account of parsed.data.accounts) {
             this.vaultState.accounts.set(account.id, account);
           }
@@ -559,15 +564,28 @@ export class VaultManager {
 
   /**
    * Calculate account balances from transactions
+   * If an account has a manual balance set, use that instead
    */
   private calculateBalances(): void {
-    // Start with initial balances
+    // Start with initial balances or manual overrides
     for (const [id, account] of this.vaultState.accounts) {
-      this.vaultState.accountBalances.set(id, account.initialBalance);
+      // If manual balance is set, use it and skip transaction calculation for this account
+      if (account.manualBalance !== undefined) {
+        this.vaultState.accountBalances.set(id, account.manualBalance);
+      } else {
+        this.vaultState.accountBalances.set(id, account.initialBalance);
+      }
     }
 
-    // Apply transactions
+    // Apply transactions only to accounts without manual balance
     for (const [, tx] of this.vaultState.transactions) {
+      const account = this.vaultState.accounts.get(tx.accountId);
+      
+      // Skip if account has manual balance override
+      if (account?.manualBalance !== undefined) {
+        continue;
+      }
+
       const currentBalance = this.vaultState.accountBalances.get(tx.accountId) ?? 0;
 
       switch (tx.type) {
@@ -582,8 +600,12 @@ export class VaultManager {
           this.vaultState.accountBalances.set(tx.accountId, currentBalance - tx.amount);
           // Add to destination
           if (tx.toAccountId) {
-            const destBalance = this.vaultState.accountBalances.get(tx.toAccountId) ?? 0;
-            this.vaultState.accountBalances.set(tx.toAccountId, destBalance + tx.amount);
+            const destAccount = this.vaultState.accounts.get(tx.toAccountId);
+            // Only apply if destination doesn't have manual balance
+            if (destAccount?.manualBalance === undefined) {
+              const destBalance = this.vaultState.accountBalances.get(tx.toAccountId) ?? 0;
+              this.vaultState.accountBalances.set(tx.toAccountId, destBalance + tx.amount);
+            }
           }
           break;
       }
@@ -660,8 +682,7 @@ export class VaultManager {
     if (!this.settings?.vaultPath) return null;
 
     try {
-      const start = Date.now();
-      console.log(`[VaultManager] Downloading logo for ${domain}...`);
+      // Use native fetch (Node 18+)
       
       const response = await fetch(`https://logo.clearbit.com/${domain}`);
       if (!response.ok) {
@@ -677,7 +698,6 @@ export class VaultManager {
       const filePath = path.join(logosDir, fileName);
       
       await fs.writeFile(filePath, Buffer.from(buffer));
-      console.log(`[VaultManager] Logo saved to ${filePath} in ${Date.now() - start}ms`);
 
       return `logos/${fileName}`;
     } catch (error) {
@@ -923,6 +943,54 @@ export class VaultManager {
   }
 
   /**
+   * Set or clear manual balance for an account
+   * @param accountId - Account ID
+   * @param balance - Balance in cents, or null to clear manual balance
+   * @param date - Date when balance was set (ISO string)
+   */
+  async setAccountManualBalance(accountId: string, balance: number | null, date: string): Promise<Account> {
+    if (!this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    const filePath = path.join(this.settings.vaultPath, VAULT_STRUCTURE.ACCOUNTS_FILE);
+    
+    // Read existing
+    let accountsFile = { version: 1 as const, accounts: [] as Account[] };
+    if (await fs.pathExists(filePath)) {
+      const existing = await fs.readJson(filePath);
+      const parsed = AccountsFileSchema.safeParse(existing);
+      if (parsed.success) {
+        accountsFile = parsed.data;
+      }
+    }
+
+    // Find account
+    const accountIndex = accountsFile.accounts.findIndex(a => a.id === accountId);
+    if (accountIndex < 0) {
+      throw new Error(`Account ${accountId} not found`);
+    }
+
+    const now = new Date().toISOString();
+    const updatedAccount: Account = {
+      ...accountsFile.accounts[accountIndex],
+      manualBalance: balance !== null ? balance : undefined,
+      manualBalanceDate: balance !== null ? date : undefined,
+      updatedAt: now,
+    };
+
+    accountsFile.accounts[accountIndex] = updatedAccount;
+
+    await this.atomicWriteJson(filePath, accountsFile);
+
+    // Update in-memory state
+    this.vaultState.accounts.set(accountId, updatedAccount);
+    this.calculateBalances();
+
+    return updatedAccount;
+  }
+
+  /**
    * Save a category to disk
    */
   async saveCategory(category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): Promise<Category> {
@@ -1027,6 +1095,27 @@ export class VaultManager {
 
   /**
    * Save settings to disk
+   */
+  // ==========================================================================
+  // SETTINGS
+  // ==========================================================================
+
+  /**
+   * Get current app settings
+   */
+  getSettings(): AppSettings | null {
+    return this.settings;
+  }
+
+  /**
+   * Update app settings
+   */
+  async updateSettings(settings: AppSettings): Promise<void> {
+    await this.saveSettings(settings);
+  }
+
+  /**
+   * Save settings to disk (private)
    */
   private async saveSettings(settings: AppSettings): Promise<void> {
     const validated = AppSettingsSchema.parse(settings);

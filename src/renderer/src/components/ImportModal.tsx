@@ -93,13 +93,11 @@ export default function ImportModal({ isOpen, onClose, preselectedBrokerId }: Im
 
                 if (linkedAccount) {
                     targetAccountId = linkedAccount.id;
-                    console.log(`[ImportModal] Found existing account for broker: ${linkedAccount.name}`);
                 } else {
                     // Create new account for this broker
                     const broker = brokers.find(b => b.id === brokerId);
                     if (!broker) throw new Error('Broker not found');
 
-                    console.log(`[ImportModal] Creating new account for broker: ${broker.name}`);
                     const newAccount = await window.api.saveAccount({
                         name: `${broker.name} Account`,
                         type: 'investment',
@@ -127,8 +125,6 @@ export default function ImportModal({ isOpen, onClose, preselectedBrokerId }: Im
                 setIsLoading(false);
                 return;
             }
-
-            console.log("[ImportModal] File selected:", result.name);
 
             // Mock File object for UI compatibility
             setFile({ name: result.name } as File);

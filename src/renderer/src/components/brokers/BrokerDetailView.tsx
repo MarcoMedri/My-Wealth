@@ -12,31 +12,36 @@ import {
     CreditCard,
     Banknote
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { AddBrokerModal } from './AddBrokerModal';
+import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
 
 // Imports for Modals
 import ImportModal from '../ImportModal';
 import { AddInvestmentModal } from '../investments/AddInvestmentModal';
 import { AddDepositModal } from '../deposits/AddDepositModal';
+import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { Upload } from 'lucide-react';
 
 interface BrokerDetailViewProps {
     brokerId: string;
 }
 
-export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) => {
+export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     const { t } = useTranslation();
     const getBroker = useVaultStore(state => state.getBroker);
-    const vaultPath = useVaultStore(state => state.vaultPath);
     const accounts = useVaultStore(state => state.accounts);
     const holdings = useVaultStore(state => state.holdings);
     const assets = useVaultStore(state => state.assets);
     const deposits = useVaultStore(state => state.deposits);
     const accountBalances = useVaultStore(state => state.accountBalances);
     const deleteBroker = useVaultStore(state => state.deleteBroker);
+    const refreshData = useVaultStore(state => state.refreshData);
+    const setActiveView = useVaultStore(state => state.setActiveView);
+    const vaultPath = useVaultStore(state => state.vaultPath);
     const formatMoney = useFormatMoney();
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -45,6 +50,8 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [editBalanceAccountId, setEditBalanceAccountId] = useState<string | null>(null);
 
     const broker = getBroker(brokerId);
 
@@ -57,7 +64,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
     }
 
     // Filter accounts, holdings, and deposits for this broker
-    const brokerAccounts = accounts.filter(a => a.brokerId === brokerId);
+    const brokerAccounts = Array.from(accounts.values()).filter(a => a.brokerId === brokerId);
     const brokerDeposits = deposits.filter(d => d.brokerId === brokerId);
 
     // Holdings can be linked directly to broker OR via account linked to broker
@@ -86,11 +93,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
 
     const totalValue = cashTotal + investmentsTotal + depositsTotal;
 
-    const handleDelete = async () => {
-        if (confirm(t('brokers.deleteConfirm', 'Are you sure you want to delete this broker? Accounts and holdings will be unlinked (not deleted).'))) {
-            await deleteBroker(broker.id);
-        }
-    };
+    // Removed handleDelete function, logic moved to ConfirmationModal
 
     return (
         <div className="h-full flex flex-col bg-background-subtle transition-colors">
@@ -137,8 +140,8 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                             <Pencil size={20} />
                         </button>
                         <button
-                            onClick={handleDelete}
-                            className="p-2 text-foreground-muted hover:text-error hover:bg-background-muted rounded-lg transition-colors"
+                            onClick={() => setIsDeleteConfirmOpen(true)} // Modified onClick
+                            className="p-2 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded-lg transition-colors" // Modified hover color
                             title={t('common.delete')}
                         >
                             <Trash2 size={20} />
@@ -153,21 +156,21 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                         className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
                         <Upload size={16} className="text-blue-500" />
-                        {t('import.title', 'Importa CSV')}
+                        {t('import.title')}
                     </button>
                     <button
                         onClick={() => setIsInvestmentModalOpen(true)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
                         <TrendingUp size={16} className="text-purple-500" />
-                        {t('investments.addInvestment', 'Aggiungi Investimento')}
+                        {t('investments.addInvestment')}
                     </button>
                     <button
                         onClick={() => setIsDepositModalOpen(true)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
                         <PiggyBank size={16} className="text-emerald-500" />
-                        {t('deposits.addDeposit', 'Aggiungi Deposito')}
+                        {t('deposits.addDeposit')}
                     </button>
                 </div>
             </div>
@@ -228,7 +231,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                                 }[account.type] || Wallet;
 
                                 return (
-                                    <div key={account.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow cursor-pointer">
+                                    <div key={account.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="p-1.5 rounded-lg bg-background-subtle text-foreground-muted">
@@ -236,13 +239,27 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                                                 </div>
                                                 <span className="font-medium text-foreground">{account.name}</span>
                                             </div>
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-background-subtle text-foreground-muted">
-                                                {t(`accountTypes.${account.type}`)}
-                                            </span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-xs px-2 py-0.5 rounded-full bg-background-subtle text-foreground-muted">
+                                                    {t(`accountTypes.${account.type}`)}
+                                                </span>
+                                                <button
+                                                    onClick={() => setEditBalanceAccountId(account.id)}
+                                                    className="p-1 text-foreground-muted hover:text-primary hover:bg-background-muted rounded transition-colors"
+                                                    title={t('accounts.editBalance')}
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                         <p className="text-2xl font-bold text-foreground">
                                             {formatMoney(accountBalances[account.id] || 0, account.currency)}
                                         </p>
+                                        {account.manualBalance !== undefined && (
+                                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                                {t('accounts.manualBalance')}
+                                            </p>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -253,7 +270,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                             <p className="text-foreground-muted italic text-sm text-center">
                                 {t('brokers.noAccounts')}<br />
                                 <span className="text-xs">
-                                    Use &quot;Import CSV&quot; to create investment accounts automatically.
+                                    {t('brokers.importHint')}
                                 </span>
                             </p>
                         </div>
@@ -292,7 +309,7 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                             ))}
                         </div>
                     ) : (
-                        <p className="text-foreground-muted italic text-sm">{t('deposits.noDeposits', 'Nessun conto deposito collegato')}</p>
+                        <p className="text-foreground-muted italic text-sm">{t('deposits.noDeposits')}</p>
                     )}
                 </div>
 
@@ -354,14 +371,32 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                 </div>
             </div>
 
-            {/* Edit Modal */}
-            {isEditModalOpen && (
-                <AddBrokerModal
-                    isOpen={isEditModalOpen}
-                    onClose={() => setIsEditModalOpen(false)}
-                    editBrokerId={brokerId}
-                />
-            )}
+            {/* Modals */}
+            <AddBrokerModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                editBrokerId={brokerId}
+            />
+
+            {editBalanceAccountId && (() => {
+                const account = accounts.find(a => a.id === editBalanceAccountId);
+                if (!account) return null;
+                return (
+                    <EditBalanceModal
+                        isOpen={true}
+                        onClose={() => setEditBalanceAccountId(null)}
+                        accountId={account.id}
+                        accountName={account.name}
+                        currentBalance={accountBalances[account.id] || 0}
+                        currency={account.currency}
+                        hasManualBalance={account.manualBalance !== undefined}
+                        onBalanceUpdated={() => {
+                            refreshData();
+                            setEditBalanceAccountId(null);
+                        }}
+                    />
+                );
+            })()}
 
             {/* Context-Aware Action Modals */}
             {isImportModalOpen && (
@@ -384,9 +419,24 @@ export const BrokerDetailView: React.FC<BrokerDetailViewProps> = ({ brokerId }) 
                 <AddDepositModal
                     isOpen={isDepositModalOpen}
                     onClose={() => setIsDepositModalOpen(false)}
-                    preselectedBrokerId={brokerId}
+                    preselectedBrokerId={broker.id} // Modified preselectedBrokerId
                 />
             )}
+
+            <ConfirmationModal // Added ConfirmationModal
+                isOpen={isDeleteConfirmOpen}
+                onClose={() => setIsDeleteConfirmOpen(false)}
+                onConfirm={async () => {
+                    await deleteBroker(broker.id); // Changed to deleteBroker from useVaultStore
+                    await refreshData();
+                    toast.success(t('brokers.deleted', 'Broker deleted successfully'));
+                    setActiveView('dashboard');
+                }}
+                title={t('brokers.deleteTitle', 'Delete Broker')}
+                description={t('brokers.confirmDelete', 'Delete this broker and all associated data? This action cannot be undone.')}
+                confirmText={t('common.delete')}
+                variant="danger"
+            />
         </div>
     );
 };

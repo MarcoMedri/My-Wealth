@@ -5,6 +5,7 @@ import { useSettingsStore } from '../../store/useSettingsStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat, type TimeFormat } from '../../../../shared/types';
 import { cn } from '../../lib/utils';
 import { CategoryManager } from './CategoryManager';
+import { ConfirmationModal } from '../ui/ConfirmationModal';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -18,6 +19,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         currency, language, theme, decimals, dateFormat, timeFormat,
         setCurrency, setLanguage, setTheme, setDecimals, setDateFormat, setTimeFormat
     } = useSettingsStore();
+
+    const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
 
     if (!isOpen) return null;
 
@@ -59,12 +62,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     Current Vault
                                 </div>
                                 <button
-                                    onClick={async () => {
-                                        if (confirm(t('settings.confirmReset', 'Are you sure? This will restart the app onboarding.'))) {
-                                            await window.api.resetVaultPath();
-                                            window.location.reload();
-                                        }
-                                    }}
+                                    onClick={() => setIsResetConfirmOpen(true)}
                                     className="px-4 py-2 bg-error/10 hover:bg-error/20 text-error rounded-lg text-sm font-medium transition-colors"
                                 >
                                     {t('settings.switchVault', 'Switch Vault')}
@@ -235,6 +233,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={isResetConfirmOpen}
+                onClose={() => setIsResetConfirmOpen(false)}
+                onConfirm={async () => {
+                    await window.api.resetVaultPath();
+                    window.location.reload();
+                }}
+                title={t('settings.switchVault')}
+                description={t('settings.confirmReset', 'Are you sure? This will restart the app onboarding.')}
+                confirmText={t('common.confirm')}
+                cancelText={t('common.cancel')}
+                variant="danger"
+            />
         </div>
     );
 }

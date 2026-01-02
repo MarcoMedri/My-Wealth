@@ -9,6 +9,7 @@ import {
     Shield,
     PiggyBank
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
 
 import { cn } from '../lib/utils';
@@ -106,7 +107,7 @@ export default function Dashboard() {
                         onClick={async () => {
                             try {
                                 await window.api.createSnapshot();
-                                alert(t('dashboard.snapshotSuccess'));
+                                toast.success(t('dashboard.snapshotSuccess'));
                                 // Ideally trigger refresh or rely on optimistic updates if store listened to changes?
                                 // VaultStore loadVault updates everything.
                                 // We might need to manually trigger a refresh of snapshots in store if not auto.
@@ -114,7 +115,7 @@ export default function Dashboard() {
                                 await useVaultStore.getState().refreshData();
                             } catch (e) {
                                 console.error(e);
-                                alert(t('dashboard.snapshotError'));
+                                toast.error(t('dashboard.snapshotError'));
                             }
                         }}
                         className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors text-sm font-medium"

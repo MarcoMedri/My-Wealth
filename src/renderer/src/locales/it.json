@@ -12,7 +12,6 @@
     "add": "Aggiungi",
     "search": "Cerca",
     "confirm": "Conferma",
-    "error": "Errore",
     "success": "Successo",
     "expense": "Uscita",
     "income": "Entrata",
@@ -29,7 +28,11 @@
     "months": "mesi",
     "timeline": "Cronologia",
     "type": "Tipo",
-    "noData": "Nessun dato"
+    "noData": "Nessun dato",
+    "account": "Conto",
+    "date": "Data",
+    "saving": "Salvataggio...",
+    "error": "Si è verificato un errore"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -52,7 +55,11 @@
     "deposits": "Conti Deposito",
     "settings": "Impostazioni",
     "developer": "Sviluppatore",
-    "noAccounts": "Nessun conto ancora"
+    "noAccounts": "Nessun conto ancora",
+    "generateDemoData": "Genera Dati Demo",
+    "clearAllData": "Cancella Tutto",
+    "expand": "Espandi",
+    "collapse": "Comprimi"
   },
   "settings": {
     "title": "Impostazioni",
@@ -120,6 +127,12 @@
     "accountType": "Tipo di Conto",
     "linkedBroker": "Broker Collegato (Opzionale)",
     "noBroker": "-- Nessuno --",
+    "editBalance": "Modifica Saldo",
+    "manualBalance": "Saldo Manuale",
+    "calculatedBalance": "Saldo Calcolato",
+    "manualBalanceWarning": "Questo sovrascriverà il saldo calcolato dalle transazioni",
+    "clearManualBalance": "Ripristina Calcolato",
+    "balanceUpdated": "Saldo aggiornato con successo",
     "currency": "Valuta",
     "initialBalance": "Saldo Iniziale",
     "color": "Colore",
@@ -151,6 +164,11 @@
     "noHoldings": "Nessun investimento con questo broker",
     "deleteConfirm": "Sei sicuro di voler eliminare questo broker?",
     "notFound": "Broker non trovato",
+    "website": "Sito Web",
+    "autoFetchLogo": "(Auto-recupero Logo)",
+    "logo": "Logo",
+    "preview": "Anteprima",
+    "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
     "types": {
       "bank": "Banca",
       "broker": "Broker",

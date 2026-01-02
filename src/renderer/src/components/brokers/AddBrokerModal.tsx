@@ -156,7 +156,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                         <div className="flex gap-4">
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Website <span className="text-gray-400 font-normal">(Auto-fetch Logo)</span>
+                                    {t('brokers.website')} <span className="text-gray-400 font-normal">{t('brokers.autoFetchLogo')}</span>
                                 </label>
                                 <input
                                     type="text"
@@ -170,13 +170,13 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                             {/* Logo Preview */}
                             <div className="space-y-1">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Logo
+                                    {t('brokers.logo')}
                                 </label>
                                 <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center overflow-hidden relative">
                                     {logoUrl && !logoPreviewError ? (
                                         <img
                                             src={logoUrl}
-                                            alt="Preview"
+                                            alt={t('brokers.preview')}
                                             className="w-full h-full object-contain"
                                             onError={() => setLogoPreviewError(true)}
                                         />
