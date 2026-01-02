@@ -17,7 +17,8 @@ import {
     Shield,
     PiggyBank,
     Watch,
-    PanelLeftClose
+    PanelLeftClose,
+    HelpCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
@@ -25,15 +26,19 @@ import { formatMoney } from '../../../shared/schemas';
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
+import { useTutorial } from '../hooks/useTutorial';
 import { SettingsModal } from './settings/SettingsModal';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 import { ConfirmationModal } from './ui/ConfirmationModal';
+import { useFormatMoney } from '../hooks/useFormatMoney'; // Assuming this hook exists
 
 export default function Sidebar() {
     const { t } = useTranslation();
     const activeView = useVaultStore(state => state.activeView);
     const setActiveView = useVaultStore(state => state.setActiveView);
     const { netWorth, baseCurrency } = useNetWorth();
+    const formatMoney = useFormatMoney();
+    const { startTutorial } = useTutorial();
     const refreshData = useVaultStore(state => state.refreshData);
     const workspace = useVaultStore(state => state.workspace);
     const setSidebarCollapsed = useVaultStore(state => state.setSidebarCollapsed);
@@ -209,8 +214,19 @@ export default function Sidebar() {
                 </button>
             </nav>
 
-            {/* Footer with Settings & Dev */}
-            <div className="p-3 border-t border-border space-y-2">
+            {/* Help & Settings */}
+            <div className="mt-auto border-t border-border pt-4">
+                <button
+                    onClick={() => startTutorial()}
+                    className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-foreground-muted hover:bg-background-muted hover:text-foreground",
+                        isCollapsed && "justify-center px-2"
+                    )}
+                    title={isCollapsed ? t('help.showTutorial') : undefined}
+                >
+                    <HelpCircle className="w-5 h-5 flex-shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('help.showTutorial')}</span>}
+                </button>
 
                 {/* Settings Toggle */}
                 <button
