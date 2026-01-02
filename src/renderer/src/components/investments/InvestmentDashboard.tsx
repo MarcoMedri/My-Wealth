@@ -8,6 +8,7 @@ import { HoldingDetailModal } from './HoldingDetailModal';
 import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
+import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 
 import {
     Chart as ChartJS,
@@ -24,6 +25,7 @@ export function InvestmentDashboard() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [sellModal, setSellModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
     const [detailModal, setDetailModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
+    const [dateRange, setDateRange] = useState<DateRange>('all');
 
     const { convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
@@ -232,6 +234,7 @@ export function InvestmentDashboard() {
                     {t('investments.title')}
                 </h1>
                 <div className="flex gap-2">
+                    <DateRangeFilter value={dateRange} onChange={setDateRange} />
                     <button
                         onClick={handleRefresh}
                         className="btn btn-ghost flex items-center gap-1"

@@ -16,6 +16,7 @@ import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
+import { DateRangeFilter, type DateRange } from './DateRangeFilter';
 
 export default function AccountsDashboard() {
     const {
@@ -27,6 +28,7 @@ export default function AccountsDashboard() {
 
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRange>('current-month');
 
     // Load data on mount
     useEffect(() => {
@@ -40,7 +42,7 @@ export default function AccountsDashboard() {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
 
-    // Calculate summary stats
+    // Calculate summary stats based on date range
     const stats = useMemo(() => {
         const now = new Date();
         const thisMonth = transactions.filter(t => {
@@ -88,13 +90,13 @@ export default function AccountsDashboard() {
 
             {/* Header */}
             <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">{t('accounts.title')}</h1>
-                    <p className="text-sm text-foreground-muted mt-1">
-                        {t('accounts.welcome')}
-                    </p>
-                </div>
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <Wallet className="w-6 h-6 text-indigo-500" />
+                    {t('accounts.title')}
+                </h1>
                 <div className="flex items-center gap-3">
+                    <DateRangeFilter value={dateRange} onChange={setDateRange} />
+
                     <button
                         onClick={() => setIsImportModalOpen(true)}
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-muted text-foreground-muted hover:bg-background-subtle hover:text-foreground transition-colors border border-border"
@@ -177,7 +179,7 @@ export default function AccountsDashboard() {
             <div className="flex-1 min-h-0 flex gap-6 px-6 pb-6">
                 {/* Main Feed - Full Width */}
                 <div className="flex-1 flex flex-col bg-background-card rounded-xl border border-border overflow-hidden shadow-sm">
-                    <TransactionTable />
+                    <TransactionTable dateRange={dateRange} />
                 </div>
             </div>
         </div>

@@ -264,5 +264,12 @@
       "buyDate": "Purchase Date",
       "addToPortfolio": "Add to Portfolio"
     }
+  },
+  "filters": {
+    "currentMonth": "Current Month",
+    "last3Months": "Last 3 Months",
+    "last6Months": "Last 6 Months",
+    "lastYear": "Last Year",
+    "allTime": "All Time"
   }
 }

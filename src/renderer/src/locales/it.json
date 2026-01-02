@@ -262,5 +262,12 @@
       "buyDate": "Data Acquisto",
       "addToPortfolio": "Aggiungi al Portafoglio"
     }
+  },
+  "filters": {
+    "currentMonth": "Mese Corrente",
+    "last3Months": "Ultimi 3 Mesi",
+    "last6Months": "Ultimi 6 Mesi",
+    "lastYear": "Ultimo Anno",
+    "allTime": "Tutto"
   }
 }

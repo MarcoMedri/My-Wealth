@@ -18,17 +18,32 @@ import type { Transaction } from '../../../shared/schemas';
 import { cn, formatDate } from '../lib/utils';
 import AddTransactionModal from './AddTransactionModal';
 import { useFormatMoney } from '../hooks/useFormatMoney';
+import { type DateRange, getDateRangeBounds } from './DateRangeFilter';
 
 const columnHelper = createColumnHelper<Transaction>();
 
-export default function TransactionTable() {
+interface TransactionTableProps {
+    dateRange?: DateRange;
+}
+
+export default function TransactionTable({ dateRange = 'all' }: TransactionTableProps) {
     const { t } = useTranslation();
-    const transactions = useVaultStore(state => state.transactions);
+    const allTransactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
     const formatMoney = useFormatMoney();
     const [sorting, setSorting] = useState<SortingState>([
         { id: 'date', desc: true }
     ]);
+
+    // Filter transactions by date range
+    const transactions = useMemo(() => {
+        if (dateRange === 'all') return allTransactions;
+        const { startDate, endDate } = getDateRangeBounds(dateRange);
+        return allTransactions.filter(tx => {
+            const txDate = new Date(tx.date);
+            return txDate >= startDate && txDate <= endDate;
+        });
+    }, [allTransactions, dateRange]);
 
     // Modal State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
