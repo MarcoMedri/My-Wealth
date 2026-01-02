@@ -5,11 +5,10 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "add": "Add",
-    "search": "Search",
-    "confirm": "Confirm",
-    "error": "Error",
-    "success": "Success"
+    "refresh": "Refresh",
+    "calculating": "Calculating...",
+    "searchPlaceholder": "Search by name or symbol...",
+    "manualEntry": "Manual Entry"
   },
   "nav": {
     "dashboard": "Overview",
@@ -200,6 +199,10 @@
     "value": "Value",
     "return": "Return",
     "actions": "Actions",
+    "showClosedPositions": "Show Closed Positions",
+    "allocationByType": "Allocation by Type",
+    "allocationByBroker": "Allocation by Broker",
+    "allocationByGeography": "Allocation by Geography",
     "sell": "Sell"
   },
   "modals": {

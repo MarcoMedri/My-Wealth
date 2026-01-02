@@ -134,15 +134,15 @@ export default function Dashboard() {
             {/* Header */}
             <header className="px-8 py-6 pb-2 flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Financial Overview</h1>
-                    <p className="text-foreground-muted mt-1">Your total wealth breakdown at a glance.</p>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.title')}</h1>
+                    <p className="text-foreground-muted mt-1">{t('dashboard.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={async () => {
                             try {
                                 await window.api.createSnapshot();
-                                alert('Snapshot created successfully!');
+                                alert(t('dashboard.snapshotSuccess'));
                                 // Ideally trigger refresh or rely on optimistic updates if store listened to changes?
                                 // VaultStore loadVault updates everything.
                                 // We might need to manually trigger a refresh of snapshots in store if not auto.
@@ -150,13 +150,13 @@ export default function Dashboard() {
                                 await useVaultStore.getState().refreshData();
                             } catch (e) {
                                 console.error(e);
-                                alert('Failed to create snapshot');
+                                alert(t('dashboard.snapshotError'));
                             }
                         }}
                         className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors text-sm font-medium"
                     >
                         <Camera className="w-4 h-4" />
-                        <span>Take Snapshot</span>
+                        <span>{t('dashboard.takeSnapshot')}</span>
                     </button>
                 </div>
             </header>

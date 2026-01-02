@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Plus, RefreshCw, Activity, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, RefreshCw, Activity, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { Holding, Asset } from '../../../../shared/schemas';
 import { AddInvestmentModal } from './AddInvestmentModal';
 import { SellInvestmentModal } from './SellInvestmentModal';
@@ -26,10 +26,25 @@ export function InvestmentDashboard() {
     const [sellModal, setSellModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
     const [detailModal, setDetailModal] = useState<{ holding: Holding; asset: Asset } | null>(null);
     const [dateRange, setDateRange] = useState<DateRange>('all');
+    const [includeClosed, setIncludeClosed] = useState(false);
 
     const { convert, baseCurrency } = useNetWorth();
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
+
+    // Use date range filter hook
+    // Note: Holdings are current state, so date filtering applies more to performance/history charts. 
+    // However, if we want to filter holdings based on "active during this period", that's complex.
+    // Standard practice for 'Investments' dashboard is to show current holdings.
+    // The DateRangeFilter is likely for the analytics/charts above.
+
+    // Filter holdings based on closed status
+    const filteredHoldings = useMemo(() => {
+        return holdings.filter(h => {
+            if (includeClosed) return true;
+            return h.quantity > 0; // Only show open positions by default
+        });
+    }, [holdings, includeClosed]);
 
     // --- Metrics ---
     const metrics = useMemo(() => {
@@ -38,6 +53,10 @@ export function InvestmentDashboard() {
         let totalDayChange = 0;
 
         holdings.forEach(holding => {
+            // Only include open positions in metrics by default or follow specific business logic?
+            // Usually dashboard metrics show CURRENT value, so closed positions (qty 0) don't contribute to total value.
+            if (holding.quantity === 0) return;
+
             const asset = assets.find(a => a.id === holding.assetId);
             if (!asset) return;
 
@@ -69,6 +88,7 @@ export function InvestmentDashboard() {
     const typeDistribution = useMemo(() => {
         const dist: Record<string, number> = {};
         holdings.forEach(h => {
+            if (h.quantity === 0) return; // Exclude closed from charts
             const asset = assets.find(a => a.id === h.assetId);
             if (!asset) return;
             const val = convert(h.quantity * asset.currentPrice, asset.currency);
@@ -82,6 +102,7 @@ export function InvestmentDashboard() {
     const brokerDistribution = useMemo(() => {
         const dist: Record<string, number> = {};
         holdings.forEach(h => {
+            if (h.quantity === 0) return; // Exclude closed from charts
             const asset = assets.find(a => a.id === h.assetId);
             const account = accounts.find(a => a.id === h.accountId);
             if (!asset || !account) return;
@@ -106,6 +127,7 @@ export function InvestmentDashboard() {
     const geoDistribution = useMemo(() => {
         const dist: Record<string, number> = {};
         holdings.forEach(h => {
+            if (h.quantity === 0) return; // Exclude closed from charts
             const asset = assets.find(a => a.id === h.assetId);
             if (!asset) return;
             const val = convert(h.quantity * asset.currentPrice, asset.currency);
@@ -168,25 +190,13 @@ export function InvestmentDashboard() {
             },
             tooltip: {
                 callbacks: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     label: function (context: any) {
                         let label = context.label || '';
                         if (label) {
                             label += ': ';
                         }
                         if (context.parsed !== null) {
-                            // Chart data is in currency units (from `convert` which returns cents/100 IF useNetWorth convert does divisions? 
-                            // Wait, `convert` in useNetWorth usually returns value in base currency.
-                            // Let's check `getChartData`. It uses `convert(h.quantity * asset.currentPrice, asset.currency)`.
-                            // `convert` returns number (units or cents?).
-                            // In `useNetWorth`: "convert(amountInCents, fromCurrency)". It returns cents by default?
-                            // Let's assume it returns cents for consistency with formatMoney.
-                            // BUT `metric.totalValue` uses `convert`.
-                            // Let's safe-check context.parsed.
-                            // If `convert` returns cents, we pass cents to `formatMoney`.
-                            // But usually chart data is divided by 100 for display? 
-                            // Current `getChartData` passes raw `val`.
-                            // If `convert` returns cents, then the chart data is in cents.
-                            // So formatMoney(context.parsed, currencySetting) is correct.
                             label += formatMoney(context.parsed, baseCurrency);
                         }
                         return label;
@@ -273,19 +283,37 @@ export function InvestmentDashboard() {
 
             {/* Row 2: Charts (Asset Type, Broker, Geography) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <ChartCard title="Allocation by Type" data={getChartData(typeDistribution)} options={chartOptions} />
-                <ChartCard title="Allocation by Broker" data={getChartData(brokerDistribution)} options={chartOptions} />
-                <ChartCard title="Allocation by Geography" data={getChartData(geoDistribution)} options={chartOptions} />
+                <ChartCard title={t('investments.allocationByType')} data={getChartData(typeDistribution)} options={chartOptions} />
+                <ChartCard title={t('investments.allocationByBroker')} data={getChartData(brokerDistribution)} options={chartOptions} />
+                <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
             </div>
 
             {/* Row 3: Holdings Table - Full Width */}
-            <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden">
-                <div className="px-6 py-4 border-b border-border font-semibold text-foreground">
-                    {t('investments.holdings')}
+            <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden min-h-[650px] flex flex-col">
+                <div className="px-6 py-4 border-b border-border flex justify-between items-center">
+                    <span className="font-semibold text-foreground">{t('investments.holdings')}</span>
+
+                    {/* Include Closed Positions Toggle */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIncludeClosed(!includeClosed)}
+                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${includeClosed ? 'bg-primary' : 'bg-input hover:bg-input-hover'
+                                }`}
+                        >
+                            <span
+                                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${includeClosed ? 'translate-x-4.5' : 'translate-x-1'
+                                    }`}
+                                style={{ transform: includeClosed ? 'translateX(18px)' : 'translateX(2px)' }}
+                            />
+                        </button>
+                        <span className="text-sm text-foreground-muted cursor-pointer select-none" onClick={() => setIncludeClosed(!includeClosed)}>
+                            {t('investments.showClosedPositions')}
+                        </span>
+                    </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto flex-1">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-background-muted text-foreground-muted font-medium">
+                        <thead className="bg-background-muted text-foreground-muted font-medium sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3">{t('investments.asset')}</th>
                                 <th className="px-6 py-3 text-right">{t('investments.price')}</th>
@@ -297,13 +325,15 @@ export function InvestmentDashboard() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {holdings.map(holding => {
+                            {filteredHoldings.map(holding => {
                                 const asset = assets.find(a => a.id === holding.assetId);
                                 if (!asset) return null;
 
                                 const value = holding.quantity * asset.currentPrice;
                                 const cost = holding.quantity * holding.averageBuyPrice;
                                 const gain = value - cost;
+                                // cost > 0 check handles division by zero. If cost is 0 (e.g. airdrop or error), return is infinite/undefined, display 0 or handle?
+                                // If cost is 0 and value > 0, return is 100% technically (or infinite). Let's stick to 0 or handle logic elsewhere.
                                 const gainPercent = cost > 0 ? (gain / cost) * 100 : 0;
 
                                 const dayChange = asset.previousClose ? asset.currentPrice - asset.previousClose : 0;
@@ -331,22 +361,22 @@ export function InvestmentDashboard() {
                                         <td className="px-6 py-4 text-right text-foreground-muted">
                                             {holding.quantity}
                                         </td>
-                                        <td className="px-6 py-4 text-right font-medium text-foreground font-mono">
+                                        <td className="px-6 py-4 text-right font-mono font-medium text-foreground">
                                             {formatMoney(value, asset.currency)}
                                         </td>
-                                        <td className={`px-6 py-4 text-right font-mono ${gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            <div>{gain >= 0 ? '+' : ''}{formatMoney(gain, asset.currency)}</div>
-                                            <div className="text-xs opacity-75">{gainPercent.toFixed(2)}%</div>
+                                        <td className={`px-6 py-4 text-right font-mono text-sm ${gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            <div className="flex flex-col items-end">
+                                                <span>{gain >= 0 ? '+' : ''}{formatMoney(gain, asset.currency)}</span>
+                                                <span className="text-xs opacity-80">{gainPercent.toFixed(2)}%</span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                                             <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSellModal({ holding, asset });
-                                                }}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-lg"
+                                                onClick={() => setSellModal({ holding, asset })}
+                                                className="btn btn-ghost btn-sm text-foreground-muted hover:text-foreground"
+                                                title={t('investments.sell')}
                                             >
-                                                Sell
+                                                <Minus className="w-4 h-4" />
                                             </button>
                                         </td>
                                     </tr>
@@ -354,6 +384,11 @@ export function InvestmentDashboard() {
                             })}
                         </tbody>
                     </table>
+                    {filteredHoldings.length === 0 && (
+                        <div className="p-12 text-center text-foreground-subtle">
+                            {t('common.noData') || 'No holdings found'}
+                        </div>
+                    )}
                 </div>
             </div>
 

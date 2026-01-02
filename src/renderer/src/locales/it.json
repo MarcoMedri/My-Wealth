@@ -5,11 +5,26 @@
     "save": "Salva",
     "delete": "Elimina",
     "edit": "Modifica",
+    "refresh": "Aggiorna",
+    "calculating": "Calcolando...",
+    "searchPlaceholder": "Cerca per nome o simbolo...",
+    "manualEntry": "Inserimento Manuale",
     "add": "Aggiungi",
     "search": "Cerca",
     "confirm": "Conferma",
     "error": "Errore",
     "success": "Successo"
+  },
+  "dashboard": {
+    "title": "Panoramica Finanziaria",
+    "subtitle": "Il tuo patrimonio netto a colpo d'occhio.",
+    "takeSnapshot": "Crea Snapshot",
+    "snapshotSuccess": "Snapshot creato con successo!",
+    "snapshotError": "Errore durante la creazione dello snapshot",
+    "netWorth": "Patrimonio Netto",
+    "assetAllocation": "Allocazione Asset",
+    "recentTransactions": "Transazioni Recenti",
+    "cashAccounts": "Conti & Liquidità"
   },
   "nav": {
     "dashboard": "Panoramica",
@@ -20,12 +35,6 @@
     "settings": "Impostazioni",
     "developer": "Sviluppatore",
     "noAccounts": "Nessun conto ancora"
-  },
-  "dashboard": {
-    "netWorth": "Patrimonio Netto",
-    "assetAllocation": "Allocazione Asset",
-    "recentTransactions": "Transazioni Recenti",
-    "cashAccounts": "Conti & Liquidità"
   },
   "settings": {
     "title": "Impostazioni",
@@ -198,6 +207,10 @@
     "value": "Valore",
     "return": "Rendimento",
     "actions": "Azioni",
+    "showClosedPositions": "Mostra Posizioni Chiuse",
+    "allocationByType": "Allocazione per Tipo",
+    "allocationByBroker": "Allocazione per Broker",
+    "allocationByGeography": "Allocazione per Geografia",
     "sell": "Vendi"
   },
   "modals": {
