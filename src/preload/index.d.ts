@@ -37,6 +37,7 @@ interface API {
   deleteBroker: (id: string) => Promise<void>
   downloadBrokerLogo: (domain: string, brokerId: string) => Promise<string | null>
   selectBrokerLogo: () => Promise<string | null>
+  getPresetLogoPath: (brokerName: string) => Promise<string | null>
   saveBrokerLogo: (sourcePath: string, brokerId: string) => Promise<string>
   
   // Import

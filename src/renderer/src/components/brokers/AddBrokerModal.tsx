@@ -211,32 +211,30 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                 <label className="block text-sm font-medium text-foreground-muted mb-1">
                                     {t('brokers.website')} <span className="text-foreground-subtle font-normal">({t('brokers.autoFetchLogo')})</span>
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
-                                        <Globe size={18} />
+                                <div className="relative flex gap-2">
+                                    <div className="flex-1 relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+                                            <Globe size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={website}
+                                            onChange={(e) => setWebsite(e.target.value)}
+                                            placeholder="es. revolut.com"
+                                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                        />
                                     </div>
-                                    <input
-                                        type="text"
-                                        value={website}
-                                        onChange={(e) => setWebsite(e.target.value)}
-                                        placeholder="es. revolut.com"
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPresetSelector(true)}
+                                        className="px-3 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors flex items-center gap-2 whitespace-nowrap"
+                                        title={t('brokers.choosePreset')}
+                                    >
+                                        <Building2 size={18} />
+                                        <span className="text-sm">{t('brokers.choosePreset')}</span>
+                                    </button>
                                 </div>
                             </div>
-
-                            {/* Preset Selector Button */}
-                            <div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPresetSelector(true)}
-                                    className="w-full px-4 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors font-medium flex items-center justify-center gap-2"
-                                >
-                                    <Building2 size={18} />
-                                    {t('brokers.choosePreset')}
-                                </button>
-                            </div>
-
                             {/* Logo Preview and Upload */}
                             <div className="flex flex-col gap-2">
                                 <label className="block text-sm font-medium text-foreground-muted">

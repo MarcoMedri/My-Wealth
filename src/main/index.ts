@@ -210,6 +210,26 @@ function registerIpcHandlers(): void {
     return result.filePaths[0]
   })
 
+  ipcMain.handle(IPC_CHANNELS.BROKER_GET_PRESET_LOGO, async (_event, brokerName: string) => {
+    const path = require('path')
+    const fs = require('fs')
+    
+    // Try different extensions
+    const extensions = ['.jpeg', '.png', '.jpg', '.svg']
+    const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
+    const iconsPath = path.join(resourcesPath, 'asset-icons')
+    
+    for (const ext of extensions) {
+      const logoPath = path.join(iconsPath, `${brokerName}${ext}`)
+      if (fs.existsSync(logoPath)) {
+        // Return file:// protocol path for Electron
+        return `file://${logoPath}`
+      }
+    }
+    
+    return null
+  })
+
   ipcMain.handle(IPC_CHANNELS.BROKER_SAVE_LOGO, async (_event, sourcePath: string, brokerId: string) => {
     return vaultManager.saveBrokerLogo(sourcePath, brokerId)
   })

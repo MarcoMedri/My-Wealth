@@ -2,47 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Building2 } from 'lucide-react';
 
-// Mapping of preset names to their file extensions
-const LOGO_EXTENSIONS: Record<string, string> = {
-    'AIA': '.jpeg',
-    'Allianz': '.jpeg',
-    'AXA': '.jpeg',
-    'BCC': '.jpeg',
-    'Binance': '.jpeg',
-    'BPER': '.jpeg',
-    'BPM': '.png',
-    'BPPB': '.jpeg',
-    'BPSO': '.jpeg',
-    'Banca AideXa': '.png',
-    'Banca Generali': '.jpeg',
-    'Banca Ifis': '.jpeg',
-    'Banco Desio': '.jpeg',
-    'Chase': '.jpeg',
-    'Coinbase': '.png',
-    'Credem': '.jpeg',
-    'Crédit Agricole': '.jpeg',
-    'Crédit Mutuel': '.jpeg',
-    'Degiro': '.jpeg',
-    'Deutsche Bank': '.jpeg',
-    'Directa Sim': '.jpeg',
-    'Etica Sgr': '.png',
-    'Fineco': '.jpeg',
-    'Generali': '.jpeg',
-    'HSBC': '.png',
-    'Hype': '.jpeg',
-    'Illimity': '.jpeg',
-    'Interactive Brokers': '.jpeg',
-    'Lloyds Bank': '.jpeg',
-    'Mediolanum': '.png',
-    'MPS': '.jpeg',
-    'N26': '.jpeg',
-    'Revolut': '.png',
-    'Robinhood': '.png',
-    'Santander': '.png',
-    'Sella': '.jpeg',
-    'Trade Republic': '.jpeg'
-};
-
 interface PresetSelectorModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -57,18 +16,25 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
     presets
 }) => {
     const { t } = useTranslation();
+    const [logoUrls, setLogoUrls] = React.useState<Record<string, string | null>>({});
+
+    // Load logo URLs when modal opens
+    React.useEffect(() => {
+        if (!isOpen) return;
+
+        const loadLogos = async () => {
+            const urls: Record<string, string | null> = {};
+            for (const preset of presets) {
+                const url = await window.api.getPresetLogoPath(preset);
+                urls[preset] = url;
+            }
+            setLogoUrls(urls);
+        };
+
+        loadLogos();
+    }, [isOpen, presets]);
 
     if (!isOpen) return null;
-
-    // Helper to get logo path from preset name
-    const getLogoPath = (presetName: string) => {
-        const extension = LOGO_EXTENSIONS[presetName];
-        if (!extension) return null;
-
-        // In Electron, we need to use a custom protocol or copy files to public
-        // For now, we'll use a relative path that assumes logos are in public/logos
-        return `/logos/${presetName}${extension}`;
-    };
 
     return (
         <div
@@ -96,7 +62,7 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                 <div className="p-6 overflow-y-auto max-h-[60vh]">
                     <div className="grid grid-cols-4 gap-3">
                         {presets.map((preset) => {
-                            const logoPath = getLogoPath(preset);
+                            const logoUrl = logoUrls[preset];
 
                             return (
                                 <button
@@ -106,9 +72,9 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                                     className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
                                 >
                                     <div className="w-12 h-12 rounded-lg bg-background-subtle flex items-center justify-center overflow-hidden">
-                                        {logoPath ? (
+                                        {logoUrl ? (
                                             <img
-                                                src={logoPath}
+                                                src={logoUrl}
                                                 alt={preset}
                                                 className="w-full h-full object-contain p-1"
                                             />
