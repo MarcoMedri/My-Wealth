@@ -179,17 +179,22 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                 <div className="p-6 overflow-y-auto">
                     {step === 'search' ? (
                         <div className="space-y-4">
-                            {/* Toggle: Search vs Manual */}
-                            <div className="flex items-center justify-between p-3 bg-background-muted rounded-xl mb-4">
-                                <span className="text-sm font-medium text-foreground">{t('modals.investmentModal.manualEntry') || 'Manual Entry'}</span>
+                            {/* Manual Entry Button */}
+                            {!isManualMode && (
                                 <button
                                     type="button"
-                                    onClick={() => setIsManualMode(!isManualMode)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isManualMode ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                    onClick={() => setIsManualMode(true)}
+                                    className="w-full p-4 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-background-subtle transition-all flex items-center gap-3 group"
                                 >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isManualMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                        <span className="text-primary text-xl font-bold">+</span>
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-semibold text-foreground">{t('modals.investmentModal.manualEntryTitle', 'Inserimento Manuale')}</div>
+                                        <div className="text-sm text-foreground-muted">{t('modals.investmentModal.manualEntryDesc', 'Crea un investimento con dettagli personalizzati')}</div>
+                                    </div>
                                 </button>
-                            </div>
+                            )}
 
                             {!isManualMode ? (
                                 <>

@@ -9,6 +9,8 @@
     "calculating": "Calculating...",
     "searchPlaceholder": "Search by name or symbol...",
     "manualEntry": "Manual Entry",
+    "manualEntryTitle": "Manual Entry",
+    "manualEntryDesc": "Create an investment with custom details",
     "expense": "Expense",
     "income": "Income",
     "uncategorized": "Uncategorized",

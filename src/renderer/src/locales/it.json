@@ -368,6 +368,8 @@
     "investmentModal": {
       "addTitle": "Aggiungi Investimento",
       "manualEntry": "Inserimento Manuale",
+      "manualEntryTitle": "Inserimento Manuale",
+      "manualEntryDesc": "Crea un investimento con dettagli personalizzati",
       "symbol": "Simbolo Ticker",
       "name": "Nome",
       "type": "Tipo",
