@@ -20,11 +20,12 @@ interface AddBrokerModalProps {
     isOpen: boolean;
     onClose: () => void;
     editBrokerId?: string;
+    initialPreset?: LogoMetadata | null;
 }
 
 const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'insurance', 'other'] as const;
 
-export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId }) => {
+export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId, initialPreset }) => {
     const { t } = useTranslation();
     const saveBroker = useVaultStore(state => state.saveBroker);
     const getBroker = useVaultStore(state => state.getBroker);
@@ -71,11 +72,19 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 if (broker.website && !broker.logoPath) {
                     setLogoUrl(`https://logo.clearbit.com/${broker.website}`);
                 } else if (broker.logoPath) {
-                    // We don't easily preview local files in this modal without converting to file:// URL which might be tricky in renderer depending on CSP
-                    // But for now let's just stick to editing website = preview new logo
-                    // If user is editing, we show current state.
+                    setLogoUrl(broker.logoPath);
                 }
             }
+        } else if (isOpen && initialPreset) {
+            // Pre-fill from preset
+            setName(initialPreset.name);
+            setType(initialPreset.type);
+            setLogoUrl(`asset://${encodeURIComponent(initialPreset.icon)}`);
+            setWebsite('');
+            setColor('#6366f1');
+            setIcon('');
+            setCustomLogoPath(null);
+            setUseCustomLogo(false);
         } else if (isOpen) {
             // Reset for new
             setName('');
@@ -88,7 +97,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             setCustomLogoPath(null);
             setUseCustomLogo(false);
         }
-    }, [isOpen, editBrokerId, getBroker]);
+    }, [isOpen, editBrokerId, initialPreset, getBroker]);
 
     // Live preview when website changes
     useEffect(() => {

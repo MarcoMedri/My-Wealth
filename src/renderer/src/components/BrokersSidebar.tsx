@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Plus,
@@ -15,6 +15,8 @@ import {
 import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
 import { AddBrokerModal } from './brokers/AddBrokerModal';
+import { BrokerPresetSelectorModal } from './brokers/BrokerPresetSelectorModal';
+import { LogoMetadata } from '@shared/types';
 
 // Icon mapping for Broker icons
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -36,7 +38,17 @@ export default function BrokersSidebar() {
     const workspace = useVaultStore(state => state.workspace);
     const vaultPath = useVaultStore(state => state.vaultPath);
     const setSidebarCollapsed = useVaultStore(state => state.setSidebarCollapsed);
+    const [isPresetSelectorOpen, setIsPresetSelectorOpen] = useState(false);
     const [isAddBrokerOpen, setIsAddBrokerOpen] = useState(false);
+    const [logoRegistry, setLogoRegistry] = useState<LogoMetadata[]>([]);
+    const [presetData, setPresetData] = useState<LogoMetadata | null>(null);
+
+    // Load logo registry on mount
+    useEffect(() => {
+        window.api.getLogoRegistry().then(registry => {
+            setLogoRegistry(registry.logos || []);
+        });
+    }, []);
 
     // Default to false if undefined
     const isCollapsed = workspace.layout?.rightSidebarCollapsed ?? false;
@@ -52,9 +64,27 @@ export default function BrokersSidebar() {
             {/* Drag region for macOS */}
             <div className="h-8 app-drag-region" />
 
+            <BrokerPresetSelectorModal
+                isOpen={isPresetSelectorOpen}
+                onClose={() => setIsPresetSelectorOpen(false)}
+                onSelectPreset={(preset) => {
+                    setPresetData(preset);
+                    setIsAddBrokerOpen(true);
+                }}
+                onCustomBroker={() => {
+                    setPresetData(null);
+                    setIsAddBrokerOpen(true);
+                }}
+                logoRegistry={logoRegistry}
+            />
+
             <AddBrokerModal
                 isOpen={isAddBrokerOpen}
-                onClose={() => setIsAddBrokerOpen(false)}
+                onClose={() => {
+                    setIsAddBrokerOpen(false);
+                    setPresetData(null);
+                }}
+                initialPreset={presetData}
             />
 
             <div className="flex-1 overflow-y-auto px-2" data-tour="brokers-section">
@@ -65,7 +95,7 @@ export default function BrokersSidebar() {
                         </h3>
                     )}
                     <button
-                        onClick={() => setIsAddBrokerOpen(true)}
+                        onClick={() => setIsPresetSelectorOpen(true)}
                         className="p-1.5 rounded hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors"
                         title={t('brokers.addTitle')}
                     >
