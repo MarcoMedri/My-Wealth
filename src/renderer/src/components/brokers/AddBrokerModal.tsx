@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Building2, Wallet, Globe, Upload, Landmark } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
+import { PresetSelectorModal } from './PresetSelectorModal';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
@@ -48,9 +49,8 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [isLoading, setIsLoading] = useState(false);
     const [customLogoPath, setCustomLogoPath] = useState<string | null>(null);
     const [useCustomLogo, setUseCustomLogo] = useState(false);
-    // Preset selector - future feature
-    // const [showPresetSelector, setShowPresetSelector] = useState(false);
-    // const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+    const [showPresetSelector, setShowPresetSelector] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && editBrokerId) {
@@ -104,6 +104,22 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             setLogoUrl(`file://${filePath}`);
             setLogoPreviewError(false); // Clear any previous error
         }
+    };
+
+    const handlePresetSelect = (presetName: string) => {
+        // Auto-fill name
+        setName(presetName);
+
+        // Auto-fill website (lowercase, remove spaces)
+        const websiteGuess = presetName.toLowerCase().replace(/\s+/g, '') + '.com';
+        setWebsite(websiteGuess);
+
+        // Set preset
+        setSelectedPreset(presetName);
+        setUseCustomLogo(false);
+
+        // Close modal
+        setShowPresetSelector(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -216,121 +232,142 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                 </div>
                             </div>
 
-                            {/* Logo Preview and Upload */}
-                            <div className="flex flex-col gap-2">
-                                <label className="block text-sm font-medium text-foreground-muted">
-                                    {t('brokers.logo')}
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-16 h-16 rounded-lg border border-border bg-background-subtle flex items-center justify-center overflow-hidden relative">
-                                        {logoUrl && !logoPreviewError ? (
-                                            <img
-                                                src={logoUrl}
-                                                alt={t('brokers.preview')}
-                                                className="w-full h-full object-contain p-1"
-                                                onError={() => setLogoPreviewError(true)}
-                                            />
-                                        ) : (
-                                            <Landmark className="w-6 h-6 text-foreground-subtle" />
-                                        )}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={handleSelectLogo}
-                                        className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg transition-colors font-medium shadow-sm"
-                                    >
-                                        <Upload size={16} />
-                                        {t('brokers.uploadLogo')}
-                                    </button>
-                                </div>
-                                {useCustomLogo && (
-                                    <p className="text-xs text-success">
-                                        {t('brokers.customLogo')}
-                                    </p>
-                                )}
+                            {/* Preset Selector Button */}
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPresetSelector(true)}
+                                    className="w-full px-4 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors font-medium flex items-center justify-center gap-2"
+                                >
+                                    <Building2 size={18} />
+                                    {t('brokers.choosePreset')}
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Type */}
-                    <div>
-                        <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            {t('brokers.typeLabel')}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {BROKER_TYPES.map(tOption => (
+                        {/* Logo Preview and Upload */}
+                        <div className="flex flex-col gap-2">
+                            <label className="block text-sm font-medium text-foreground-muted">
+                                {t('brokers.logo')}
+                            </label>
+                            <div className="flex items-center gap-2">
+                                <div className="w-16 h-16 rounded-lg border border-border bg-background-subtle flex items-center justify-center overflow-hidden relative">
+                                    {logoUrl && !logoPreviewError ? (
+                                        <img
+                                            src={logoUrl}
+                                            alt={t('brokers.preview')}
+                                            className="w-full h-full object-contain p-1"
+                                            onError={() => setLogoPreviewError(true)}
+                                        />
+                                    ) : (
+                                        <Landmark className="w-6 h-6 text-foreground-subtle" />
+                                    )}
+                                </div>
                                 <button
-                                    key={tOption}
                                     type="button"
-                                    onClick={() => setType(tOption)}
-                                    className={`px-3 py-2 text-sm rounded-lg border transition-all ${type === tOption
-                                        ? 'border-primary bg-primary/10 text-primary font-medium'
-                                        : 'border-border hover:bg-background-muted text-foreground-muted hover:text-foreground'
-                                        }`}
+                                    onClick={handleSelectLogo}
+                                    className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg transition-colors font-medium shadow-sm"
                                 >
-                                    {t(`brokers.types.${tOption}`)}
+                                    <Upload size={16} />
+                                    {t('brokers.uploadLogo')}
                                 </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Color */}
-                    <div>
-                        <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            {t('common.color')}
-                        </label>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="color"
-                                value={color}
-                                onChange={(e) => setColor(e.target.value)}
-                                className="h-10 w-10 p-1 rounded cursor-pointer bg-background border border-border"
-                            />
-                            <span className="text-foreground-muted font-mono text-sm">{color}</span>
-                        </div>
-                    </div>
-
-                    {/* Icon (Optional) */}
-                    <div>
-                        <label className="block text-sm font-medium text-foreground-muted mb-1">
-                            {t('common.icon')} <span className="text-foreground-subtle font-normal">({t('common.optional')})</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={icon}
-                            onChange={(e) => setIcon(e.target.value)}
-                            placeholder="Emoji (e.g. 🏦)"
-                            className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                            maxLength={2}
-                        />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="pt-4 flex items-center justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-foreground-muted hover:bg-background-muted rounded-lg transition-colors"
-                        >
-                            {t('common.cancel')}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isLoading || !name}
-                            className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                        >
-                            {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <Check size={18} />
-                                    {editBrokerId ? t('common.save') : t('common.create')}
-                                </>
+                            </div>
+                            {useCustomLogo && (
+                                <p className="text-xs text-success">
+                                    {t('brokers.customLogo')}
+                                </p>
                             )}
-                        </button>
+                        </div>
                     </div>
-                </form>
             </div>
-        </div>
+
+            {/* Type */}
+            <div>
+                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                    {t('brokers.typeLabel')}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                    {BROKER_TYPES.map(tOption => (
+                        <button
+                            key={tOption}
+                            type="button"
+                            onClick={() => setType(tOption)}
+                            className={`px-3 py-2 text-sm rounded-lg border transition-all ${type === tOption
+                                ? 'border-primary bg-primary/10 text-primary font-medium'
+                                : 'border-border hover:bg-background-muted text-foreground-muted hover:text-foreground'
+                                }`}
+                        >
+                            {t(`brokers.types.${tOption}`)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Color */}
+            <div>
+                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                    {t('common.color')}
+                </label>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                        className="h-10 w-10 p-1 rounded cursor-pointer bg-background border border-border"
+                    />
+                    <span className="text-foreground-muted font-mono text-sm">{color}</span>
+                </div>
+            </div>
+
+            {/* Icon (Optional) */}
+            <div>
+                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                    {t('common.icon')} <span className="text-foreground-subtle font-normal">({t('common.optional')})</span>
+                </label>
+                <input
+                    type="text"
+                    value={icon}
+                    onChange={(e) => setIcon(e.target.value)}
+                    placeholder="Emoji (e.g. 🏦)"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                    maxLength={2}
+                />
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 flex items-center justify-end gap-3">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 text-foreground-muted hover:bg-background-muted rounded-lg transition-colors"
+                >
+                    {t('common.cancel')}
+                </button>
+                <button
+                    type="submit"
+                    disabled={isLoading || !name}
+                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                >
+                    {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <Check size={18} />
+                            {editBrokerId ? t('common.save') : t('common.create')}
+                        </>
+                    )}
+                </button>
+            </div>
+        </form>
+            </div >
+
+    {/* Preset Selector Modal */ }
+    < PresetSelectorModal
+isOpen = { showPresetSelector }
+onClose = {() => setShowPresetSelector(false)}
+onSelect = { handlePresetSelect }
+presets = { PRESET_LOGOS }
+    />
+        </div >
     );
 };
