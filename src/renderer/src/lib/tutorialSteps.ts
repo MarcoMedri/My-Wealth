@@ -27,10 +27,10 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
     ]
   },
   {
-    id: 'dashboard',
-    attachTo: { element: '[data-tour="dashboard"]', on: 'bottom' },
-    title: t('tutorial.dashboard.title'),
-    text: t('tutorial.dashboard.text'),
+    id: 'brokers',
+    attachTo: { element: '[data-tour="brokers-nav"]', on: 'right' },
+    title: t('tutorial.brokers.title'),
+    text: t('tutorial.brokers.text'),
     buttons: [
       {
         text: t('tutorial.back'),
@@ -73,10 +73,10 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
     ]
   },
   {
-    id: 'brokers',
-    attachTo: { element: '[data-tour="brokers-nav"]', on: 'right' },
-    title: t('tutorial.brokers.title'),
-    text: t('tutorial.brokers.text'),
+    id: 'dashboard',
+    attachTo: { element: '[data-tour="dashboard"]', on: 'bottom' },
+    title: t('tutorial.dashboard.title'),
+    text: t('tutorial.dashboard.text'),
     buttons: [
       {
         text: t('tutorial.back'),
