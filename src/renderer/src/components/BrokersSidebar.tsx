@@ -18,7 +18,9 @@ import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
 import { AddBrokerModal } from './brokers/AddBrokerModal';
 import { BrokerPresetSelectorModal } from './brokers/BrokerPresetSelectorModal';
+import { ConfirmationModal } from './ui/ConfirmationModal';
 import { LogoMetadata } from '@shared/types';
+import { toast } from 'sonner';
 
 // Icon mapping for Broker icons
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -39,9 +41,13 @@ export default function BrokersSidebar() {
     const setActiveView = useVaultStore(state => state.setActiveView);
     const workspace = useVaultStore(state => state.workspace);
     const vaultPath = useVaultStore(state => state.vaultPath);
+    const deleteBroker = useVaultStore(state => state.deleteBroker);
+    const refreshData = useVaultStore(state => state.refreshData);
     const setSidebarCollapsed = useVaultStore(state => state.setSidebarCollapsed);
     const [isPresetSelectorOpen, setIsPresetSelectorOpen] = useState(false);
     const [isAddBrokerOpen, setIsAddBrokerOpen] = useState(false);
+    const [editBrokerId, setEditBrokerId] = useState<string | null>(null);
+    const [deleteBrokerId, setDeleteBrokerId] = useState<string | null>(null);
     const [logoRegistry, setLogoRegistry] = useState<LogoMetadata[]>([]);
     const [presetData, setPresetData] = useState<LogoMetadata | null>(null);
 
@@ -84,9 +90,29 @@ export default function BrokersSidebar() {
                 isOpen={isAddBrokerOpen}
                 onClose={() => {
                     setIsAddBrokerOpen(false);
+                    setEditBrokerId(null);
                     setPresetData(null);
                 }}
+                editBrokerId={editBrokerId || undefined}
                 initialPreset={presetData}
+            />
+
+            <ConfirmationModal
+                isOpen={deleteBrokerId !== null}
+                onClose={() => setDeleteBrokerId(null)}
+                onConfirm={async () => {
+                    if (deleteBrokerId) {
+                        await deleteBroker(deleteBrokerId);
+                        await refreshData();
+                        toast.success(t('brokers.deleted', 'Broker deleted successfully'));
+                        setDeleteBrokerId(null);
+                        setActiveView('dashboard');
+                    }
+                }}
+                title={t('brokers.deleteTitle', 'Delete Broker')}
+                description={t('brokers.confirmDelete', 'Delete this broker and all associated data? This action cannot be undone.')}
+                confirmText={t('common.delete')}
+                variant="danger"
             />
 
             <div className="flex-1 overflow-y-auto px-2" data-tour="brokers-section">
@@ -181,8 +207,9 @@ export default function BrokersSidebar() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    setEditBrokerId(broker.id);
+                                                    setPresetData(null);
                                                     setIsAddBrokerOpen(true);
-                                                    // TODO: Pass broker ID for editing
                                                 }}
                                                 className="p-1.5 rounded hover:bg-background-muted text-foreground-muted hover:text-primary transition-colors"
                                                 title={t('common.edit')}
@@ -192,8 +219,7 @@ export default function BrokersSidebar() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    // TODO: Open delete confirmation
-                                                    console.log('Delete broker:', broker.id);
+                                                    setDeleteBrokerId(broker.id);
                                                 }}
                                                 className="p-1.5 rounded hover:bg-background-muted text-foreground-muted hover:text-red-500 transition-colors"
                                                 title={t('common.delete')}
