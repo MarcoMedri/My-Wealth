@@ -136,7 +136,7 @@ export default function BrokersSidebar() {
                         <div className="px-3 py-4 text-center border border-dashed border-border rounded-lg">
                             <p className="text-sm text-foreground-subtle mb-2">{t('brokers.noAccounts')}</p>
                             <button
-                                onClick={() => setIsAddBrokerOpen(true)}
+                                onClick={() => setIsPresetSelectorOpen(true)}
                                 className="text-xs text-primary font-medium hover:underline"
                             >
                                 {t('brokers.addTitle')}
