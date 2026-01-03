@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Building2, Wallet } from 'lucide-react';
+import { X, Check, Building2, Wallet, Globe, Upload, Landmark } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
@@ -22,6 +22,15 @@ interface AddBrokerModalProps {
 
 const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'other'] as const;
 
+// Preset broker logos available in resources/asset-icons
+const PRESET_LOGOS = [
+    'Revolut', 'N26', 'Fineco', 'Hype', 'Binance', 'Coinbase',
+    'Interactive Brokers', 'Degiro', 'Directa Sim', 'Trade Republic',
+    'BPER', 'BPM', 'Credem', 'Sella', 'Illimity', 'Banca Generali',
+    'Mediobanca', 'MPS', 'Deutsche Bank', 'HSBC', 'Santander',
+    'Chase', 'Lloyds Bank', 'AIA', 'Allianz', 'Generali', 'Zurich'
+].sort();
+
 export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId }) => {
     const { t } = useTranslation();
     const saveBroker = useVaultStore(state => state.saveBroker);
@@ -37,6 +46,9 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [isLoading, setIsLoading] = useState(false);
     const [customLogoPath, setCustomLogoPath] = useState<string | null>(null);
     const [useCustomLogo, setUseCustomLogo] = useState(false);
+    // Preset selector - future feature
+    // const [showPresetSelector, setShowPresetSelector] = useState(false);
+    // const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && editBrokerId) {
@@ -147,15 +159,15 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        {editBrokerId ? <Building2 className="text-blue-500" /> : <Wallet className="text-green-500" />}
+            <div className="bg-background-card rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-border">
+                <div className="p-6 border-b border-border flex items-center justify-between bg-background-subtle">
+                    <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                        {editBrokerId ? <Building2 className="text-primary" /> : <Wallet className="text-success" />}
                         {editBrokerId ? t('brokers.editBroker') : t('brokers.addBroker')}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="text-foreground-muted hover:text-foreground transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -165,61 +177,72 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                     {/* Name & Website Grid */}
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-foreground-muted mb-1">
                                 {t('brokers.nameLabel')}
                             </label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder={t('brokers.namePlaceholder')}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+                                    <Building2 size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder={t('brokers.namePlaceholder')}
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div className="flex gap-4">
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('brokers.website')} <span className="text-gray-400 font-normal">{t('brokers.autoFetchLogo')}</span>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('brokers.website')} <span className="text-foreground-subtle font-normal">({t('brokers.autoFetchLogo')})</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    value={website}
-                                    onChange={(e) => setWebsite(e.target.value)}
-                                    placeholder="e.g. revolut.com"
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                />
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+                                        <Globe size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={website}
+                                        onChange={(e) => setWebsite(e.target.value)}
+                                        placeholder="es. revolut.com"
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    />
+                                </div>
                             </div>
 
                             {/* Logo Preview and Upload */}
                             <div className="flex flex-col gap-2">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label className="block text-sm font-medium text-foreground-muted">
                                     {t('brokers.logo')}
                                 </label>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-12 h-12 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 flex items-center justify-center overflow-hidden relative">
+                                    <div className="w-16 h-16 rounded-lg border border-border bg-background-subtle flex items-center justify-center overflow-hidden relative">
                                         {logoUrl && !logoPreviewError ? (
                                             <img
                                                 src={logoUrl}
                                                 alt={t('brokers.preview')}
-                                                className="w-full h-full object-contain"
+                                                className="w-full h-full object-contain p-1"
                                                 onError={() => setLogoPreviewError(true)}
                                             />
                                         ) : (
-                                            <span className="text-xs text-gray-400">?</span>
+                                            <Landmark className="w-6 h-6 text-foreground-subtle" />
                                         )}
                                     </div>
                                     <button
                                         type="button"
                                         onClick={handleSelectLogo}
-                                        className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg transition-colors font-medium shadow-sm"
                                     >
+                                        <Upload size={16} />
                                         {t('brokers.uploadLogo')}
                                     </button>
                                 </div>
                                 {useCustomLogo && (
-                                    <p className="text-xs text-green-600 dark:text-green-400">
+                                    <p className="text-xs text-success">
                                         {t('brokers.customLogo')}
                                     </p>
                                 )}
@@ -229,7 +252,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
 
                     {/* Type */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-medium text-foreground-muted mb-1">
                             {t('brokers.typeLabel')}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -239,8 +262,8 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                     type="button"
                                     onClick={() => setType(tOption)}
                                     className={`px-3 py-2 text-sm rounded-lg border transition-all ${type === tOption
-                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium'
-                                        : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        ? 'border-primary bg-primary/10 text-primary font-medium'
+                                        : 'border-border hover:bg-background-muted text-foreground-muted hover:text-foreground'
                                         }`}
                                 >
                                     {t(`brokers.types.${tOption}`)}
@@ -251,7 +274,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
 
                     {/* Color */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-medium text-foreground-muted mb-1">
                             {t('common.color')}
                         </label>
                         <div className="flex items-center gap-3">
@@ -259,23 +282,23 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                 type="color"
                                 value={color}
                                 onChange={(e) => setColor(e.target.value)}
-                                className="h-10 w-10 p-1 rounded cursor-pointer bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                                className="h-10 w-10 p-1 rounded cursor-pointer bg-background border border-border"
                             />
-                            <span className="text-gray-500 dark:text-gray-400 font-mono text-sm">{color}</span>
+                            <span className="text-foreground-muted font-mono text-sm">{color}</span>
                         </div>
                     </div>
 
                     {/* Icon (Optional) */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {t('common.icon')} <span className="text-gray-400 font-normal">({t('common.optional')})</span>
+                        <label className="block text-sm font-medium text-foreground-muted mb-1">
+                            {t('common.icon')} <span className="text-foreground-subtle font-normal">({t('common.optional')})</span>
                         </label>
                         <input
                             type="text"
                             value={icon}
                             onChange={(e) => setIcon(e.target.value)}
                             placeholder="Emoji (e.g. 🏦)"
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                             maxLength={2}
                         />
                     </div>
@@ -285,17 +308,17 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            className="px-4 py-2 text-foreground-muted hover:bg-background-muted rounded-lg transition-colors"
                         >
                             {t('common.cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading || !name}
-                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+                            className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                             ) : (
                                 <>
                                     <Check size={18} />
