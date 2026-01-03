@@ -410,8 +410,15 @@ app.whenReady().then(async () => {
   // Register custom protocol to serve asset icons
   protocol.handle('asset', (request) => {
     const url = request.url.replace('asset://', '')
-    const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
+    
+    // Use same path logic as logo registry
+    const isDev = !app.isPackaged
+    const resourcesPath = isDev 
+      ? path.join(app.getAppPath(), 'resources')
+      : (process.resourcesPath || path.join(__dirname, '../../resources'))
+    
     const filePath = path.join(resourcesPath, 'asset-icons', url)
+    console.log('Asset protocol request:', url, '→', filePath)
     
     return net.fetch(`file://${filePath}`)
   })
