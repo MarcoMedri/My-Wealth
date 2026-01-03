@@ -82,30 +82,43 @@
     backdrop-filter: blur(2px);
 }
 
-/* Arrow - force uniform color with maximum specificity */
+/* Arrow - nuclear option: override everything */
+div[class*="shepherd"] .shepherd-arrow,
 .shepherd-element .shepherd-arrow,
 .shepherd-theme-custom .shepherd-arrow,
-[class*="shepherd-element"] .shepherd-arrow {
+[class*="shepherd-element"] .shepherd-arrow,
+[data-shepherd-step-id]~* .shepherd-arrow {
     width: 16px !important;
     height: 16px !important;
+    background: transparent !important;
 }
 
+div[class*="shepherd"] .shepherd-arrow::before,
 .shepherd-element .shepherd-arrow::before,
 .shepherd-theme-custom .shepherd-arrow::before,
-[class*="shepherd-element"] .shepherd-arrow::before {
+[class*="shepherd-element"] .shepherd-arrow::before,
+[data-shepherd-step-id]~* .shepherd-arrow::before {
     background: rgb(var(--background-card)) !important;
+    background-color: rgb(var(--background-card)) !important;
     border: none !important;
+    border-color: transparent !important;
     box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
 }
 
-/* Force for all attachment positions with maximum specificity */
+/* Force for all attachment positions - absolute nuclear option */
 .shepherd-element-attached-top .shepherd-arrow::before,
 .shepherd-element-attached-bottom .shepherd-arrow::before,
 .shepherd-element-attached-left .shepherd-arrow::before,
 .shepherd-element-attached-right .shepherd-arrow::before,
-[class*="shepherd-element-attached"] .shepherd-arrow::before {
+[class*="shepherd-element-attached-top"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-bottom"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-left"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-right"] .shepherd-arrow::before {
     background: rgb(var(--background-card)) !important;
+    background-color: rgb(var(--background-card)) !important;
     border: none !important;
+    border-color: transparent !important;
+    border-width: 0 !important;
     box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
 }
 
