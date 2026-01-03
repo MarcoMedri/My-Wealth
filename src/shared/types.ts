@@ -120,6 +120,9 @@ export const IPC_CHANNELS = {
   // Exchange Rates
   EXCHANGE_RATES_GET: 'exchange-rates:get',
 
+  // Performance/Analytics
+  PERFORMANCE_GET_METRICS: 'performance:getMetrics',
+
   // Developer operations (dev-only)
   DEV_SEED: 'dev:seed',
   DEV_CLEAR: 'dev:clear',

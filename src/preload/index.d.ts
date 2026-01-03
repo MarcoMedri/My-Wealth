@@ -78,6 +78,9 @@ interface API {
   // Exchange Rates
   getExchangeRates: (baseCurrency: string) => Promise<Record<string, number>>;
 
+  // Performance / Analytics
+  getPerformanceMetrics: (params?: { startDate?: string, endDate?: string }) => Promise<{ twr: number, mwr: number, absoluteReturn: number, startValue: number, endValue: number }>;
+
   // Developer (dev-only)
   generateDemoData: () => Promise<{ accounts: number; categories: number; transactions: number }>
   clearVaultData: () => Promise<{ success: boolean }>

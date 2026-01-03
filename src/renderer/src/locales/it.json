@@ -351,6 +351,31 @@
     "allocationByGeography": "Allocazione per Geografia",
     "sell": "Vendi",
     "portfolioDistribution": "Distribuzione Portafoglio",
+    "performance": {
+      "title": "Metriche di Performance",
+      "twr": "TWR",
+      "twrDescription": "Rendimento Pesato Tempo",
+      "mwr": "MWR",
+      "mwrDescription": "Rendimento Pesato Denaro",
+      "absoluteReturn": "Assoluto",
+      "absoluteDescription": "Guadagno/Perdita Totale",
+      "chartTitle": "Valore Portafoglio nel Tempo",
+      "needMoreSnapshots": "Crea più snapshot per vedere la tua performance nel tempo"
+    },
+    "allocation": {
+      "title": "Allocazione Portafoglio",
+      "byType": "Per Tipo",
+      "byBroker": "Per Broker",
+      "byCurrency": "Per Valuta"
+    },
+    "types": {
+      "stock": "Azioni",
+      "etf": "ETF",
+      "crypto": "Crypto",
+      "bond": "Obbligazioni",
+      "fund": "Fondi",
+      "other": "Altro"
+    },
     "moreItems": "+ altri {{count}}",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",

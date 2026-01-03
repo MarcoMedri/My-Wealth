@@ -10,6 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import { cn } from '../../lib/utils';
+import { ReturnMetricsCard } from './ReturnMetricsCard';
+import { PerformanceChart } from './PerformanceChart';
+import { AllocationPieChart } from './AllocationPieChart';
 
 import {
     Chart as ChartJS,
@@ -327,7 +330,14 @@ export function InvestmentDashboard() {
                 <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
             </div>
 
-            {/* Row 3: Holdings Table - Full Width */}
+            {/* Row 3: Performance Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <ReturnMetricsCard />
+                <PerformanceChart />
+                <AllocationPieChart />
+            </div>
+
+            {/* Row 4: Holdings Table - Full Width */}
             <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden min-h-[650px] flex flex-col">
                 <div className="px-6 py-4 border-b border-border flex justify-between items-center">
                     <span className="font-semibold text-foreground">{t('investments.holdings')}</span>

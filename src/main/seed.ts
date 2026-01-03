@@ -323,6 +323,20 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     currency: 'EUR',
     currentPrice: 500000, // €5,000.00 (unit)
     metadata: { exchange: 'Private', region: 'Switzerland' }
+  },
+  // ========================================================================
+  // TEST SCENARIO: Predictable asset for TWR/MWR verification
+  // Buy: 500 shares @ €100 = €50,000 investment
+  // Current: €110/share = €55,000 value
+  // Expected Return: +10%
+  // ========================================================================
+  {
+    symbol: 'TEST-ETF-10PCT',
+    name: 'Test ETF (+10% Scenario)',
+    type: 'etf',
+    currency: 'EUR',
+    currentPrice: 11000, // €110.00 (current)
+    metadata: { exchange: 'TEST', region: 'Test' }
   }
 ];
 
@@ -601,14 +615,29 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
   
   // Create holdings for the investment account
   assets.forEach(asset => {
-    // Generate random quantity
-    const quantity = asset.type === 'crypto' 
-      ? faker.number.float({ min: 0.1, max: 2.5, fractionDigits: 4 })
-      : faker.number.int({ min: 10, max: 100 });
-      
-    // Generate somewhat realistic buy price (current price +/- 20%)
-    const variation = faker.number.float({ min: 0.8, max: 1.2 });
-    const averageBuyPrice = Math.round(asset.currentPrice * variation);
+    // ========================================================================
+    // SPECIAL CASE: Test scenario asset with fixed values for TWR verification
+    // ========================================================================
+    let quantity: number;
+    let averageBuyPrice: number;
+    
+    if (asset.symbol === 'TEST-ETF-10PCT') {
+      // Fixed values for predictable +10% return
+      // Buy: 500 shares @ €100.00 = €50,000 investment
+      // Current: €110.00/share = €55,000 value
+      // Return: +10%
+      quantity = 500;
+      averageBuyPrice = 10000; // €100.00 in cents
+    } else {
+      // Generate random quantity for other assets
+      quantity = asset.type === 'crypto' 
+        ? faker.number.float({ min: 0.1, max: 2.5, fractionDigits: 4 })
+        : faker.number.int({ min: 10, max: 100 });
+        
+      // Generate somewhat realistic buy price (current price +/- 20%)
+      const variation = faker.number.float({ min: 0.8, max: 1.2 });
+      averageBuyPrice = Math.round(asset.currentPrice * variation);
+    }
 
     const holding: Holding = {
       id: randomUUID(),

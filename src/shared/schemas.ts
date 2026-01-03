@@ -824,6 +824,22 @@ export const WorkspaceSettingsSchema = z.object({
    * false = snapshot directly
    */
   autoRefreshOnSnapshot: z.boolean().nullable().optional(),
+  
+  /**
+   * Investments Dashboard preferences
+   */
+  investmentsDashboard: z.object({
+    dateRange: z.string().optional(),
+    includeClosed: z.boolean().optional(),
+  }).optional(),
+
+  /**
+   * Accounts Dashboard preferences
+   */
+  accountsDashboard: z.object({
+    dateRange: z.string().optional(),
+    selectedAccountIds: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;

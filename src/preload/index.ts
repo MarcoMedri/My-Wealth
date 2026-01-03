@@ -181,6 +181,9 @@ const api = {
   refreshInvestmentPrices: (): Promise<{ updated: number, failed: number, total: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES)
   },
+  getPerformanceMetrics: (params?: { startDate?: string, endDate?: string }): Promise<{ twr: number, mwr: number, absoluteReturn: number, startValue: number, endValue: number }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.PERFORMANCE_GET_METRICS, params)
+  },
   deleteAsset: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.ASSET_DELETE, id)
   },

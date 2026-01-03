@@ -350,6 +350,31 @@
     "allocationByGeography": "Allocation by Geography",
     "sell": "Sell",
     "portfolioDistribution": "Portfolio Distribution",
+    "performance": {
+      "title": "Performance Metrics",
+      "twr": "TWR",
+      "twrDescription": "Time-Weighted Return",
+      "mwr": "MWR",
+      "mwrDescription": "Money-Weighted Return",
+      "absoluteReturn": "Absolute",
+      "absoluteDescription": "Total Gain/Loss",
+      "chartTitle": "Portfolio Value Over Time",
+      "needMoreSnapshots": "Take more snapshots to see your performance over time"
+    },
+    "allocation": {
+      "title": "Portfolio Allocation",
+      "byType": "By Type",
+      "byBroker": "By Broker",
+      "byCurrency": "By Currency"
+    },
+    "types": {
+      "stock": "Stocks",
+      "etf": "ETF",
+      "crypto": "Crypto",
+      "bond": "Bonds",
+      "fund": "Funds",
+      "other": "Other"
+    },
     "moreItems": "+ {{count}} more",
     "refreshSuccess": "✅ {{count}} prices updated successfully",
     "refreshPartial": "⚠️ Updated {{updated}} prices ({{failed}} failed)",

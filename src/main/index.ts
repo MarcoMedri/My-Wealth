@@ -373,6 +373,15 @@ function registerIpcHandlers(): void {
     return exchangeRateManager.getExchangeRates(baseCurrency);
   });
 
+  // ========== PERFORMANCE / ANALYTICS ==========
+  ipcMain.handle(IPC_CHANNELS.PERFORMANCE_GET_METRICS, async (_event, params?: { startDate?: string, endDate?: string }) => {
+    const { PerformanceService } = await import('./services/PerformanceService');
+    const service = new PerformanceService();
+    const startDate = params?.startDate ? new Date(params.startDate) : undefined;
+    const endDate = params?.endDate ? new Date(params.endDate) : new Date();
+    return service.calculatePortfolioPerformance(startDate, endDate);
+  });
+
   // ========== DEVELOPER (dev-only) ==========
   
   ipcMain.handle(IPC_CHANNELS.DEV_SEED, async () => {
