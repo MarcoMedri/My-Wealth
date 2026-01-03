@@ -82,7 +82,7 @@
     backdrop-filter: blur(2px);
 }
 
-/* Arrow - improved aesthetics */
+/* Arrow - force consistent color for all positions */
 .shepherd-theme-custom .shepherd-arrow {
     width: 16px !important;
     height: 16px !important;
@@ -92,6 +92,15 @@
     background: rgb(var(--background-card)) !important;
     border: none !important;
     box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
+}
+
+/* Force arrow color for all attachment positions */
+.shepherd-element-attached-top .shepherd-arrow::before,
+.shepherd-element-attached-bottom .shepherd-arrow::before,
+.shepherd-element-attached-left .shepherd-arrow::before,
+.shepherd-element-attached-right .shepherd-arrow::before {
+    background: rgb(var(--background-card)) !important;
+    border: none !important;
 }
 
 /* Highlight element */
