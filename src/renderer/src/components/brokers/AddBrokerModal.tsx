@@ -179,10 +179,18 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
 
             // Zod validation would happen here or in main process, but for now we trust the form
             await saveBroker(broker);
+
+            // Show success toast
+            if (editBrokerId) {
+                toast.success(t('brokers.updated', 'Broker updated successfully'));
+            } else {
+                toast.success(t('brokers.created', 'Broker created successfully'));
+            }
+
             onClose();
         } catch (error) {
             console.error('Failed to save broker', error);
-            alert(t('errors.saveFailed'));
+            toast.error(t('brokers.saveFailed', 'Failed to save broker'));
         } finally {
             setIsLoading(false);
         }

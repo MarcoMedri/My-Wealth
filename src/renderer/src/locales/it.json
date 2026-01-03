@@ -213,6 +213,9 @@
     "deleteTitle": "Elimina Broker",
     "deleted": "Broker eliminato con successo",
     "confirmDelete": "Eliminare questo broker e tutti i dati associati? Questa azione non può essere annullata.",
+    "created": "Broker creato con successo",
+    "updated": "Broker aggiornato con successo",
+    "saveFailed": "Impossibile salvare il broker",
     "types": {
       "bank": "Banca",
       "broker": "Broker",

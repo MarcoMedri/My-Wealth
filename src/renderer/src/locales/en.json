@@ -111,6 +111,9 @@
     "deleteTitle": "Delete Broker",
     "deleted": "Broker deleted successfully",
     "confirmDelete": "Delete this broker and all associated data? This action cannot be undone.",
+    "created": "Broker created successfully",
+    "updated": "Broker updated successfully",
+    "saveFailed": "Failed to save broker",
     "types": {
         "bank": "Bank",
         "broker": "Broker",
