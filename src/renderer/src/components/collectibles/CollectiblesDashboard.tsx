@@ -183,15 +183,13 @@ export function CollectiblesDashboard() {
                                 </div>
                             </div>
 
-                            <div className="mt-4 pt-3 border-t border-border flex justify-between items-end">
-                                <div>
-                                    <div className="text-xs text-foreground-muted">{t('collectibles.currentValue')}</div>
-                                    <div className="text-lg font-bold text-foreground">
-                                        {formatMoney(item.currentValue, item.currency)}
-                                    </div>
+                            <div className="mt-4 pt-3 border-t border-border">
+                                <div className="text-xs text-foreground-muted">{t('collectibles.currentValue')}</div>
+                                <div className="text-lg font-bold text-foreground">
+                                    {formatMoney(item.currentValue, item.currency)}
                                 </div>
                                 {item.purchasePrice && (
-                                    <div className={`text-sm font-medium ${appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <div className={`text-sm font-medium mt-1 ${appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                         {appreciation >= 0 ? '+' : ''}{formatMoney(appreciation, item.currency)}
                                     </div>
                                 )}

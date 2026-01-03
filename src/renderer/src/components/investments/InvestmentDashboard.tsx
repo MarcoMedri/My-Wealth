@@ -12,7 +12,6 @@ import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import { cn } from '../../lib/utils';
 import { ReturnMetricsCard } from './ReturnMetricsCard';
 import { PerformanceChart } from './PerformanceChart';
-import { AllocationPieChart } from './AllocationPieChart';
 
 import {
     Chart as ChartJS,
@@ -330,11 +329,14 @@ export function InvestmentDashboard() {
                 <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
             </div>
 
-            {/* Row 3: Performance Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Row 3: Performance Metrics */}
+            <div className="grid grid-cols-1 gap-6">
                 <ReturnMetricsCard />
+            </div>
+
+            {/* Row 4: Portfolio Value Over Time */}
+            <div className="grid grid-cols-1 gap-6">
                 <PerformanceChart />
-                <AllocationPieChart />
             </div>
 
             {/* Row 4: Holdings Table - Full Width */}
@@ -475,11 +477,11 @@ function KpiCard({ title, value, currency, percent, isChange }: { title: string,
     const formatMoney = useFormatMoney();
 
     return (
-        <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
-            <div className="text-sm text-foreground-muted mb-1">{title}</div>
-            <div className={`text-2xl font-bold flex items-center gap-2 ${colorClass}`}>
-                {isChange && (isPositive ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />)}
-                {isChange && isPositive ? '+' : ''}{formatMoney(value, currency)}
+        <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border overflow-hidden">
+            <div className="text-sm text-foreground-muted mb-1 truncate">{title}</div>
+            <div className={`text-lg sm:text-xl lg:text-2xl font-bold flex items-center gap-1 ${colorClass} truncate`}>
+                {isChange && (isPositive ? <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> : <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />)}
+                <span className="truncate">{isChange && isPositive ? '+' : ''}{formatMoney(value, currency)}</span>
             </div>
             {percent !== undefined && (
                 <div className={`text-sm mt-1 ${isChange ? (isPositive ? 'text-emerald-500/80' : 'text-rose-500/80') : 'text-foreground-muted'}`}>
