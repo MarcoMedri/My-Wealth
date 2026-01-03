@@ -4,12 +4,17 @@
     background: rgb(var(--background-card));
     border: 1px solid rgb(var(--border));
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.1);
+    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.15);
     max-width: 400px;
 }
 
 .shepherd-theme-custom .shepherd-header {
     padding: 1rem 1rem 0.5rem;
+    background: rgb(var(--background-subtle));
+    border-radius: 12px 12px 0 0;
+    margin: -1px -1px 0 -1px;
+    border: 1px solid rgb(var(--border));
+    border-bottom: none;
 }
 
 .shepherd-theme-custom .shepherd-title {
@@ -20,7 +25,7 @@
 }
 
 .shepherd-theme-custom .shepherd-text {
-    color: rgb(var(--foreground-muted));
+    color: rgb(var(--foreground));
     font-size: 0.875rem;
     line-height: 1.6;
     padding: 0.5rem 1rem 1rem;
@@ -50,13 +55,14 @@
 }
 
 .shepherd-theme-custom .shepherd-button-secondary {
-    background: transparent;
-    color: rgb(var(--foreground-muted));
+    background: rgb(var(--background-subtle));
+    color: rgb(var(--foreground));
     border: 1px solid rgb(var(--border));
 }
 
 .shepherd-theme-custom .shepherd-button-secondary:hover {
     background: rgb(var(--background-muted));
+    border-color: rgb(var(--border-muted));
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon {
