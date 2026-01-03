@@ -242,14 +242,10 @@ function registerIpcHandlers(): void {
     
     const registryPath = path.join(resourcesPath, 'logo-registry.json')
     
-    console.log('Loading logo registry from:', registryPath)
-    console.log('File exists:', fs.existsSync(registryPath))
-    
     try {
       if (fs.existsSync(registryPath)) {
         const content = fs.readFileSync(registryPath, 'utf-8')
         const parsed = JSON.parse(content)
-        console.log('Logo registry loaded successfully:', parsed.logos?.length || 0, 'logos')
         return parsed
       } else {
         console.error('Logo registry file not found at:', registryPath)
@@ -420,7 +416,6 @@ app.whenReady().then(async () => {
       : (process.resourcesPath || path.join(__dirname, '../../resources'))
     
     const filePath = path.join(resourcesPath, 'asset-icons', url)
-    console.log('Asset protocol request:', url, '→', filePath)
     
     return net.fetch(`file://${filePath}`)
   })

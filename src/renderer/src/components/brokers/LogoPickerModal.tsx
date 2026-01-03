@@ -85,7 +85,6 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
         const matches = logoRegistry.filter(preset =>
             preset.name.toLowerCase().includes(query.toLowerCase())
         );
-        console.log('Search query:', query, 'Matches found:', matches.length, matches);
         setLocalResults(matches);
     };
 
