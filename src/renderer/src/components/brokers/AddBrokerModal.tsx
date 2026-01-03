@@ -133,18 +133,21 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             const now = new Date().toISOString();
             const id = editBrokerId || generateId();
 
-            // Attempt to download/save logo
+            // Determine logo path based on source
             let logoPath: string | null = null;
 
             if (useCustomLogo && customLogoPath) {
-                // Save custom logo
+                // Save custom uploaded logo
                 try {
                     logoPath = await window.api.saveBrokerLogo(customLogoPath, id);
                 } catch (err) {
                     console.error('Failed to save custom logo', err);
                 }
+            } else if (logoUrl && logoUrl.startsWith('asset://')) {
+                // Preset logo from registry - save the asset:// URL directly
+                logoPath = logoUrl;
             } else if (website && !logoPreviewError) {
-                // Auto-fetch from Clearbit
+                // Auto-fetch from Clearbit (legacy, if website field is re-added)
                 try {
                     logoPath = await window.api.downloadBrokerLogo(website, id);
                 } catch (err) {
