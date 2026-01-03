@@ -14,7 +14,7 @@
     *   Detailed performance metrics including Day Change, Total Return, and Cost Basis.
     *   Support for buy/sell transactions with automatic P/L calculation.
 *   **🏦 Comprehensive Net Worth Tracking**:
-    *   **Brokers & Institutions**: Organize accounts by broker/bank with custom logos (auto-fetch from Clearbit or manual upload)
+    *   **Brokers & Institutions**: Organize accounts by broker/bank with a preset-first creation flow (47+ built-in presets) or custom manual entry.
     *   **Accounts**: Track checking, savings, credit cards, loans, and investment accounts with manual balance override support
  reconciliation.
     *   **Conti Deposito**: Track high-yield deposit accounts with maturity tracking.

@@ -47,6 +47,10 @@ My Wealth is a **local-first** desktop application built with **Electron**. It f
 └── /shared              # Code shared between Main and Renderer
     ├── schemas.ts       # Zod data schemas (Single Source of Truth)
     └── types.ts         # TypeScript interfaces derived from schemas
+    
+├── /resources           # Static resources
+│   ├── logo-registry.json # Registry of preset brokers
+│   └── /asset-icons     # High-res logos for presets
 ```
 
 ---
@@ -62,6 +66,7 @@ My Wealth is a **local-first** desktop application built with **Electron**. It f
 *   **React-Window**: Virtual scrolling for performance.
 *   **Recharts / Chart.js**: Data visualization.
 *   **i18next**: Internationalization (English/Italian).
+*   **Sonner**: Toast notifications.
 
 ---
 
@@ -151,6 +156,14 @@ Window dimensions and position are automatically saved:
 - Schema: `AppSettingsSchema.windowBounds`
 - Main process: `createWindow()` in `src/main/index.ts`
 - Methods: `VaultManager.getSettings()`, `VaultManager.updateSettings()`
+
+### Preset-First Broker Creation
+A streamlined flow for adding brokers using a pre-defined registry:
+- **Registry**: `resources/logo-registry.json` contains metadata for 47+ brokers.
+- **Protocol**: Custom `asset://` protocol serves secure local images from `resources/asset-icons/`.
+- **UI**: `BrokerPresetSelectorModal` allows quick filtering and selection.
+- **Fallback**: Users can still create custom brokers or upload custom logos.
+- **UX**: Edit/Delete buttons on hover in sidebar, simplified forms.
 
 ---
 
