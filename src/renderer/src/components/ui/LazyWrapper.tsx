@@ -44,6 +44,7 @@ interface LazyChartProps {
 /**
  * Lazy-load chart components with appropriate skeleton
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function LazyChart({ chart, height = 300, skeletonType: _skeletonType = 'line' }: LazyChartProps) {
     const skeleton = (
         <div

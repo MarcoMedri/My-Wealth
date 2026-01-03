@@ -26,8 +26,7 @@ export interface RecurringTransactionInput {
 export function calculateNextExecutionDate(
     frequency: RecurrenceFrequency,
     fromDate: Date,
-    dayOfMonth?: number,
-    dayOfWeek?: number
+    dayOfMonth?: number
 ): Date {
     const next = new Date(fromDate);
     
@@ -133,8 +132,7 @@ export function execute(recurring: RecurringTransaction): RecurringTransaction {
     const nextExecution = calculateNextExecutionDate(
         recurring.frequency,
         new Date(recurring.nextExecutionDate),
-        recurring.dayOfMonth,
-        recurring.dayOfWeek
+        recurring.dayOfMonth
     );
     
     return {

@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
-import { formatMoney } from '../../../shared/schemas';
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';

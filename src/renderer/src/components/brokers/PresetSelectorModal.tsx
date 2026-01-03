@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Building2, Plus } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import type { LogoMetadata, LogoCategory } from '../../../../shared/types';
 
 interface PresetSelectorModalProps {
@@ -32,7 +32,7 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
 
         // Sort categories in desired order
         const categoryOrder: LogoCategory[] = ['bank', 'fintech', 'broker', 'crypto', 'insurance', 'other'];
-        const sorted: Record<LogoCategory, LogoMetadata[]> = {} as any;
+        const sorted: Record<LogoCategory, LogoMetadata[]> = {} as Record<LogoCategory, LogoMetadata[]>;
 
         categoryOrder.forEach(cat => {
             if (grouped[cat]) {
