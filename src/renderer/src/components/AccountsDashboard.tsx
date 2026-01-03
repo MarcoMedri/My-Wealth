@@ -218,7 +218,7 @@ export default function AccountsDashboard() {
             <div className="flex-1 min-h-[650px] flex gap-6 px-6 pb-6">
                 {/* Main Feed - Full Width */}
                 <div className="flex-1 flex flex-col bg-background-card rounded-xl border border-border overflow-hidden shadow-sm">
-                    <TransactionTable transactions={filteredTransactions} dateRange={dateRange} />
+                    <TransactionTable dateRange={dateRange} selectedAccountIds={selectedAccountIds} />
                 </div>
             </div>
         </div>

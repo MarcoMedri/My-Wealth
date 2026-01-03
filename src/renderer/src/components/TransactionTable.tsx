@@ -25,9 +25,10 @@ const columnHelper = createColumnHelper<Transaction>();
 
 interface TransactionTableProps {
     dateRange?: DateRange;
+    selectedAccountIds?: string[];
 }
 
-export default function TransactionTable({ dateRange = 'all' }: TransactionTableProps) {
+export default function TransactionTable({ dateRange = 'all', selectedAccountIds = [] }: TransactionTableProps) {
     const { t } = useTranslation();
     const allTransactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
@@ -46,6 +47,12 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
             return txDate >= startDate && txDate <= endDate;
         });
     }, [allTransactions, dateRange]);
+
+    // Further filter by selected accounts
+    const filteredTransactions = useMemo(() => {
+        if (selectedAccountIds.length === 0) return transactions;
+        return transactions.filter(tx => selectedAccountIds.includes(tx.accountId));
+    }, [transactions, selectedAccountIds]);
 
     // Modal State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -168,15 +175,9 @@ export default function TransactionTable({ dateRange = 'all' }: TransactionTable
         })
     ], [categoryMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate, getCategoryName]);
 
-    // Sort transactions
-    const sortedData = useMemo(() => {
-        return [...transactions].sort((a, b) =>
-            new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-    }, [transactions]);
-
+    // Sort transactions (sorted by date desc by default in table state)
     const table = useReactTable({
-        data: sortedData,
+        data: filteredTransactions,
         columns,
         state: { sorting },
         onSortingChange: setSorting,
