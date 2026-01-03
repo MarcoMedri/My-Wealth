@@ -218,14 +218,14 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                         <button
                                             key={preset.name}
                                             onClick={() => {
-                                                onSelectLogo(`asset://${preset.icon}`, 'brand', preset);
+                                                onSelectLogo(`asset://${encodeURIComponent(preset.icon)}`, 'brand', preset);
                                                 onClose();
                                             }}
                                             className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
                                         >
                                             <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden">
                                                 <img
-                                                    src={`asset://${preset.icon}`}
+                                                    src={`asset://${encodeURIComponent(preset.icon)}`}
                                                     alt={preset.name}
                                                     className="w-full h-full object-cover"
                                                 />
