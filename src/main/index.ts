@@ -233,13 +233,26 @@ function registerIpcHandlers(): void {
   // ========== LOGO REGISTRY ==========
 
   ipcMain.handle(IPC_CHANNELS.LOGO_GET_REGISTRY, async () => {
-    const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
+    // In dev mode, resources are in the project root
+    // In production, they're in app.asar or process.resourcesPath
+    const isDev = !app.isPackaged
+    const resourcesPath = isDev 
+      ? path.join(app.getAppPath(), 'resources')
+      : (process.resourcesPath || path.join(__dirname, '../../resources'))
+    
     const registryPath = path.join(resourcesPath, 'logo-registry.json')
+    
+    console.log('Loading logo registry from:', registryPath)
+    console.log('File exists:', fs.existsSync(registryPath))
     
     try {
       if (fs.existsSync(registryPath)) {
         const content = fs.readFileSync(registryPath, 'utf-8')
-        return JSON.parse(content)
+        const parsed = JSON.parse(content)
+        console.log('Logo registry loaded successfully:', parsed.logos?.length || 0, 'logos')
+        return parsed
+      } else {
+        console.error('Logo registry file not found at:', registryPath)
       }
     } catch (error) {
       console.error('Failed to load logo registry:', error)

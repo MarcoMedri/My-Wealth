@@ -48,7 +48,9 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
         const loadRegistry = async () => {
             try {
                 const registry = await window.api.getLogoRegistry();
+                console.log('Logo registry loaded:', registry);
                 setLogoRegistry(registry.logos);
+                console.log('Logo registry set:', registry.logos.length, 'logos');
             } catch (error) {
                 console.error('Failed to load logo registry:', error);
             }
