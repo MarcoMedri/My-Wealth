@@ -108,9 +108,11 @@ export default function BrokersSidebar() {
                                         )}
                                         style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
                                     >
-                                        {broker.logoPath && vaultPath ? (
+                                        {broker.logoPath ? (
                                             <img
-                                                src={`file://${vaultPath}/${broker.logoPath}`}
+                                                src={broker.logoPath.startsWith('asset://')
+                                                    ? broker.logoPath
+                                                    : `file://${vaultPath}/${broker.logoPath}`}
                                                 alt={broker.name}
                                                 className="w-full h-full object-contain"
                                             />
