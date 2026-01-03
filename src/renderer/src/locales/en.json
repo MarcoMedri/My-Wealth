@@ -108,6 +108,9 @@
     "searchByUrl": "Search by Website URL",
     "orUploadCustom": "Or upload a custom logo",
     "importHint": "Use \"Import CSV\" to automatically create investment accounts.",
+    "deleteTitle": "Delete Broker",
+    "deleted": "Broker deleted successfully",
+    "confirmDelete": "Delete this broker and all associated data? This action cannot be undone.",
     "types": {
         "bank": "Bank",
         "broker": "Broker",

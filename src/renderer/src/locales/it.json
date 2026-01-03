@@ -210,6 +210,9 @@
     "searchByUrl": "Cerca per URL del Sito",
     "orUploadCustom": "Oppure carica un logo personalizzato",
     "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
+    "deleteTitle": "Elimina Broker",
+    "deleted": "Broker eliminato con successo",
+    "confirmDelete": "Eliminare questo broker e tutti i dati associati? Questa azione non può essere annullata.",
     "types": {
       "bank": "Banca",
       "broker": "Broker",
