@@ -118,6 +118,10 @@ const api = {
   getPresetLogoPath: (brokerName: string): Promise<string | null> => {
     return ipcRenderer.invoke(IPC_CHANNELS.BROKER_GET_PRESET_LOGO, brokerName)
   },
+
+  getLogoRegistry: (): Promise<import('../shared/types').LogoRegistry> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.LOGO_GET_REGISTRY)
+  },
   /** Save a selected broker logo to the vault */
   saveBrokerLogo: (sourcePath: string, brokerId: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.BROKER_SAVE_LOGO, sourcePath, brokerId)

@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Building2, Wallet, Globe, Upload, Landmark } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
+import type { LogoMetadata } from '../../../../shared/types';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
@@ -23,17 +23,6 @@ interface AddBrokerModalProps {
 
 const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'other'] as const;
 
-// Preset broker logos available in resources/asset-icons
-const PRESET_LOGOS = [
-    'AIA', 'Allianz', 'AXA', 'BCC', 'Binance', 'BPER', 'BPM', 'BPPB', 'BPSO',
-    'Banca AideXa', 'Banca Generali', 'Banca Ifis', 'Banco Desio', 'Chase',
-    'Coinbase', 'Credem', 'Crédit Agricole', 'Crédit Mutuel', 'Degiro',
-    'Deutsche Bank', 'Directa Sim', 'Etica Sgr', 'Fineco', 'Generali',
-    'HSBC', 'Hype', 'Illimity', 'Interactive Brokers', 'Lloyds Bank',
-    'Mediolanum', 'MPS', 'N26', 'Revolut', 'Robinhood', 'Santander',
-    'Sella', 'Trade Republic'
-].sort();
-
 export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId }) => {
     const { t } = useTranslation();
     const saveBroker = useVaultStore(state => state.saveBroker);
@@ -51,6 +40,20 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [useCustomLogo, setUseCustomLogo] = useState(false);
     const [showPresetSelector, setShowPresetSelector] = useState(false);
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+    const [logoRegistry, setLogoRegistry] = useState<LogoMetadata[]>([]);
+
+    // Load logo registry on mount
+    useEffect(() => {
+        const loadRegistry = async () => {
+            try {
+                const registry = await window.api.getLogoRegistry();
+                setLogoRegistry(registry.logos);
+            } catch (error) {
+                console.error('Failed to load logo registry:', error);
+            }
+        };
+        loadRegistry();
+    }, []);
 
     useEffect(() => {
         if (isOpen && editBrokerId) {
@@ -106,11 +109,10 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
         }
     };
 
-    const handlePresetSelect = (presetName: string) => {
-        setName(presetName);
-        const websiteGuess = presetName.toLowerCase().replace(/\s+/g, '') + '.com';
-        setWebsite(websiteGuess);
-        setSelectedPreset(presetName);
+    const handlePresetSelect = (preset: LogoMetadata) => {
+        setName(preset.name);
+        setWebsite(preset.website || `${preset.name.toLowerCase().replace(/\s+/g, '')}.com`);
+        setSelectedPreset(preset.name);
         setUseCustomLogo(false);
         setShowPresetSelector(false);
     };
@@ -362,7 +364,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 isOpen={showPresetSelector}
                 onClose={() => setShowPresetSelector(false)}
                 onSelect={handlePresetSelect}
-                presets={PRESET_LOGOS}
+                presets={logoRegistry}
             />
         </div>
     );

@@ -72,6 +72,9 @@ export const IPC_CHANNELS = {
   BROKER_GET_PRESET_LOGO: 'broker:getPresetLogo',
   BROKER_SAVE_LOGO: 'broker:saveLogo',
   
+  // Logo registry
+  LOGO_GET_REGISTRY: 'logo:getRegistry',
+  
   // Import operations
   IMPORT_CSV_PREVIEW: 'import:csvPreview',
   IMPORT_CSV_EXECUTE: 'import:csvExecute',
@@ -232,3 +235,21 @@ export const SUPPORTED_TIME_FORMATS: { code: TimeFormat; label: string }[] = [
   { code: 'HH:mm', label: '24-hour (14:30)' },
   { code: 'hh:mm a', label: '12-hour (02:30 PM)' },
 ];
+
+// ============================================================================
+// Logo Registry
+// ============================================================================
+
+export type LogoCategory = 'bank' | 'fintech' | 'broker' | 'crypto' | 'insurance' | 'other';
+
+export interface LogoMetadata {
+  name: string;
+  icon: string;
+  category: LogoCategory;
+  website?: string;
+}
+
+export interface LogoRegistry {
+  version: string;
+  logos: LogoMetadata[];
+}

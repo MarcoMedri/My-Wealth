@@ -38,6 +38,7 @@ interface API {
   downloadBrokerLogo: (domain: string, brokerId: string) => Promise<string | null>
   selectBrokerLogo: () => Promise<string | null>
   getPresetLogoPath: (brokerName: string) => Promise<string | null>
+  getLogoRegistry: () => Promise<import('../shared/types').LogoRegistry>
   saveBrokerLogo: (sourcePath: string, brokerId: string) => Promise<string>
   
   // Import

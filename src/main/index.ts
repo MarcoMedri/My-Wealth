@@ -230,6 +230,25 @@ function registerIpcHandlers(): void {
     return vaultManager.saveBrokerLogo(sourcePath, brokerId)
   })
 
+  // ========== LOGO REGISTRY ==========
+
+  ipcMain.handle(IPC_CHANNELS.LOGO_GET_REGISTRY, async () => {
+    const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
+    const registryPath = path.join(resourcesPath, 'logo-registry.json')
+    
+    try {
+      if (fs.existsSync(registryPath)) {
+        const content = fs.readFileSync(registryPath, 'utf-8')
+        return JSON.parse(content)
+      }
+    } catch (error) {
+      console.error('Failed to load logo registry:', error)
+    }
+    
+    // Return empty registry if file not found or error
+    return { version: '1.0.0', logos: [] }
+  })
+
   // ========== CSV IMPORT ==========
   ipcMain.handle(IPC_CHANNELS.IMPORT_GET_PRESETS, async () => {
     const { IMPORT_PRESETS } = await import('./csv-importer')
