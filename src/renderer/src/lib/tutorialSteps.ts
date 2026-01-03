@@ -28,7 +28,7 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
   },
   {
     id: 'brokers',
-    attachTo: { element: '[data-tour="sidebar"]', on: 'right' },
+    attachTo: { element: '[data-tour="sidebar"]', on: 'left' },
     title: t('tutorial.brokers.title'),
     text: t('tutorial.brokers.text'),
     buttons: [
@@ -51,7 +51,7 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
   },
   {
     id: 'sidebar',
-    attachTo: { element: '[data-tour="sidebar"]', on: 'right' },
+    attachTo: { element: '[data-tour="sidebar"]', on: 'left' },
     title: t('tutorial.sidebar.title'),
     text: t('tutorial.sidebar.text'),
     buttons: [
