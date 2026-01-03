@@ -71,12 +71,12 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                                     onClick={() => onSelect(preset)}
                                     className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
                                 >
-                                    <div className="w-12 h-12 rounded-lg bg-background-subtle flex items-center justify-center overflow-hidden">
+                                    <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden border border-border">
                                         {logoUrl ? (
                                             <img
                                                 src={logoUrl}
                                                 alt={preset}
-                                                className="w-full h-full object-contain p-1"
+                                                className="w-full h-full object-cover"
                                             />
                                         ) : (
                                             <Building2 className="w-6 h-6 text-foreground-muted group-hover:text-primary transition-colors" />

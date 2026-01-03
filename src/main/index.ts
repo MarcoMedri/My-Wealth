@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
@@ -211,10 +211,6 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(IPC_CHANNELS.BROKER_GET_PRESET_LOGO, async (_event, brokerName: string) => {
-    const path = require('path')
-    const fs = require('fs')
-    
-    // Try different extensions
     const extensions = ['.jpeg', '.png', '.jpg', '.svg']
     const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
     const iconsPath = path.join(resourcesPath, 'asset-icons')
@@ -222,8 +218,8 @@ function registerIpcHandlers(): void {
     for (const ext of extensions) {
       const logoPath = path.join(iconsPath, `${brokerName}${ext}`)
       if (fs.existsSync(logoPath)) {
-        // Return file:// protocol path for Electron
-        return `file://${logoPath}`
+        // Return asset:// protocol URL for Electron
+        return `asset://${brokerName}${ext}`
       }
     }
     
@@ -377,6 +373,15 @@ app.whenReady().then(async () => {
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // Register custom protocol to serve asset icons
+  protocol.handle('asset', (request) => {
+    const url = request.url.replace('asset://', '')
+    const resourcesPath = process.resourcesPath || path.join(__dirname, '../../resources')
+    const filePath = path.join(resourcesPath, 'asset-icons', url)
+    
+    return net.fetch(`file://${filePath}`)
   })
 
   createWindow()
