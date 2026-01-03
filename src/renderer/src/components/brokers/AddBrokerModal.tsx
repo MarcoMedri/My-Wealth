@@ -187,61 +187,39 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    {/* Name & Website Grid */}
-                    <div className="space-y-4">
-                        {/* Row 1: Logo Circle (clickable) + Nome Input */}
-                        <div className="flex items-center gap-4">
-                            {/* Logo Circle */}
-                            <button
-                                type="button"
-                                onClick={() => setShowLogoPicker(true)}
-                                className="w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary flex items-center justify-center transition-colors bg-background-subtle overflow-hidden flex-shrink-0"
-                            >
-                                {logoUrl && !logoPreviewError ? (
-                                    <img
-                                        src={logoUrl}
-                                        alt="Logo"
-                                        className="w-full h-full object-cover"
-                                        onError={() => setLogoPreviewError(true)}
-                                    />
-                                ) : (
-                                    <ImagePlus className="w-8 h-8 text-foreground-muted" />
-                                )}
-                            </button>
+                    {/* Logo Circle (clickable) + Nome Input */}
+                    <div className="flex items-center gap-4">
+                        {/* Logo Circle */}
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoPicker(true)}
+                            className="w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary flex items-center justify-center transition-colors bg-background-subtle overflow-hidden flex-shrink-0"
+                        >
+                            {logoUrl && !logoPreviewError ? (
+                                <img
+                                    src={logoUrl}
+                                    alt="Logo"
+                                    className="w-full h-full object-cover"
+                                    onError={() => setLogoPreviewError(true)}
+                                />
+                            ) : (
+                                <ImagePlus className="w-8 h-8 text-foreground-muted" />
+                            )}
+                        </button>
 
-                            {/* Nome Input */}
-                            <div className="flex-1">
-                                <div className="relative">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
-                                        <Building2 size={18} />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder={t('brokers.namePlaceholder')}
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Row 2: Website */}
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('brokers.website')}
-                            </label>
+                        {/* Nome Input */}
+                        <div className="flex-1">
                             <div className="relative">
                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
-                                    <Globe size={18} />
+                                    <Building2 size={18} />
                                 </div>
                                 <input
                                     type="text"
-                                    value={website}
-                                    onChange={(e) => setWebsite(e.target.value)}
-                                    placeholder="example.com"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder={t('brokers.namePlaceholder')}
                                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    required
                                 />
                             </div>
                         </div>
