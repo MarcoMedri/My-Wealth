@@ -498,11 +498,11 @@
     },
     "sidebar": {
       "title": "Naviga le Tue Finanze 🗂️",
-      "text": "Usa la barra laterale per accedere a Conti, Investimenti, Budget e altro. Clicca su qualsiasi sezione per esplorare."
+      "text": "Usa la barra laterale per accedere alle diverse sezioni. Iniziamo con Broker per organizzare i tuoi conti."
     },
-    "addTransaction": {
-      "title": "Traccia i Tuoi Soldi ➕",
-      "text": "Clicca qui per aggiungere entrate o spese. Ogni transazione aiuta a costruire il tuo quadro finanziario."
+    "brokers": {
+      "title": "Crea il Tuo Primo Broker 🏦",
+      "text": "Clicca qui per aggiungere un broker o istituzione finanziaria. Qui organizzerai tutti i tuoi conti (banca, investimenti, ecc.)."
     },
     "complete": {
       "title": "Tutto Pronto! 🎉",

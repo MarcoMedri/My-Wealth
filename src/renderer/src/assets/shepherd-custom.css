@@ -1,31 +1,31 @@
 /* Custom Shepherd.js theme matching app design */
 
 .shepherd-theme-custom {
-    background: rgb(var(--background-card));
-    border: 1px solid rgb(var(--border));
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.15);
+    background: rgb(var(--background-card)) !important;
+    border: 1px solid rgb(var(--border)) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.15) !important;
     max-width: 400px;
 }
 
 .shepherd-theme-custom .shepherd-header {
-    padding: 1rem 1rem 0.5rem;
-    background: rgb(var(--background-subtle));
-    border-radius: 12px 12px 0 0;
+    padding: 1rem 1rem 0.5rem !important;
+    background: rgb(var(--background-subtle)) !important;
+    border-radius: 12px 12px 0 0 !important;
     margin: -1px -1px 0 -1px;
-    border: 1px solid rgb(var(--border));
-    border-bottom: none;
+    border: 1px solid rgb(var(--border)) !important;
+    border-bottom: none !important;
 }
 
 .shepherd-theme-custom .shepherd-title {
-    color: rgb(var(--foreground));
+    color: rgb(var(--foreground)) !important;
     font-weight: 600;
     font-size: 1.125rem;
     margin: 0;
 }
 
 .shepherd-theme-custom .shepherd-text {
-    color: rgb(var(--foreground));
+    color: rgb(var(--foreground)) !important;
     font-size: 0.875rem;
     line-height: 1.6;
     padding: 0.5rem 1rem 1rem;
@@ -39,9 +39,9 @@
 }
 
 .shepherd-theme-custom .shepherd-button {
-    background: rgb(var(--primary));
-    color: rgb(var(--primary-foreground));
-    border: none;
+    background: rgb(var(--primary)) !important;
+    color: rgb(var(--primary-foreground)) !important;
+    border: none !important;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 500;
@@ -51,41 +51,41 @@
 }
 
 .shepherd-theme-custom .shepherd-button:hover {
-    background: rgb(var(--primary-hover));
+    background: rgb(var(--primary-hover)) !important;
 }
 
 .shepherd-theme-custom .shepherd-button-secondary {
-    background: rgb(var(--background-subtle));
-    color: rgb(var(--foreground));
-    border: 1px solid rgb(var(--border));
+    background: rgb(var(--background-subtle)) !important;
+    color: rgb(var(--foreground)) !important;
+    border: 1px solid rgb(var(--border)) !important;
 }
 
 .shepherd-theme-custom .shepherd-button-secondary:hover {
-    background: rgb(var(--background-muted));
-    border-color: rgb(var(--border-muted));
+    background: rgb(var(--background-muted)) !important;
+    border-color: rgb(var(--border-muted)) !important;
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon {
-    color: rgb(var(--foreground-muted));
+    color: rgb(var(--foreground-muted)) !important;
     font-size: 1.5rem;
     font-weight: 300;
     transition: color 0.2s;
 }
 
 .shepherd-theme-custom .shepherd-cancel-icon:hover {
-    color: rgb(var(--foreground));
+    color: rgb(var(--foreground)) !important;
 }
 
 /* Modal overlay */
 .shepherd-modal-overlay-container {
-    background: rgb(var(--foreground) / 0.5);
+    background: rgb(var(--foreground) / 0.5) !important;
     backdrop-filter: blur(2px);
 }
 
-/* Arrow */
+/* Arrow - remove default border */
 .shepherd-theme-custom .shepherd-arrow::before {
-    background: rgb(var(--background-card));
-    border: 1px solid rgb(var(--border));
+    background: rgb(var(--background-card)) !important;
+    border: none !important;
 }
 
 /* Highlight element */

@@ -495,11 +495,11 @@
     },
     "sidebar": {
       "title": "Navigate Your Finances 🗂️",
-      "text": "Use the sidebar to access Accounts, Investments, Budgets, and more. Click any section to explore."
+      "text": "Use the sidebar to access different sections. Let's start with Brokers to organize your accounts."
     },
-    "addTransaction": {
-      "title": "Track Your Money ➕",
-      "text": "Click here to add income or expenses. Every transaction helps build your financial picture."
+    "brokers": {
+      "title": "Create Your First Broker 🏦",
+      "text": "Click here to add a broker or financial institution. This is where you'll organize all your accounts (bank, investment, etc.)."
     },
     "complete": {
       "title": "You're All Set! 🎉",
