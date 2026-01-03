@@ -73,10 +73,10 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
     ]
   },
   {
-    id: 'add-transaction',
-    attachTo: { element: '[data-tour="add-transaction"]', on: 'left' },
-    title: t('tutorial.addTransaction.title'),
-    text: t('tutorial.addTransaction.text'),
+    id: 'brokers',
+    attachTo: { element: '[data-tour="brokers-nav"]', on: 'right' },
+    title: t('tutorial.brokers.title'),
+    text: t('tutorial.brokers.text'),
     buttons: [
       {
         text: t('tutorial.back'),
