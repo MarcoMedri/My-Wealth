@@ -143,8 +143,8 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === tab
-                                    ? 'text-primary border-b-2 border-primary bg-background'
-                                    : 'text-foreground-muted hover:text-foreground'
+                                ? 'text-primary border-b-2 border-primary bg-background'
+                                : 'text-foreground-muted hover:text-foreground'
                                 }`}
                         >
                             {t(`brokers.logoPicker.tabs.${tab}`)}
@@ -170,7 +170,7 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                 />
                             </div>
 
-                            {/* Web Results */}
+                            {/* Web Results - Only show when searching */}
                             {webResults.length > 0 && (
                                 <div>
                                     <h4 className="flex items-center gap-2 text-sm font-medium text-foreground-muted mb-3">
@@ -207,37 +207,35 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                 </div>
                             )}
 
-                            {/* Local Results */}
-                            {localResults.length > 0 && (
-                                <div>
-                                    <h4 className="flex items-center gap-2 text-sm font-medium text-foreground-muted mb-3">
-                                        📦 {t('brokers.logoPicker.localResults')}
-                                    </h4>
-                                    <div className="grid grid-cols-4 gap-3">
-                                        {localResults.map((preset) => (
-                                            <button
-                                                key={preset.name}
-                                                onClick={() => {
-                                                    onSelectLogo(`asset://${preset.icon}`, 'brand');
-                                                    onClose();
-                                                }}
-                                                className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
-                                            >
-                                                <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden">
-                                                    <img
-                                                        src={`asset://${preset.icon}`}
-                                                        alt={preset.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <span className="text-xs text-center text-foreground-muted line-clamp-2">
-                                                    {preset.name}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
+                            {/* All Logos - Show all when no search, filtered when searching */}
+                            <div>
+                                <h4 className="flex items-center gap-2 text-sm font-medium text-foreground-muted mb-3">
+                                    📦 {searchQuery ? t('brokers.logoPicker.localResults') : 'Tutti i loghi'}
+                                </h4>
+                                <div className="grid grid-cols-4 gap-3">
+                                    {(searchQuery ? localResults : logoRegistry).map((preset) => (
+                                        <button
+                                            key={preset.name}
+                                            onClick={() => {
+                                                onSelectLogo(`asset://${preset.icon}`, 'brand');
+                                                onClose();
+                                            }}
+                                            className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
+                                        >
+                                            <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden">
+                                                <img
+                                                    src={`asset://${preset.icon}`}
+                                                    alt={preset.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <span className="text-xs text-center text-foreground-muted line-clamp-2">
+                                                {preset.name}
+                                            </span>
+                                        </button>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     )}
 
