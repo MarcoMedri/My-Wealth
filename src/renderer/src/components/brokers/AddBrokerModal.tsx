@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Building2, Wallet, Globe, Upload, Landmark, ImagePlus } from 'lucide-react';
+import { X, Check, Building2, Wallet, Globe, ImagePlus } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
 import { LogoPickerModal } from './LogoPickerModal';
@@ -41,7 +41,6 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [useCustomLogo, setUseCustomLogo] = useState(false);
     const [showPresetSelector, setShowPresetSelector] = useState(false);
     const [showLogoPicker, setShowLogoPicker] = useState(false);
-    const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
     const [logoRegistry, setLogoRegistry] = useState<LogoMetadata[]>([]);
 
     // Load logo registry on mount
@@ -100,22 +99,10 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
         }
     }, [website]);
 
-    const handleSelectLogo = async () => {
-        const filePath = await window.api.selectBrokerLogo();
-        if (filePath) {
-            setCustomLogoPath(filePath);
-            setUseCustomLogo(true);
-            // Show preview of selected file
-            setLogoUrl(`file://${filePath}`);
-            setLogoPreviewError(false); // Clear any previous error
-        }
-    };
-
     const handlePresetSelect = (preset: LogoMetadata) => {
         setName(preset.name);
         setWebsite(preset.website || `${preset.name.toLowerCase().replace(/\s+/g, '')}.com`);
         setType(preset.type); // Auto-fill type from preset
-        setSelectedPreset(preset.name);
         setUseCustomLogo(false);
         setShowPresetSelector(false);
     };
@@ -202,64 +189,50 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {/* Name & Website Grid */}
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('brokers.nameLabel')}
-                            </label>
-                            <div className="relative">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
-                                    <Building2 size={18} />
-                                </div>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder={t('brokers.namePlaceholder')}
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                    required
-                                />
-                            </div>
-                        </div>
+                        {/* Row 1: Logo Circle (clickable) + Nome Input */}
+                        <div className="flex items-center gap-4">
+                            {/* Logo Circle */}
+                            <button
+                                type="button"
+                                onClick={() => setShowLogoPicker(true)}
+                                className="w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary flex items-center justify-center transition-colors bg-background-subtle overflow-hidden flex-shrink-0"
+                            >
+                                {logoUrl && !logoPreviewError ? (
+                                    <img
+                                        src={logoUrl}
+                                        alt="Logo"
+                                        className="w-full h-full object-cover"
+                                        onError={() => setLogoPreviewError(true)}
+                                    />
+                                ) : (
+                                    <ImagePlus className="w-8 h-8 text-foreground-muted" />
+                                )}
+                            </button>
 
-                        {/* Row 1: Preset Selector + Logo Preview */}
-                        <div className="flex gap-4 items-end">
+                            {/* Nome Input */}
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                    {t('brokers.choosePreset')}
-                                </label>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPresetSelector(true)}
-                                    className="w-full px-4 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Building2 size={18} />
-                                    <span>{t('brokers.choosePreset')}</span>
-                                </button>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                    {t('brokers.logo')}
-                                </label>
-                                <div className="w-16 h-16 rounded-lg border border-border bg-background-subtle flex items-center justify-center overflow-hidden">
-                                    {logoUrl && !logoPreviewError ? (
-                                        <img
-                                            src={logoUrl}
-                                            alt={t('brokers.preview')}
-                                            className="w-full h-full object-contain p-1"
-                                            onError={() => setLogoPreviewError(true)}
-                                        />
-                                    ) : (
-                                        <Landmark className="w-6 h-6 text-foreground-subtle" />
-                                    )}
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
+                                        <Building2 size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder={t('brokers.namePlaceholder')}
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                        required
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Row 2: Website + Upload Custom Logo */}
-                        <div className="flex gap-4 items-end">
+                        {/* Row 2: Website + Preset Selector Button */}
+                        <div className="flex gap-4">
+                            {/* Website Input */}
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                    {t('brokers.website')} <span className="text-foreground-subtle font-normal">({t('brokers.autoFetchLogo')})</span>
+                                    {t('brokers.website')}
                                 </label>
                                 <div className="relative">
                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted">
@@ -269,25 +242,25 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                         type="text"
                                         value={website}
                                         onChange={(e) => setWebsite(e.target.value)}
-                                        placeholder="es. revolut.com"
+                                        placeholder="example.com"
                                         className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                                     />
                                 </div>
                             </div>
+
+                            {/* Preset Selector Button */}
                             <div>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('brokers.choosePreset')}
+                                </label>
                                 <button
                                     type="button"
-                                    onClick={handleSelectLogo}
-                                    className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg transition-colors font-medium shadow-sm whitespace-nowrap"
+                                    onClick={() => setShowPresetSelector(true)}
+                                    className="px-4 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors flex items-center gap-2 whitespace-nowrap"
                                 >
-                                    <Upload size={16} />
-                                    {t('brokers.uploadLogo')}
+                                    <Building2 size={18} />
+                                    <span>{t('brokers.choosePreset')}</span>
                                 </button>
-                                {useCustomLogo && (
-                                    <p className="text-xs text-success mt-1">
-                                        {t('brokers.customLogo')}
-                                    </p>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -377,7 +350,19 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                 isOpen={showPresetSelector}
                 onClose={() => setShowPresetSelector(false)}
                 onSelect={handlePresetSelect}
+                onNewBroker={() => {
+                    setShowPresetSelector(false);
+                    // User skipped preset selection, form is already open
+                }}
                 presets={logoRegistry}
+            />
+
+            {/* Logo Picker Modal */}
+            <LogoPickerModal
+                isOpen={showLogoPicker}
+                onClose={() => setShowLogoPicker(false)}
+                onSelectLogo={handleLogoSelect}
+                logoRegistry={logoRegistry}
             />
         </div>
     );

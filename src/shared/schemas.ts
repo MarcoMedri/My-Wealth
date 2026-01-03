@@ -113,7 +113,8 @@ export const BrokerTypeSchema = z.enum([
   'bank',
   'broker',
   'crypto_exchange',
-  'other'
+  'insurance',
+  'other',
 ]);
 export type BrokerType = z.infer<typeof BrokerTypeSchema>;
 
