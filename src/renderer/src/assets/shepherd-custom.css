@@ -4,7 +4,7 @@
     background: rgb(var(--background-card)) !important;
     border: 1px solid rgb(var(--border)) !important;
     border-radius: 12px !important;
-    box-shadow: 0 10px 40px rgb(var(--foreground) / 0.15) !important;
+    box-shadow: none !important;
     max-width: 400px;
 }
 
@@ -13,7 +13,7 @@
     background: rgb(var(--background-subtle)) !important;
     border-radius: 12px 12px 0 0 !important;
     margin: -1px -1px 0 -1px;
-    border: 1px solid rgb(var(--border)) !important;
+    border: none !important;
     border-bottom: none !important;
 }
 
