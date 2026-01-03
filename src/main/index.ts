@@ -409,7 +409,9 @@ app.whenReady().then(async () => {
 
   // Register custom protocol to serve asset icons
   protocol.handle('asset', (request) => {
-    const url = request.url.replace('asset://', '')
+    // Decode the URL to handle encoded characters (spaces, special chars, etc.)
+    const encodedUrl = request.url.replace('asset://', '')
+    const url = decodeURIComponent(encodedUrl)
     
     // Use same path logic as logo registry
     const isDev = !app.isPackaged
