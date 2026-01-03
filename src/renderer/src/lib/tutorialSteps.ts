@@ -28,7 +28,7 @@ export const getTutorialSteps = (t: (key: string) => string): any[] => [
   },
   {
     id: 'brokers',
-    attachTo: { element: '[data-tour="brokers-nav"]', on: 'right' },
+    attachTo: { element: '[data-tour="sidebar"]', on: 'right' },
     title: t('tutorial.brokers.title'),
     text: t('tutorial.brokers.text'),
     buttons: [
