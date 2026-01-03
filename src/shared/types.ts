@@ -242,6 +242,19 @@ export const SUPPORTED_TIME_FORMATS: { code: TimeFormat; label: string }[] = [
 
 export type LogoCategory = 'bank' | 'fintech' | 'broker' | 'crypto' | 'insurance' | 'other';
 
+export interface Broker {
+  id: string;
+  name: string;
+  type: 'bank' | 'broker' | 'crypto_exchange' | 'insurance' | 'other';
+  color: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  icon?: string; // Emoji or Lucide icon name
+  website?: string;
+  logoPath?: string; // Path to custom uploaded logo
+}
+
 export interface LogoMetadata {
   name: string;
   icon: string;

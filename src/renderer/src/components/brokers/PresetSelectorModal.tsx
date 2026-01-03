@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Building2 } from 'lucide-react';
-import type { LogoMetadata } from '../../../../shared/types';
+import { X, Building2, Plus } from 'lucide-react';
+import type { LogoMetadata, LogoCategory } from '../../../../shared/types';
 
 interface PresetSelectorModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSelect: (preset: LogoMetadata) => void;
+    onNewBroker: () => void;
     presets: LogoMetadata[];
 }
 
@@ -14,26 +15,33 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
     isOpen,
     onClose,
     onSelect,
+    onNewBroker,
     presets
 }) => {
     const { t } = useTranslation();
-    const [logoUrls, setLogoUrls] = React.useState<Record<string, string | null>>({});
 
-    // Load logo URLs when modal opens
-    React.useEffect(() => {
-        if (!isOpen) return;
-
-        const loadLogos = async () => {
-            const urls: Record<string, string | null> = {};
-            for (const preset of presets) {
-                // Use asset:// protocol directly from icon filename
-                urls[preset.name] = `asset://${preset.icon}`;
+    // Group presets by category
+    const presetsByCategory = useMemo(() => {
+        const grouped = presets.reduce((acc, preset) => {
+            if (!acc[preset.category]) {
+                acc[preset.category] = [];
             }
-            setLogoUrls(urls);
-        };
+            acc[preset.category].push(preset);
+            return acc;
+        }, {} as Record<LogoCategory, LogoMetadata[]>);
 
-        loadLogos();
-    }, [isOpen, presets]);
+        // Sort categories in desired order
+        const categoryOrder: LogoCategory[] = ['bank', 'fintech', 'broker', 'crypto', 'insurance', 'other'];
+        const sorted: Record<LogoCategory, LogoMetadata[]> = {} as any;
+
+        categoryOrder.forEach(cat => {
+            if (grouped[cat]) {
+                sorted[cat] = grouped[cat];
+            }
+        });
+
+        return sorted;
+    }, [presets]);
 
     if (!isOpen) return null;
 
@@ -43,7 +51,7 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
             onClick={onClose}
         >
             <div
-                className="bg-background-card rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden border border-border"
+                className="bg-background-card rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden border border-border flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -59,37 +67,63 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                     </button>
                 </div>
 
-                {/* Grid */}
-                <div className="p-6 overflow-y-auto max-h-[60vh]">
-                    <div className="grid grid-cols-4 gap-3">
-                        {presets.map((preset) => {
-                            const logoUrl = logoUrls[preset.name];
+                {/* New Broker Button */}
+                <div className="p-4 border-b border-border bg-background">
+                    <button
+                        onClick={() => {
+                            onNewBroker();
+                            onClose();
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg transition-colors font-medium shadow-sm"
+                    >
+                        <Plus size={20} />
+                        {t('brokers.newBroker')}
+                    </button>
+                </div>
 
-                            return (
-                                <button
-                                    key={preset.name}
-                                    type="button"
-                                    onClick={() => onSelect(preset)}
-                                    className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
-                                >
-                                    <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden border border-border">
-                                        {logoUrl ? (
+                {/* Categories Grid */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {Object.entries(presetsByCategory).map(([category, categoryPresets]) => (
+                        <div key={category}>
+                            {/* Category Header */}
+                            <h4 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide mb-3">
+                                {t(`brokers.categories.${category}`)}
+                            </h4>
+
+                            {/* Presets Grid */}
+                            <div className="grid grid-cols-4 gap-3">
+                                {categoryPresets.map((preset) => (
+                                    <button
+                                        key={preset.name}
+                                        type="button"
+                                        onClick={() => onSelect(preset)}
+                                        className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all group"
+                                    >
+                                        <div className="w-14 h-14 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors">
                                             <img
-                                                src={logoUrl}
+                                                src={`asset://${preset.icon}`}
                                                 alt={preset.name}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    // Fallback to Building2 icon if image fails
+                                                    const parent = (e.target as HTMLElement).parentElement;
+                                                    if (parent) {
+                                                        parent.innerHTML = '';
+                                                        const icon = document.createElement('div');
+                                                        icon.className = 'w-6 h-6 text-foreground-muted group-hover:text-primary';
+                                                        parent.appendChild(icon);
+                                                    }
+                                                }}
                                             />
-                                        ) : (
-                                            <Building2 className="w-6 h-6 text-foreground-muted group-hover:text-primary transition-colors" />
-                                        )}
-                                    </div>
-                                    <span className="text-xs text-center text-foreground-muted group-hover:text-foreground transition-colors line-clamp-2">
-                                        {preset.name}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
+                                        </div>
+                                        <span className="text-xs text-center text-foreground-muted group-hover:text-foreground transition-colors line-clamp-2 w-full">
+                                            {preset.name}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

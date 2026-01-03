@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Building2, Wallet, Globe, Upload, Landmark } from 'lucide-react';
+import { X, Check, Building2, Wallet, Globe, Upload, Landmark, ImagePlus } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
+import { LogoPickerModal } from './LogoPickerModal';
 import type { LogoMetadata } from '../../../../shared/types';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
@@ -21,7 +22,7 @@ interface AddBrokerModalProps {
     editBrokerId?: string;
 }
 
-const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'other'] as const;
+const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'insurance', 'other'] as const;
 
 export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId }) => {
     const { t } = useTranslation();
@@ -39,6 +40,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [customLogoPath, setCustomLogoPath] = useState<string | null>(null);
     const [useCustomLogo, setUseCustomLogo] = useState(false);
     const [showPresetSelector, setShowPresetSelector] = useState(false);
+    const [showLogoPicker, setShowLogoPicker] = useState(false);
     const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
     const [logoRegistry, setLogoRegistry] = useState<LogoMetadata[]>([]);
 
@@ -112,9 +114,20 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const handlePresetSelect = (preset: LogoMetadata) => {
         setName(preset.name);
         setWebsite(preset.website || `${preset.name.toLowerCase().replace(/\s+/g, '')}.com`);
+        setType(preset.type); // Auto-fill type from preset
         setSelectedPreset(preset.name);
         setUseCustomLogo(false);
         setShowPresetSelector(false);
+    };
+
+    // Logo picker handler
+    const handleLogoSelect = (logoUrl: string, source: 'brand' | 'icon' | 'emoji' | 'upload') => {
+        setLogoUrl(logoUrl);
+        setLogoPreviewError(false);
+        setUseCustomLogo(source === 'upload');
+        if (source === 'upload') {
+            setCustomLogoPath(logoUrl.replace('file://', ''));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
