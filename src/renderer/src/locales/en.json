@@ -73,6 +73,11 @@
     "uploadLogo": "Upload Custom Logo",
     "customLogo": "Custom Logo",
     "useAutoFetch": "Use Auto-Fetch",
+    "choosePreset": "Choose from Presets",
+    "presetSelector": "Select a Broker",
+    "noPresetFound": "Can't find your broker?",
+    "searchByUrl": "Search by Website URL",
+    "orUploadCustom": "Or upload a custom logo",
     "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
     "types": {
         "bank": "Bank",

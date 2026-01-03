@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Building2, Wallet, Globe, Upload, Landmark } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
+import { PresetSelectorModal } from './PresetSelectorModal';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
@@ -48,9 +49,8 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     const [isLoading, setIsLoading] = useState(false);
     const [customLogoPath, setCustomLogoPath] = useState<string | null>(null);
     const [useCustomLogo, setUseCustomLogo] = useState(false);
-    // Preset selector - future feature
-    // const [showPresetSelector, setShowPresetSelector] = useState(false);
-    // const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+    const [showPresetSelector, setShowPresetSelector] = useState(false);
+    const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && editBrokerId) {
@@ -104,6 +104,15 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             setLogoUrl(`file://${filePath}`);
             setLogoPreviewError(false); // Clear any previous error
         }
+    };
+
+    const handlePresetSelect = (presetName: string) => {
+        setName(presetName);
+        const websiteGuess = presetName.toLowerCase().replace(/\s+/g, '') + '.com';
+        setWebsite(websiteGuess);
+        setSelectedPreset(presetName);
+        setUseCustomLogo(false);
+        setShowPresetSelector(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -214,6 +223,18 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                         className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Preset Selector Button */}
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPresetSelector(true)}
+                                    className="w-full px-4 py-2.5 bg-background-subtle hover:bg-background-muted border border-border rounded-lg text-foreground-muted hover:text-foreground transition-colors font-medium flex items-center justify-center gap-2"
+                                >
+                                    <Building2 size={18} />
+                                    {t('brokers.choosePreset')}
+                                </button>
                             </div>
 
                             {/* Logo Preview and Upload */}
@@ -331,6 +352,14 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                     </div>
                 </form>
             </div>
+
+            {/* Preset Selector Modal */}
+            <PresetSelectorModal
+                isOpen={showPresetSelector}
+                onClose={() => setShowPresetSelector(false)}
+                onSelect={handlePresetSelect}
+                presets={PRESET_LOGOS}
+            />
         </div>
     );
 };
