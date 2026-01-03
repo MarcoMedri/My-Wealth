@@ -102,7 +102,7 @@ div[class*="shepherd"] .shepherd-arrow::before,
     background-color: rgb(var(--background-card)) !important;
     border: none !important;
     border-color: transparent !important;
-    box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
+    box-shadow: none !important;
 }
 
 /* Force for all attachment positions - absolute nuclear option */
