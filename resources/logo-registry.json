@@ -41,7 +41,7 @@
     { "name": "Trade Republic", "icon": "Trade Republic.jpeg", "category": "broker", "type": "broker", "website": "traderepublic.com" },
     { "name": "Truist", "icon": "Truist.jpeg", "category": "bank", "type": "bank", "website": "truist.com" },
     { "name": "Ubi Banca Carime", "icon": "Ubi Banca Carime.png", "category": "bank", "type": "bank", "website": "ubibanca.it" },
-    { "name": "Volksbank · Banca Popolare dell'Alto Adige", "icon": "Volksbank · Banca Popolare dell'Alto Adige.jpeg", "category": "bank", "type": "bank", "website": "volksbank.it" },
+    { "name": "Volksbank · Banca Popolare Alto Adige", "icon": "Volksbank · Banca Popolare Alto Adige.jpeg", "category": "bank", "type": "bank", "website": "volksbank.it" },
     { "name": "Zurich", "icon": "Zurich.png", "category": "insurance", "type": "insurance", "website": "zurich.com" },
     { "name": "BBVA", "icon": "bbva.png", "category": "bank", "type": "bank", "website": "bbva.com" },
     { "name": "Crédit Agricole", "icon": "credit agricole.jpeg", "category": "bank", "type": "bank", "website": "credit-agricole.fr" },
