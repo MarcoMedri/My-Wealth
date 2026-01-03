@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Building2, Wallet, Globe, ImagePlus } from 'lucide-react';
+import { X, Check, Building2, Wallet, ImagePlus } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
 import { LogoPickerModal } from './LogoPickerModal';
