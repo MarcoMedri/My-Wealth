@@ -10,7 +10,9 @@ import {
     Banknote,
     PiggyBank,
     Briefcase,
-    PanelRightClose
+    PanelRightClose,
+    Pencil,
+    Trash2
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
@@ -119,56 +121,88 @@ export default function BrokersSidebar() {
                             const isActive = activeView === `broker:${broker.id}`;
 
                             return (
-                                <button
+                                <div
                                     key={broker.id}
-                                    onClick={() => setActiveView(`broker:${broker.id}`)}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all group border border-transparent",
-                                        isCollapsed ? "justify-center px-0" : "",
-                                        isActive
-                                            ? "bg-background-card text-foreground font-medium shadow-sm border-border"
-                                            : "hover:bg-background-muted text-foreground-muted hover:text-foreground"
-                                    )}
-                                    title={isCollapsed ? broker.name : undefined}
+                                    className="relative group"
                                 >
-                                    <div
+                                    <button
+                                        onClick={() => setActiveView(`broker:${broker.id}`)}
                                         className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center shadow-sm shrink-0 overflow-hidden",
-                                            broker.logoPath ? "bg-white p-0.5" : ""
+                                            "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all border border-transparent",
+                                            isCollapsed ? "justify-center px-0" : "",
+                                            isActive
+                                                ? "bg-background-card text-foreground font-medium shadow-sm border-border"
+                                                : "hover:bg-background-muted text-foreground-muted hover:text-foreground"
                                         )}
-                                        style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
+                                        title={isCollapsed ? broker.name : undefined}
                                     >
-                                        {broker.logoPath ? (
-                                            <img
-                                                src={broker.logoPath.startsWith('asset://')
-                                                    ? broker.logoPath
-                                                    : `file://${vaultPath}/${broker.logoPath}`}
-                                                alt={broker.name}
-                                                className="w-full h-full object-contain"
-                                            />
-                                        ) : (
-                                            (() => {
-                                                const IconComponent = broker.icon ? ICON_MAP[broker.icon] : Building2;
-                                                return IconComponent ? (
-                                                    <IconComponent
-                                                        className="w-4 h-4 text-white"
-                                                    />
-                                                ) : (
-                                                    <Building2
-                                                        className="w-4 h-4 text-white"
-                                                    />
-                                                );
-                                            })()
+                                        <div
+                                            className={cn(
+                                                "w-8 h-8 rounded-lg flex items-center justify-center shadow-sm shrink-0 overflow-hidden",
+                                                broker.logoPath ? "bg-white p-0.5" : ""
+                                            )}
+                                            style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
+                                        >
+                                            {broker.logoPath ? (
+                                                <img
+                                                    src={broker.logoPath.startsWith('asset://')
+                                                        ? broker.logoPath
+                                                        : `file://${vaultPath}/${broker.logoPath}`}
+                                                    alt={broker.name}
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            ) : (
+                                                (() => {
+                                                    const IconComponent = broker.icon ? ICON_MAP[broker.icon] : Building2;
+                                                    return IconComponent ? (
+                                                        <IconComponent
+                                                            className="w-4 h-4 text-white"
+                                                        />
+                                                    ) : (
+                                                        <Building2
+                                                            className="w-4 h-4 text-white"
+                                                        />
+                                                    );
+                                                })()
+                                            )}
+                                        </div>
+                                        {!isCollapsed && (
+                                            <div className="flex-1 text-left min-w-0">
+                                                <p className="text-sm truncate">
+                                                    {broker.name}
+                                                </p>
+                                            </div>
                                         )}
-                                    </div>
+                                    </button>
+
+                                    {/* Edit/Delete buttons - show on hover */}
                                     {!isCollapsed && (
-                                        <div className="flex-1 text-left min-w-0">
-                                            <p className="text-sm truncate">
-                                                {broker.name}
-                                            </p>
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background-card rounded px-1">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setIsAddBrokerOpen(true);
+                                                    // TODO: Pass broker ID for editing
+                                                }}
+                                                className="p-1.5 rounded hover:bg-background-muted text-foreground-muted hover:text-primary transition-colors"
+                                                title={t('common.edit')}
+                                            >
+                                                <Pencil size={14} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // TODO: Open delete confirmation
+                                                    console.log('Delete broker:', broker.id);
+                                                }}
+                                                className="p-1.5 rounded hover:bg-background-muted text-foreground-muted hover:text-red-500 transition-colors"
+                                                title={t('common.delete')}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
                                         </div>
                                     )}
-                                </button>
+                                </div>
                             );
                         })
                     )}
