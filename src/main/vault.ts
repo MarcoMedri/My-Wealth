@@ -115,6 +115,13 @@ export class VaultManager {
   }
 
   /**
+   * Get the current state of the vault
+   */
+  getState(): VaultState {
+    return this.vaultState;
+  }
+
+  /**
    * Get the current vault status
    */
   async getStatus(): Promise<VaultStatus> {

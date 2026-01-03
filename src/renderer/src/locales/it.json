@@ -46,7 +46,15 @@
     "netWorthTrend": "Andamento Patrimonio Netto",
     "assetAllocation": "Allocazione Asset",
     "recentTransactions": "Transazioni Recenti",
-    "cashAccounts": "Conti & Liquidità"
+    "cashAccounts": "Conti & Liquidità",
+    "snapshotConfirmation": {
+      "title": "Aggiorna Dati prima dello Snapshot",
+      "description": "Vuoi aggiornare le quotazioni di mercato per avere uno snapshot più preciso?",
+      "updateAndSnapshot": "Aggiorna & Scatta",
+      "snapshotOnly": "Solo Scatta",
+      "rememberChoice": "Ricorda la mia scelta (modificabile in Impostazioni)",
+      "autoUpdate": "Aggiornamento Automatico"
+    }
   },
   "nav": {
     "dashboard": "Panoramica",
@@ -75,8 +83,17 @@
       "dark": "Scuro",
       "system": "Sistema"
     },
+    "automation": "Automazione",
+    "snapshotBehavior": "Comportamento Snapshot",
+    "snapshotAutoUpdate": "Aggiorna Sempre Prezzi",
+    "snapshotNoUpdate": "Solo Snapshot (Veloce)",
+    "snapshotAsk": "Chiedi Sempre",
+    "switchVault": "Cambia Vault",
+    "confirmReset": "Sei sicuro? Questo riavvierà la configurazione iniziale dell'app.",
     "decimals": "Decimali",
     "categories": "Categorie",
+    "vaultLocation": "Posizione Vault",
+    "currentVault": "Vault Attuale",
     "dateTime": "Data & Ora",
     "dateFormat": "Formato Data",
     "timeFormat": "Formato Ora",
@@ -334,7 +351,10 @@
     "allocationByGeography": "Allocazione per Geografia",
     "sell": "Vendi",
     "portfolioDistribution": "Distribuzione Portafoglio",
-    "moreItems": "+ altri {{count}}"
+    "moreItems": "+ altri {{count}}",
+    "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
+    "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
+    "refreshError": "❌ Impossibile aggiornare le quotazioni"
   },
   "modals": {
     "cancel": "Annulla",

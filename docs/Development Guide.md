@@ -1,6 +1,6 @@
-# My Wealth - Developer Guide 👩‍💻👨‍💻
+# My Wealth - Development Guide 👩‍💻👨‍💻
 
-Welcome to the **My Wealth** developer documentation. This guide provides an overview of the architecture, code structure, and best practices used in the project.
+Welcome to the **My Wealth** developer documentation. This guide provides an overview of the architecture, code structure, data models, and best practices used in the project.
 
 ---
 
@@ -14,6 +14,18 @@ My Wealth is a **local-first** desktop application built with **Electron**. It f
 2.  **Type Safety**: Strict TypeScript usage with Zod schemas for all data validation at runtime.
 3.  **Performance**: Optimized for large datasets using virtualization, lazy loading, and efficient re-rendering.
 4.  **Money Handling**: All monetary values are stored as **integers (cents)** to avoid floating-point errors.
+
+### The Broker-Centric Model
+
+The most critical specific concept in this application is the **Broker-Centric Data Model**. The **Broker** (e.g., Fineco, Directa, Binance) is the **primary container** and the source of truth for user data. It is not just a tag; it is the entity that physically holds the assets.
+
+*   A Broker can hold:
+    *   **Accounts**: For liquid cash (checking, savings) and transactions.
+    *   **Holdings**: Investment positions (stocks, ETFs).
+    *   **Deposit Accounts**: Constrained liquidity (Conti deposito).
+    *   **Insurance**: Policies managed by that institution.
+
+**Rule:** When adding new financial entities, always ask: *"Which Broker holds this?"*
 
 ---
 
@@ -70,43 +82,54 @@ My Wealth is a **local-first** desktop application built with **Electron**. It f
 
 ---
 
-##  best practices
+## 💾 Data Persistence (The Vault)
 
-### 1. Data Integrity (Zod)
-We strictly validate all data entering the application (from disk or user input) using Zod schemas defined in `src/shared/schemas.ts`.
+Data is stored in strict JSON files locally. We use a **Relational JSON** approach.
 
-**Do:**
-```typescript
-// Define schema
-export const AssetSchema = z.object({
-  currentPrice: Money,
-  symbol: z.string(),
-});
+*   `brokers.json`: List of brokers (ID, name, type).
+*   `accounts.json`: Contains `brokerId` foreign key to link to a broker.
+*   `holdings.json`: Contains `brokerId` OR `accountId` to link to the container.
+*   `deposits.json`: Contains `brokerId` foreign key.
 
-// Infer type
-export type Asset = z.infer<typeof AssetSchema>;
-```
+### Loading & Integrity
+The `VaultManager` (`src/main/vault.ts`) loads all files into memory. The frontend store (`useVaultStore`) then reconstructs the relationships derived from these IDs.
 
-### 2. Money Handling 💸
+*   **Zod Validation**: We strictly validate all data entering the application (from disk or user input) using Zod schemas defined in `src/shared/schemas.ts`.
+*   **Cascading Deletion**: When an entity (Broker, Account) is deleted, the system performs a cascading delete to remove all dependent data (Transactions, Holdings, Trades) to ensure referential integrity.
+*   **Account Archiving**: Accounts can be "Closed" (`isArchived: true`), which hides them from active selection but preserves their history and transactions.
+
+---
+
+## 🧩 Best Practices
+
+### 1. Money Handling 💸
 **NEVER** use floating point numbers for currency storage or calculation.
 *   ✅ Store: `1099` (cents)
 *   ❌ Store: `10.99` (dollars/euros)
 
 Use the `Money` Zod schema helper. Format only for display using `useFormatMoney` hook or `formatMoney` helper.
 
-### 3. State Management (Zustand)
+### 2. State Management (Zustand)
 We use independent stores for different concerns:
 *   `useVaultStore`: Contains the application data (accounts, assets, transactions). Persisted to disk via Main process.
 *   `useSettingsStore`: UI preferences (theme, language). Persisted to `workspace.json`.
+
+### 3. IPC Communication
+We use a strict IPC pattern between Renderer and Main process:
+1.  **Define Channel** in `src/shared/types.ts` (`IPC_CHANNELS`).
+2.  **Expose API** in `src/preload/index.ts` (typed in `index.d.ts`).
+3.  **Handle Logic** in `src/main/index.ts` (calling managers like `VaultManager`).
 
 ### 4. Performance 🚀
 *   **Virtualization**: Use `VirtualList` for any list that might exceed 50 items (Transactions, Holdings).
 *   **Lazy Loading**: Use `LazyWrapper` for heavy components (Charts, complex modals).
 *   **Memoization**: Use `useMemo` and `useCallback` for expensive calculations or stable references passed to children.
 
-### 5. Components
-*   **Composition**: Build complex UIs from small, reusable components in `src/renderer/src/components/ui`.
+### 5. UI Patterns
+*   **Component Composition**: Build complex UIs from small, reusable components in `src/renderer/src/components/ui`.
 *   **Styles**: Use Tailwind CSS classes. Use `cn()` utility for conditional class merging.
+*   **Modals**: Modals should be context-aware (e.g., "Adding an investment *to this specific broker*").
+*   **Archive vs Delete**: Prefer archiving (`isArchived: true`) over deletion to preserve history. Use `CloseDeleteAccountModal` for standardized UX.
 
 ---
 
@@ -131,43 +154,30 @@ npm run build:mac   # or :win, :linux
 
 ---
 
-## 🎯 Recent Features
+## 🎯 Feature Reference
 
 ### Manual Balance Adjustment
-Accounts support manual balance override to handle:
-- Incomplete transaction history (e.g., starting mid-year)
-- Dividends/interest without creating individual transactions
-- Reconciliation with real bank statements
-
-**Implementation:**
-- `Account.manualBalance` (optional field in schema)
-- If set, overrides calculated balance from transactions
-- UI: Edit button on account cards in BrokerDetailView
-- Component: `EditBalanceModal.tsx`
+Accounts support manual balance override to handle incomplete history or reconciliation.
+*   Implementation: `Account.manualBalance` in schema.
+*   UI: `EditBalanceModal.tsx` via BrokerDetailView.
 
 ### Window Size Persistence
-Window dimensions and position are automatically saved:
-- Stored in `AppSettings.windowBounds`
-- Debounced saves (500ms) on resize/move events
-- Immediate save on window close
-- Restores size, position, and maximized state on app restart
-
-**Implementation:**
-- Schema: `AppSettingsSchema.windowBounds`
-- Main process: `createWindow()` in `src/main/index.ts`
-- Methods: `VaultManager.getSettings()`, `VaultManager.updateSettings()`
+Window dimensions and position are automatically saved in `AppSettings.windowBounds` and restored on restart.
 
 ### Preset-First Broker Creation
-A streamlined flow for adding brokers using a pre-defined registry:
-- **Registry**: `resources/logo-registry.json` contains metadata for 47+ brokers.
-- **Protocol**: Custom `asset://` protocol serves secure local images from `resources/asset-icons/`.
-- **UI**: `BrokerPresetSelectorModal` allows quick filtering and selection.
-- **Fallback**: Users can still create custom brokers or upload custom logos.
-- **UX**: Edit/Delete buttons on hover in sidebar, simplified forms.
+A streamlined flow for adding brokers using a pre-defined registry (`resources/logo-registry.json`).
+*   Uses custom `asset://` protocol for local images.
+*   UI: `BrokerPresetSelectorModal`.
+
+### Testing Imports
+When working on the Import Wizard:
+1.  Ensure you respect the `brokerId` context.
+2.  If an account doesn't exist for the broker, create one with `type: 'investment'` automatically.
+3.  Use the `imported` tag for transactions to bypass strict categorization rules during the initial import.
 
 ---
 
-## 🧩 Adding New Features
+## 🚀 Adding New Features
 
 1.  **Define Schema**: Add data models to `src/shared/schemas.ts`.
 2.  **Update Types**: Export the inferred type.
@@ -176,5 +186,4 @@ A streamlined flow for adding brokers using a pre-defined registry:
 5.  **UI**: Create components in `src/renderer/src/components`.
 
 ---
-
-*Documentation generated by code assistant*
+*Documentation consolidated for My Wealth v1.0*

@@ -800,21 +800,30 @@ export interface VaultState {
 // ============================================================================
 
 export const WorkspaceSettingsSchema = z.object({
-  accountsDashboard: z.object({
-    dateRange: z.string().optional(), // 'current-month', 'last-3-months', etc.
-    selectedAccountIds: z.array(z.string()).optional(), // IDs of accounts to show in dashboard
-  }).optional(),
-  investmentsDashboard: z.object({
-    dateRange: z.string().optional(),
-    includeClosed: z.boolean().optional(),
-  }).optional(),
-  global: z.object({
-    // potentially theme, language, etc in future?
-  }).optional(),
+  /** Last active view: 'dashboard', 'accounts', etc. */
+  activeView: z.string().optional(),
+  
+  /** Selected month filter: "YYYY-MM" or "all" */
+  dateFilter: z.string().optional(),
+
+  /**
+   * Layout preferences
+   */
   layout: z.object({
-    leftSidebarCollapsed: z.boolean().default(false),
-    rightSidebarCollapsed: z.boolean().default(false),
-  }).optional()
+      /** Is the left sidebar collapsed? */
+      leftSidebarCollapsed: z.boolean().default(false),
+      
+      /** Is the right sidebar collapsed? */
+      rightSidebarCollapsed: z.boolean().default(false),
+  }).optional(),
+  
+  /**
+   * Snapshot/Refresh automation preference
+   * null/undefined = ask user
+   * true = auto refresh then snapshot
+   * false = snapshot directly
+   */
+  autoRefreshOnSnapshot: z.boolean().nullable().optional(),
 });
 
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;

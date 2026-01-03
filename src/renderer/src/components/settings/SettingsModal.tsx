@@ -1,7 +1,8 @@
 import React from 'react';
-import { X, Globe, Moon, Sun, DollarSign, Monitor, Database } from 'lucide-react';
+import { X, Globe, Moon, Sun, DollarSign, Monitor, Database, Camera, RefreshCw, HelpCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useVaultStore } from '../../store/useVaultStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat, type TimeFormat } from '../../../../shared/types';
 import { cn } from '../../lib/utils';
 import { CategoryManager } from './CategoryManager';
@@ -19,6 +20,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         currency, language, theme, decimals, dateFormat, timeFormat,
         setCurrency, setLanguage, setTheme, setDecimals, setDateFormat, setTimeFormat
     } = useSettingsStore();
+
+    const { workspace, setWorkspaceSettings } = useVaultStore();
 
     const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
 
@@ -59,7 +62,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     {/* Ideally we would show the path here, but we don't have it in store yet. 
                                         We can add it to store later. For now just generic text or nothing.
                                     */}
-                                    Current Vault
+                                    {t('settings.currentVault')}
                                 </div>
                                 <button
                                     onClick={() => setIsResetConfirmOpen(true)}
@@ -141,6 +144,62 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         {d}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+                    </section>
+
+
+
+                    <div className="border-t border-border" />
+
+                    {/* Automation */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
+                            {t('settings.automation')}
+                        </h3>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                                <Camera className="w-4 h-4" />
+                                {t('settings.snapshotBehavior')}
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button
+                                    onClick={() => setWorkspaceSettings({ autoRefreshOnSnapshot: true })}
+                                    className={cn(
+                                        "flex flex-col items-center gap-2 px-3 py-3 rounded-xl border text-sm transition-all",
+                                        workspace.autoRefreshOnSnapshot === true
+                                            ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300"
+                                            : "border-border hover:bg-background-muted text-foreground"
+                                    )}
+                                >
+                                    <RefreshCw className="w-5 h-5" />
+                                    <span className="text-center text-xs sm:text-sm">{t('settings.snapshotAutoUpdate')}</span>
+                                </button>
+                                <button
+                                    onClick={() => setWorkspaceSettings({ autoRefreshOnSnapshot: false })}
+                                    className={cn(
+                                        "flex flex-col items-center gap-2 px-3 py-3 rounded-xl border text-sm transition-all",
+                                        workspace.autoRefreshOnSnapshot === false
+                                            ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300"
+                                            : "border-border hover:bg-background-muted text-foreground"
+                                    )}
+                                >
+                                    <Camera className="w-5 h-5" />
+                                    <span className="text-center text-xs sm:text-sm">{t('settings.snapshotNoUpdate')}</span>
+                                </button>
+                                <button
+                                    onClick={() => setWorkspaceSettings({ autoRefreshOnSnapshot: null })}
+                                    className={cn(
+                                        "flex flex-col items-center gap-2 px-3 py-3 rounded-xl border text-sm transition-all",
+                                        (workspace.autoRefreshOnSnapshot === null || workspace.autoRefreshOnSnapshot === undefined)
+                                            ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-indigo-700 dark:text-indigo-300"
+                                            : "border-border hover:bg-background-muted text-foreground"
+                                    )}
+                                >
+                                    <HelpCircle className="w-5 h-5" />
+                                    <span className="text-center text-xs sm:text-sm">{t('settings.snapshotAsk')}</span>
+                                </button>
                             </div>
                         </div>
                     </section>
@@ -232,7 +291,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     </section>
 
                 </div>
-            </div>
+            </div >
 
             <ConfirmationModal
                 isOpen={isResetConfirmOpen}
@@ -247,6 +306,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 cancelText={t('common.cancel')}
                 variant="danger"
             />
-        </div>
+        </div >
     );
 }

@@ -83,6 +83,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                 } catch (e) {
                     console.error(e);
                     // setSearchError(t('modals.investmentModal.searchError', 'Errore nella ricerca.'));
+                    setSearchResults([]); // Clear stale results
                 } finally {
                     setIsSearching(false);
                 }
@@ -258,6 +259,13 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                                         </div>
                                     </button>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* No Results State */}
+                        {showResults && !isSearching && searchQuery.length > 2 && searchResults.length === 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-background-card border border-border rounded-xl shadow-xl p-4 text-center text-foreground-muted z-50">
+                                <p>{t('modals.investmentModal.noResults', 'Nessun risultato trovato.')}</p>
                             </div>
                         )}
                     </div>

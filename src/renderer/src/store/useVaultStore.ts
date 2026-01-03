@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import type { Account, Category, Transaction, SerializableVaultState, Asset, Holding, Property, Collectible, InsurancePolicy, DepositAccount, InvestmentTrade, Dividend, Broker, Snapshot, WorkspaceSettings } from '../../../shared/schemas';
 import { toast } from 'sonner';
 import { formatMoney } from '../../../shared/schemas';
+import i18n from '../i18n';
 
 // ============================================================================
 // STORE STATE INTERFACE
@@ -239,13 +240,13 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       
       // Show success toast with statistics
       if (result.failed === 0) {
-        toast.success(`✅ ${result.updated} prices updated successfully`);
+        toast.success(i18n.t('investments.refreshSuccess', { count: result.updated, defaultValue: `✅ ${result.updated} prices updated successfully` }));
       } else {
-        toast.warning(`⚠️ Updated ${result.updated} prices (${result.failed} failed)`);
+        toast.warning(i18n.t('investments.refreshPartial', { updated: result.updated, failed: result.failed, defaultValue: `⚠️ Updated ${result.updated} prices (${result.failed} failed)` }));
       }
     } catch (error) {
-      console.error('Failed to refresh prices:', error);
-      toast.error('❌ Failed to update prices');
+       console.error('Failed to refresh prices:', error);
+       toast.error(i18n.t('investments.refreshError', { defaultValue: '❌ Failed to update prices' }));
     } finally {
       set({ isLoading: false });
     }

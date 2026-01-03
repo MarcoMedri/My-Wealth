@@ -7,7 +7,8 @@ import {
     Watch,
     Camera,
     Shield,
-    PiggyBank
+    PiggyBank,
+    RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
@@ -17,6 +18,7 @@ import { useNetWorth } from '../hooks/useNetWorth';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 import DashboardCharts, { DashboardPeriod } from './DashboardCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
+import { SnapshotConfirmationModal } from './modals/SnapshotConfirmationModal';
 
 // Force HMR update
 export default function Dashboard() {
@@ -32,11 +34,15 @@ export default function Dashboard() {
         transactions,
         accounts,
         snapshots,
-        setActiveView
+        setActiveView,
+        workspace,
+        setWorkspaceSettings
     } = useVaultStore();
 
     const { netWorth, convert, baseCurrency } = useNetWorth();
     const formatMoney = useFormatMoney();
+
+    const [showSnapshotModal, setShowSnapshotModal] = useState(false);
 
     // --- Filter State ---
     const [period] = useState<DashboardPeriod>('1y');
@@ -91,11 +97,56 @@ export default function Dashboard() {
 
 
     // --- User Actions ---
+    const handleSnapshotAction = async (refresh: boolean) => {
+        try {
+            if (refresh) {
+                await useVaultStore.getState().refreshAllPrices();
+            }
 
+            await window.api.createSnapshot();
+            toast.success(t('dashboard.snapshotSuccess'));
+            await useVaultStore.getState().refreshData();
+        } catch (e) {
+            console.error(e);
+            toast.error(t('dashboard.snapshotError'));
+        }
+    };
+
+    const handleSnapshotClick = async () => {
+        const autoRefresh = workspace.autoRefreshOnSnapshot; // This is a boolean | null | undefined
+
+        // Explicitly check for boolean values
+        if (autoRefresh === true) {
+            await handleSnapshotAction(true);
+        } else if (autoRefresh === false) {
+            await handleSnapshotAction(false);
+        } else {
+            // Null or undefined -> Ask user
+            setShowSnapshotModal(true);
+        }
+    };
+
+    const handleModalConfirm = async (shouldRefresh: boolean, rememberChoice: boolean) => {
+        setShowSnapshotModal(false);
+
+        if (rememberChoice) {
+            await setWorkspaceSettings({
+                autoRefreshOnSnapshot: shouldRefresh
+            });
+        }
+
+        await handleSnapshotAction(shouldRefresh);
+    };
 
 
     return (
         <div className="p-6 space-y-6 overflow-y-auto h-full" data-tour="dashboard">
+            <SnapshotConfirmationModal
+                isOpen={showSnapshotModal}
+                onClose={() => setShowSnapshotModal(false)}
+                onConfirm={handleModalConfirm}
+            />
+
             {/* Header */}
             <header className="px-8 py-6 pb-2 flex justify-between items-end">
                 <div>
@@ -104,27 +155,22 @@ export default function Dashboard() {
                 </div>
                 <div className="flex gap-3">
                     <button
-                        onClick={async () => {
-                            try {
-                                await window.api.createSnapshot();
-                                toast.success(t('dashboard.snapshotSuccess'));
-                                // Ideally trigger refresh or rely on optimistic updates if store listened to changes?
-                                // VaultStore loadVault updates everything.
-                                // We might need to manually trigger a refresh of snapshots in store if not auto.
-                                // useVaultStore doesn't expose refreshSnapshots? It exposes loadVault via init?
-                                await useVaultStore.getState().refreshData();
-                            } catch (e) {
-                                console.error(e);
-                                toast.error(t('dashboard.snapshotError'));
-                            }
-                        }}
+                        onClick={() => useVaultStore.getState().refreshAllPrices()}
+                        className="flex items-center gap-2 bg-background-subtle hover:bg-background-element border border-border px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                        title={t('investments.refreshPrices')}
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t('investments.refresh')}</span>
+                    </button>
+                    <button
+                        onClick={handleSnapshotClick}
                         className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors text-sm font-medium"
                     >
                         <Camera className="w-4 h-4" />
                         <span>{t('dashboard.takeSnapshot')}</span>
                     </button>
                 </div>
-            </header>
+            </header >
 
             <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
 
@@ -218,7 +264,7 @@ export default function Dashboard() {
             </div>
 
 
-        </div>
+        </div >
     );
 }
 

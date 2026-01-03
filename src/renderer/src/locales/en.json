@@ -138,7 +138,15 @@
     "netWorthTrend": "Net Worth Trend",
     "assetAllocation": "Asset Allocation",
     "recentTransactions": "Recent Transactions",
-    "cashAccounts": "Cash & Accounts"
+    "cashAccounts": "Cash & Accounts",
+    "snapshotConfirmation": {
+      "title": "Update Data before Snapshot",
+      "description": "Do you want to refresh market quotes to get a more accurate snapshot?",
+      "updateAndSnapshot": "Update & Take Snapshot",
+      "snapshotOnly": "Just Snapshot",
+      "rememberChoice": "Remember my choice (change in Settings)",
+      "autoUpdate": "Auto Update"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -152,8 +160,16 @@
       "dark": "Dark",
       "system": "System"
     },
+    "automation": "Automation",
+    "snapshotBehavior": "Snapshot Behavior",
+    "snapshotAutoUpdate": "Always Update Prices",
+    "snapshotNoUpdate": "Snapshot Only (Fast)",
+    "snapshotAsk": "Ask Every Time",
+    "confirmReset": "Are you sure? This will restart the app onboarding.",
     "decimals": "Decimal Places",
     "categories": "Categories",
+    "vaultLocation": "Vault Location",
+    "currentVault": "Current Vault",
     "dateTime": "Date & Time",
     "dateFormat": "Date Format",
     "timeFormat": "Time Format",
@@ -334,7 +350,10 @@
     "allocationByGeography": "Allocation by Geography",
     "sell": "Sell",
     "portfolioDistribution": "Portfolio Distribution",
-    "moreItems": "+ {{count}} more"
+    "moreItems": "+ {{count}} more",
+    "refreshSuccess": "✅ {{count}} prices updated successfully",
+    "refreshPartial": "⚠️ Updated {{updated}} prices ({{failed}} failed)",
+    "refreshError": "❌ Failed to refresh prices"
   },
   "modals": {
     "cancel": "Cancel",

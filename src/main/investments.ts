@@ -1,7 +1,12 @@
 import yahooFinanceModule from 'yahoo-finance2';
+
+// Robust loader for Electron/Vite environment
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const YahooFinanceModule = (yahooFinanceModule as any).default || yahooFinanceModule;
-const yahooFinance = new YahooFinanceModule();
+const pkg = (yahooFinanceModule as any).default || yahooFinanceModule;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const yahooFinance = (typeof pkg === 'function') ? new pkg() : pkg;
+
+console.log('[InvestmentManager] Yahoo Finance initialized. Type:', typeof yahooFinance, 'Is search function?', typeof yahooFinance.search);
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import path from 'path';
