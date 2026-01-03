@@ -24,11 +24,13 @@ const BROKER_TYPES = ['bank', 'broker', 'crypto_exchange', 'other'] as const;
 
 // Preset broker logos available in resources/asset-icons
 const PRESET_LOGOS = [
-    'Revolut', 'N26', 'Fineco', 'Hype', 'Binance', 'Coinbase',
-    'Interactive Brokers', 'Degiro', 'Directa Sim', 'Trade Republic',
-    'BPER', 'BPM', 'Credem', 'Sella', 'Illimity', 'Banca Generali',
-    'Mediobanca', 'MPS', 'Deutsche Bank', 'HSBC', 'Santander',
-    'Chase', 'Lloyds Bank', 'AIA', 'Allianz', 'Generali', 'Zurich'
+    'AIA', 'Allianz', 'AXA', 'BCC', 'Binance', 'BPER', 'BPM', 'BPPB', 'BPSO',
+    'Banca AideXa', 'Banca Generali', 'Banca Ifis', 'Banco Desio', 'Chase',
+    'Coinbase', 'Credem', 'Crédit Agricole', 'Crédit Mutuel', 'Degiro',
+    'Deutsche Bank', 'Directa Sim', 'Etica Sgr', 'Fineco', 'Generali',
+    'HSBC', 'Hype', 'Illimity', 'Interactive Brokers', 'Lloyds Bank',
+    'Mediolanum', 'MPS', 'N26', 'Revolut', 'Robinhood', 'Santander',
+    'Sella', 'Trade Republic'
 ].sort();
 
 export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose, editBrokerId }) => {
