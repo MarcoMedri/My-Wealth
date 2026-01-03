@@ -30,7 +30,9 @@
     "account": "Account",
     "date": "Date",
     "saving": "Saving...",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "close": "Close"
   },
   "nav": {
     "dashboard": "Overview",
@@ -63,6 +65,8 @@
     "cashBalance": "Cash Balance",
     "investmentsValue": "Investments",
     "linkedAccounts": "Linked Accounts",
+    "securitiesAccounts": "Securities Accounts",
+    "archivedAccounts": "Closed Accounts",
     "portfolio": "Portfolio",
     "noAccounts": "No accounts linked to this broker",
     "noHoldings": "No investment holdings with this broker",
@@ -206,6 +210,7 @@
     "accountNamePlaceholder": "e.g. Main Bank Account",
     "accountType": "Account Type",
     "linkedBroker": "Linked Broker (Optional)",
+    "brokerLink": "Linked Broker",
     "noBroker": "-- None --",
     "editBalance": "Edit Balance",
     "manualBalance": "Manual Balance",
@@ -225,8 +230,25 @@
       "cash": "Cash Wallet",
       "loan": "Loan / Mortgage",
       "deposit": "Deposit Account",
+      "addDeposit": "Add Deposit",
+      "addDepositDesc": "Create a deposit account",
+      "noDeposits": "No deposit accounts",
       "other": "Other"
-    }
+    },
+    "addAccountDesc": "Create a new account",
+    "manageAccount": "Manage Account",
+    "attention": "Attention",
+    "deleteWarning": "You are about to remove the account \"{{name}}\". Choose how to proceed:",
+    "closeAccount": "Close Account",
+    "closeAccountDesc": "The account will be archived. Transaction history will be preserved and included in net worth calculation, but the account will no longer be active.",
+    "deleteAccount": "Delete Account",
+    "deleteAccountWarning": "WARNING: All associated transactions will be permanently deleted. History will be lost forever.",
+    "deleteAccountDesc": "The account will be permanently deleted.",
+    "addSecuritiesAccount": "Add Securities Account",
+    "addSecuritiesAccountDesc": "For investments (Stocks, ETFs, etc.)",
+    "archivedSuccess": "Account archived successfully",
+    "archiveError": "Failed to archive account",
+    "accountDeleted": "Account deleted successfully"
   },
   "transactions": {
     "addTransaction": "Add Transaction",
@@ -291,6 +313,7 @@
     "trackDescription": "Track your stocks, ETFs, and crypto in one place. Real-time quotes and performance analysis.",
     "addFirst": "Add First Investment",
     "addInvestment": "Add Investment",
+    "addInvestmentDesc": "Manually add investment",
     "refresh": "Refresh",
     "refreshPrices": "Refresh all prices from market",
     "totalValue": "Total Value",
@@ -386,7 +409,9 @@
         "fund": "Fund",
         "insurance": "Insurance",
         "other": "Other"
-      }
+      },
+      "noAccountTitle": "No Securities Account",
+      "noAccountDesc": "To add an investment, you must first create a \"Securities Account\" within a Broker."
     }
   },
   "filters": {
@@ -480,7 +505,9 @@
       "travel": "Travel",
       "liability": "Liability",
       "other": "Other"
-    }
+    },
+    "noBrokerTitle": "No Broker Found",
+    "noBrokerDesc": "To add an insurance policy, you must first create a Broker (or Insurance Provider)."
   },
   "deposits": {
     "title": "Deposit Accounts",
@@ -511,11 +538,14 @@
       "semiannual": "Semiannual",
       "annual": "Annual"
     },
+    "noBrokerTitle": "No Broker Found",
+    "noBrokerDesc": "To add a deposit account, you must first create a Broker (e.g. Bank).",
     "constraintTypes": {
       "free": "Free",
       "locked": "Locked (Non-withdrawable)",
       "flexible": "Flexible (with penalty)"
     },
+
     "placeholders": {
       "name": "e.g. Cherry Bank Vincolato 60m"
     },

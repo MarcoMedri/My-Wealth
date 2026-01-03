@@ -167,6 +167,10 @@ function registerIpcHandlers(): void {
     return vaultManager.saveAccount(account)
   })
 
+  ipcMain.handle(IPC_CHANNELS.ACCOUNT_DELETE, async (_event, id: string) => {
+    return vaultManager.deleteAccount(id)
+  })
+
   ipcMain.handle(IPC_CHANNELS.ACCOUNT_SET_MANUAL_BALANCE, async (_event, accountId: string, balance: number | null, date: string) => {
     return vaultManager.setAccountManualBalance(accountId, balance, date)
   })

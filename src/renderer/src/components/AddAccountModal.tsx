@@ -3,17 +3,21 @@
  * Form to create a new account
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import Modal from './Modal';
 import { cn } from '../lib/utils';
-import { Loader2 } from 'lucide-react';
-import type { AccountType } from '../../../shared/schemas';
+import { Loader2, Trash } from 'lucide-react';
+import { CloseDeleteAccountModal } from './accounts/CloseDeleteAccountModal';
+import type { Account, AccountType } from '../../../shared/schemas';
 
 interface AddAccountModalProps {
     isOpen: boolean;
     onClose: () => void;
+    preselectedBrokerId?: string;
+    initialData?: Account;
+    defaultType?: AccountType;
 }
 
 const ACCOUNT_TYPE_KEYS: AccountType[] = ['checking', 'savings', 'credit', 'investment', 'cash', 'loan', 'deposit', 'other'];
@@ -29,11 +33,13 @@ const COLORS = [
     '#14b8a6', // Teal
 ];
 
-export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
+export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, initialData, defaultType }: AddAccountModalProps) {
     const { t } = useTranslation();
-    const { refreshData } = useVaultStore();
+    const { refreshData, deleteAccount } = useVaultStore();
+    const transactions = useVaultStore(state => state.transactions);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isCloseDeleteOpen, setIsCloseDeleteOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -41,10 +47,67 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
         currency: 'EUR',
         initialBalance: '0.00',
         color: COLORS[0],
-        brokerId: '',
+        brokerId: preselectedBrokerId || '',
     });
 
+    // Load initial data for editing
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                name: initialData.name,
+                type: initialData.type,
+                currency: initialData.currency,
+                initialBalance: (initialData.initialBalance / 100).toFixed(2),
+                color: initialData.color,
+                brokerId: initialData.brokerId || '',
+            });
+        } else {
+            // Reset form when modal opens in create mode
+            setFormData({
+                name: '',
+                type: defaultType || 'checking',
+                currency: 'EUR',
+                initialBalance: '0.00',
+                color: COLORS[0],
+                brokerId: preselectedBrokerId || '',
+            });
+        }
+    }, [initialData, isOpen, preselectedBrokerId, defaultType]);
+
     const brokers = useVaultStore(state => state.brokers);
+
+    const handleDeleteClick = () => {
+        setIsCloseDeleteOpen(true);
+    };
+
+    const handleCloseAccount = async () => {
+        if (!initialData) return;
+        setIsLoading(true);
+        try {
+            await window.api.saveAccount({ ...initialData, isArchived: true });
+            await refreshData();
+            setIsCloseDeleteOpen(false);
+            onClose();
+        } catch (e) {
+            setError(e instanceof Error ? e.message : t('accounts.archiveError'));
+            setIsLoading(false);
+            setIsCloseDeleteOpen(false);
+        }
+    };
+
+    const handleDeleteForever = async () => {
+        if (!initialData) return;
+        setIsLoading(true);
+        try {
+            await deleteAccount(initialData.id);
+            setIsCloseDeleteOpen(false);
+            onClose();
+        } catch (e) {
+            setError(e instanceof Error ? e.message : t('errors.deleteFailed') || 'Delete failed');
+            setIsLoading(false);
+            setIsCloseDeleteOpen(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,14 +121,15 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
             const initialBalanceCents = Math.round(amount * 100);
 
             await window.api.saveAccount({
+                id: initialData?.id, // Pass ID for update
                 name: formData.name,
                 type: formData.type,
                 currency: formData.currency,
                 initialBalance: initialBalanceCents,
                 color: formData.color,
                 brokerId: formData.brokerId || undefined,
-                isArchived: false,
-                sortOrder: 0,
+                isArchived: initialData?.isArchived ?? false,
+                sortOrder: initialData?.sortOrder ?? 0,
             });
 
             await refreshData();
@@ -77,7 +141,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                 currency: 'EUR',
                 initialBalance: '0.00',
                 color: COLORS[0],
-                brokerId: '',
+                brokerId: preselectedBrokerId || '',
             });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create account');
@@ -87,7 +151,7 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={t('accounts.addAccount')}>
+        <Modal isOpen={isOpen} onClose={onClose} title={initialData ? t('accounts.editAccount') : t('accounts.addAccount')}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                     <div className="p-3 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -217,10 +281,36 @@ export default function AddAccountModal({ isOpen, onClose }: AddAccountModalProp
                         )}
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {t('accounts.createAccount')}
+                        {initialData ? t('common.save') : t('accounts.createAccount')}
                     </button>
                 </div>
             </form>
+
+            {/* Delete Button */}
+            {initialData && (
+                <div className="absolute bottom-5 left-6">
+                    <button
+                        type="button"
+                        onClick={handleDeleteClick}
+                        disabled={isLoading}
+                        className="text-red-500 hover:text-red-600 p-2 rounded-lg hover:bg-red-500/10 transition-colors"
+                        title={t('common.delete')}
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            )}
+
+            {initialData && (
+                <CloseDeleteAccountModal
+                    isOpen={isCloseDeleteOpen}
+                    onClose={() => setIsCloseDeleteOpen(false)}
+                    onCloseAccount={handleCloseAccount}
+                    onDeleteAccount={handleDeleteForever}
+                    accountName={initialData.name}
+                    hasTransactions={transactions.some(t => t.accountId === initialData.id)}
+                />
+            )}
         </Modal>
     );
 }

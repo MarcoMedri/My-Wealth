@@ -80,6 +80,11 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_SAVE, account)
   },
 
+  /** Delete an account */
+  deleteAccount: (id: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_DELETE, id)
+  },
+
   /** Set or clear manual balance for an account */
   setAccountManualBalance: (accountId: string, balance: number | null, date: string): Promise<Account> => {
     return ipcRenderer.invoke(IPC_CHANNELS.ACCOUNT_SET_MANUAL_BALANCE, accountId, balance, date)

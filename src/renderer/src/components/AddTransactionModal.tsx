@@ -3,7 +3,7 @@
  * Form to create a new transaction
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 // Force HMR update - Tab selection bug fixed
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
@@ -20,16 +20,24 @@ interface AddTransactionModalProps {
     onClose: () => void;
     transaction?: Transaction | null; // Optional transaction to edit
     isDuplicate?: boolean; // If true, treats the transaction as a template for a new one
+    preselectedAccountId?: string;
+    limitToBrokerId?: string; // If set, only allow selecting accounts from this broker
 }
 
-export default function AddTransactionModal({ isOpen, onClose, transaction, isDuplicate = false }: AddTransactionModalProps) {
+export default function AddTransactionModal({ isOpen, onClose, transaction, isDuplicate = false, preselectedAccountId, limitToBrokerId }: AddTransactionModalProps) {
     const { t } = useTranslation();
     const { accounts, categories, addTransaction, updateTransaction } = useVaultStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Memoize active accounts to prevent effect loops
-    const activeAccounts = useMemo(() => accounts.filter((a: Account) => !a.isArchived), [accounts]);
+    const activeAccounts = useMemo(() => {
+        let filtered = accounts.filter((a: Account) => !a.isArchived);
+        if (limitToBrokerId) {
+            filtered = filtered.filter(a => a.brokerId === limitToBrokerId);
+        }
+        return filtered;
+    }, [accounts, limitToBrokerId]);
 
     // Group categories by type
     const incomeCategories = categories.filter(c => c.type === 'income');
@@ -40,44 +48,59 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
         date: new Date().toISOString().split('T')[0],
         amount: '',
         payee: '',
-        accountId: activeAccounts[0]?.id || '',
+        accountId: preselectedAccountId || activeAccounts[0]?.id || '',
         categoryId: '',
         toAccountId: '',
         notes: '',
     });
 
-    useEffect(() => {
-        if (!isOpen) return; // Only run when opening
+    // Track previous open state to detect opening transition
+    // Initialize to false so that if mounted open, it triggers the opening logic
+    const prevIsOpenRef = useRef(false);
 
-        if (transaction) {
-            setFormData({
-                type: transaction.type,
-                date: transaction.date.split('T')[0],
-                amount: (transaction.amount / 100).toFixed(2),
-                payee: transaction.payee,
-                accountId: transaction.accountId,
-                categoryId: transaction.categoryId || '',
-                toAccountId: transaction.toAccountId || '',
-                notes: transaction.notes || '',
-            });
-        } else {
-            // Reset to defaults
-            setFormData({
-                type: 'expense',
-                date: new Date().toISOString().split('T')[0],
-                amount: '',
-                payee: '',
-                accountId: activeAccounts[0]?.id || '',
-                categoryId: '',
-                toAccountId: '',
-                notes: '',
-            });
+    useEffect(() => {
+        // Only run logic if we are transitioning from closed to open
+        const isOpening = isOpen && !prevIsOpenRef.current;
+        prevIsOpenRef.current = isOpen;
+
+        if (!isOpen) return;
+
+        if (isOpening) {
+            if (transaction) {
+                setFormData({
+                    type: transaction.type,
+                    date: transaction.date.split('T')[0],
+                    amount: (transaction.amount / 100).toFixed(2),
+                    payee: transaction.payee,
+                    accountId: transaction.accountId,
+                    categoryId: transaction.categoryId || '',
+                    toAccountId: transaction.toAccountId || '',
+                    notes: transaction.notes || '',
+                });
+            } else {
+                // Reset to defaults
+                setFormData(prev => ({
+                    ...prev, // Keep existing values if any, or strictly reset? Better to strict reset.
+                    type: 'expense',
+                    date: new Date().toISOString().split('T')[0],
+                    amount: '',
+                    payee: '',
+                    // Use preselected, or fallback to first available active account (which is already filtered by broker if limitToBrokerId set)
+                    accountId: preselectedAccountId || activeAccounts[0]?.id || '',
+                    categoryId: '',
+                    toAccountId: '',
+                    notes: '',
+                }));
+            }
+        } else if (preselectedAccountId && formData.accountId !== preselectedAccountId && formData.accountId === '') {
+            // Edge case: if preselectedAccountId arrives late or changes while open AND nothing is selected
+            setFormData(prev => ({ ...prev, accountId: preselectedAccountId }));
+        } else if (limitToBrokerId && !activeAccounts.find(a => a.id === formData.accountId) && activeAccounts.length > 0 && !transaction) {
+            // Auto-select first available account for the broker if current selection is invalid
+            setFormData(prev => ({ ...prev, accountId: activeAccounts[0].id }));
         }
-        // We only want to run this when the modal opens or the transaction/account-list changes significantly.
-        // Including activeAccounts directly caused a loop because filter returns a new array.
-        // Now that it's memoized, it should be safe.
-        // Also added !isOpen check to avoid running on close.
-    }, [transaction, isOpen, activeAccounts]);
+
+    }, [transaction, isOpen, activeAccounts, preselectedAccountId, limitToBrokerId, formData.accountId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -109,6 +132,7 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                 amount: amountCents,
                 currency: account.currency,
                 accountId: formData.accountId,
+                brokerId: account.brokerId, // Link transaction to broker
                 categoryId: formData.categoryId || null,
                 toAccountId: formData.type === 'transfer' ? formData.toAccountId : null,
                 splits: [],

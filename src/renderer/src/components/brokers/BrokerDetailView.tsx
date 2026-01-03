@@ -10,7 +10,10 @@ import {
     Pencil,
     PiggyBank,
     CreditCard,
-    Banknote
+    Banknote,
+    Upload,
+    Plus,
+    Archive
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../../store/useVaultStore';
@@ -20,12 +23,14 @@ import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
 import { ICON_MAP } from '../../lib/iconMap';
 
-// Imports for Modals
+import AddAccountModal from '../AddAccountModal';
 import ImportModal from '../ImportModal';
 import { AddInvestmentModal } from '../investments/AddInvestmentModal';
 import { AddDepositModal } from '../deposits/AddDepositModal';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
-import { Upload } from 'lucide-react';
+import { CloseDeleteAccountModal } from '../accounts/CloseDeleteAccountModal';
+import type { Account, DepositAccount, AccountType } from '../../../../shared/schemas';
+import AddTransactionModal from '../AddTransactionModal';
 
 interface BrokerDetailViewProps {
     brokerId: string;
@@ -38,6 +43,7 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     const holdings = useVaultStore(state => state.holdings);
     const assets = useVaultStore(state => state.assets);
     const deposits = useVaultStore(state => state.deposits);
+    const transactions = useVaultStore(state => state.transactions);
     const accountBalances = useVaultStore(state => state.accountBalances);
     const deleteBroker = useVaultStore(state => state.deleteBroker);
     const refreshData = useVaultStore(state => state.refreshData);
@@ -49,10 +55,25 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
 
     // Action Modals State
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
     const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [selectedAccount, setSelectedAccount] = useState<Account | undefined>(undefined);
+    const [selectedDeposit, setSelectedDeposit] = useState<DepositAccount | undefined>(undefined);
+    const [addAccountType, setAddAccountType] = useState<AccountType | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [editBalanceAccountId, setEditBalanceAccountId] = useState<string | null>(null);
+
+    // Account Archive/Delete State
+    const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
+    const [isCloseDeleteModalOpen, setIsCloseDeleteModalOpen] = useState(false);
+    const [depositToDelete, setDepositToDelete] = useState<DepositAccount | null>(null);
+    const [isDepositDeleteConfirmOpen, setIsDepositDeleteConfirmOpen] = useState(false);
+    const [isArchiveDeleteConfirmOpen, setIsArchiveDeleteConfirmOpen] = useState(false);
+
+    const deleteAccount = useVaultStore(state => state.deleteAccount);
+    const deleteDeposit = useVaultStore(state => state.deleteDeposit);
 
     const broker = getBroker(brokerId);
 
@@ -65,20 +86,26 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     }
 
     // Filter accounts, holdings, and deposits for this broker
-    const brokerAccounts = Array.from(accounts.values()).filter(a => a.brokerId === brokerId);
+    // Filter accounts, holdings, and deposits for this broker
+    const allBrokerAccounts = Array.from(accounts.values()).filter(a => a.brokerId === brokerId);
+
+    const securitiesAccounts = allBrokerAccounts.filter(a => !a.isArchived && a.type === 'investment');
+    const cashAccounts = allBrokerAccounts.filter(a => !a.isArchived && a.type !== 'investment');
+    const archivedAccounts = allBrokerAccounts.filter(a => a.isArchived);
+
     const brokerDeposits = deposits.filter(d => d.brokerId === brokerId);
 
     // Holdings can be linked directly to broker OR via account linked to broker
     // Logic: 
     // 1. Get holdings where holding.brokerId === brokerId
     // 2. OR holdings where holding.accountId belongs to this broker
-    const brokerAccountIds = new Set(brokerAccounts.map(a => a.id));
+    const brokerAccountIds = new Set(allBrokerAccounts.map(a => a.id));
     const brokerHoldings = holdings.filter(h =>
         h.brokerId === brokerId || (h.accountId && brokerAccountIds.has(h.accountId))
     );
 
     // Calculate totals
-    const cashTotal = brokerAccounts.reduce((sum, account) => {
+    const cashTotal = cashAccounts.reduce((sum, account) => {
         return sum + (accountBalances[account.id] || 0);
     }, 0);
 
@@ -163,19 +190,20 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                         {t('import.title')}
                     </button>
                     <button
+                        onClick={() => setIsTransactionModalOpen(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
+                    >
+                        <Plus size={16} className="text-emerald-500" />
+                        {t('transactions.addTransaction')}
+                    </button>
+                    <button
                         onClick={() => setIsInvestmentModalOpen(true)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
                     >
                         <TrendingUp size={16} className="text-purple-500" />
                         {t('investments.addInvestment')}
                     </button>
-                    <button
-                        onClick={() => setIsDepositModalOpen(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-background text-foreground border border-border rounded-lg text-sm font-medium hover:bg-background-muted transition-colors shadow-sm"
-                    >
-                        <PiggyBank size={16} className="text-emerald-500" />
-                        {t('deposits.addDeposit')}
-                    </button>
+
                 </div>
             </div>
 
@@ -213,73 +241,131 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                     </div>
                 </div>
 
-                {/* Linked Accounts */}
+                {/* Securities Accounts (Conto Titoli) */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <TrendingUp size={20} className="text-foreground-muted" />
+                        {t('brokers.securitiesAccounts', 'Conti Titoli')}
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {securitiesAccounts.map(account => (
+                            <div
+                                key={account.id}
+                                className="cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+                                onClick={() => { setSelectedAccount(account); setIsAccountModalOpen(true); }}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-500">
+                                            <TrendingUp size={16} />
+                                        </div>
+                                        <span className="font-medium text-foreground">{account.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setAccountToDelete(account);
+                                                setIsCloseDeleteModalOpen(true);
+                                            }}
+                                            className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
+                                            title={t('common.delete')}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {formatMoney(accountBalances[account.id] || 0, account.currency)}
+                                </p>
+                                {account.manualBalance !== undefined && (
+                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                        {t('accounts.manualBalance')}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                        <AddCard
+                            onClick={() => { setSelectedAccount(undefined); setAddAccountType('investment'); setIsAccountModalOpen(true); }}
+                            title={t('accounts.addSecuritiesAccount', 'Aggiungi Conto Titoli')}
+                            description={t('accounts.addSecuritiesAccountDesc', 'Per investimenti (ETF, Azioni, ecc)')}
+                            icon={Plus}
+                        />
+                    </div>
+                </div>
+
+                {/* Cash & Other Accounts */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                         <Wallet size={20} className="text-foreground-muted" />
-                        {t('brokers.linkedAccounts')}
+                        {t('brokers.cashAccounts', 'Conti Cash')}
                     </h2>
 
-                    {brokerAccounts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {brokerAccounts.map(account => {
-                                const AccountIcon = {
-                                    'checking': Wallet,
-                                    'savings': PiggyBank,
-                                    'deposit': PiggyBank,
-                                    'credit': CreditCard,
-                                    'investment': TrendingUp,
-                                    'cash': Banknote,
-                                    'loan': Building2,
-                                    'other': Wallet
-                                }[account.type] || Wallet;
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {cashAccounts.map(account => {
+                            const AccountIcon = {
+                                'checking': Wallet,
+                                'savings': PiggyBank,
+                                'deposit': PiggyBank,
+                                'credit': CreditCard,
+                                'investment': TrendingUp,
+                                'cash': Banknote,
+                                'loan': Building2,
+                                'other': Wallet
+                            }[account.type] || Wallet;
 
-                                return (
-                                    <div key={account.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-background-subtle text-foreground-muted">
-                                                    <AccountIcon size={16} />
-                                                </div>
-                                                <span className="font-medium text-foreground">{account.name}</span>
+                            return (
+                                <div
+                                    key={account.id}
+                                    className="cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+                                    onClick={() => { setSelectedAccount(account); setIsAccountModalOpen(true); }}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 rounded-lg bg-background-subtle text-foreground-muted">
+                                                <AccountIcon size={16} />
                                             </div>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-xs px-2 py-0.5 rounded-full bg-background-subtle text-foreground-muted">
-                                                    {t(`accountTypes.${account.type}`)}
-                                                </span>
-                                                <button
-                                                    onClick={() => setEditBalanceAccountId(account.id)}
-                                                    className="p-1 text-foreground-muted hover:text-primary hover:bg-background-muted rounded transition-colors"
-                                                    title={t('accounts.editBalance')}
-                                                >
-                                                    <Pencil size={14} />
-                                                </button>
-                                            </div>
+                                            <span className="font-medium text-foreground">{account.name}</span>
                                         </div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            {formatMoney(accountBalances[account.id] || 0, account.currency)}
-                                        </p>
-                                        {account.manualBalance !== undefined && (
-                                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                                {t('accounts.manualBalance')}
-                                            </p>
-                                        )}
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-background-subtle text-foreground-muted">
+                                                {t(`accountTypes.${account.type}`)}
+                                            </span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setAccountToDelete(account);
+                                                    setIsCloseDeleteModalOpen(true);
+                                                }}
+                                                className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
+                                                title={t('common.delete')}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-background-subtle/50">
-                            <Wallet className="w-8 h-8 text-foreground-muted mb-2 opacity-50" />
-                            <p className="text-foreground-muted italic text-sm text-center">
-                                {t('brokers.noAccounts')}<br />
-                                <span className="text-xs">
-                                    {t('brokers.importHint')}
-                                </span>
-                            </p>
-                        </div>
-                    )}
+                                    <p className="text-2xl font-bold text-foreground">
+                                        {formatMoney(accountBalances[account.id] || 0, account.currency)}
+                                    </p>
+                                    {account.manualBalance !== undefined && (
+                                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                            {t('accounts.manualBalance')}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+                        <AddCard
+                            onClick={() => { setSelectedAccount(undefined); setAddAccountType('checking'); setIsAccountModalOpen(true); }}
+                            title={t('accounts.addAccount')}
+                            description={t('accounts.addAccountDesc', 'Crea un nuovo conto')}
+                            icon={Plus}
+                        />
+                    </div>
                 </div>
+
+
 
                 {/* Deposit Accounts */}
                 <div className="space-y-4">
@@ -288,43 +374,62 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                         {t('deposits.title')}
                     </h2>
 
-                    {brokerDeposits.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {brokerDeposits.map(deposit => (
-                                <div key={deposit.id} className="bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500">
-                                                <PiggyBank size={16} />
-                                            </div>
-                                            <span className="font-medium text-foreground">{deposit.name}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {brokerDeposits.map(deposit => (
+                            <div
+                                key={deposit.id}
+                                className="group/card relative cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+                                onClick={() => { setSelectedDeposit(deposit); setIsDepositModalOpen(true); }}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500">
+                                            <PiggyBank size={16} />
                                         </div>
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
-                                            {(deposit.grossRate).toFixed(2)}%
-                                        </span>
+                                        <span className="font-medium text-foreground">{deposit.name}</span>
                                     </div>
-                                    <p className="text-2xl font-bold text-foreground">
-                                        {formatMoney(deposit.principal, deposit.currency)}
-                                    </p>
-                                    <p className="text-xs text-foreground-muted mt-1">
-                                        {t('deposits.maturityDate')}: {new Date(deposit.maturityDate).toLocaleDateString()}
-                                    </p>
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-medium">
+                                        {(deposit.grossRate).toFixed(2)}%
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-foreground-muted italic text-sm">{t('deposits.noDeposits')}</p>
-                    )}
+                                <div className="absolute top-4 right-4 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setDepositToDelete(deposit);
+                                            setIsDepositDeleteConfirmOpen(true);
+                                        }}
+                                        className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
+                                        title={t('common.delete')}
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {formatMoney(deposit.principal, deposit.currency)}
+                                </p>
+                                <p className="text-xs text-foreground-muted mt-1">
+                                    {t('deposits.maturityDate')}: {new Date(deposit.maturityDate).toLocaleDateString()}
+                                </p>
+                            </div>
+                        ))}
+                        <AddCard
+                            onClick={() => { setSelectedDeposit(undefined); setIsDepositModalOpen(true); }}
+                            title={t('deposits.addDeposit')}
+                            description={t('deposits.addDepositDesc', 'Crea un conto deposito')}
+                            icon={Plus}
+                        />
+                    </div>
                 </div>
 
                 {/* Portfolio / Holdings */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                        <PieChart size={20} className="text-foreground-muted" />
-                        {t('brokers.portfolio')}
-                    </h2>
+                {brokerHoldings.length > 0 && (
+                    <div className="space-y-4">
+                        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                            <PieChart size={20} className="text-foreground-muted" />
+                            {t('brokers.portfolio')}
+                        </h2>
 
-                    {brokerHoldings.length > 0 ? (
                         <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden">
                             <table className="w-full text-left">
                                 <thead className="bg-background-subtle text-xs uppercase text-foreground-muted font-medium">
@@ -364,15 +469,52 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                                 </tbody>
                             </table>
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-background-subtle/50">
-                            <PieChart className="w-8 h-8 text-foreground-muted mb-2 opacity-50" />
-                            <p className="text-foreground-muted italic text-sm text-center">
-                                {t('brokers.noHoldings')}<br />
-                            </p>
+                    </div>
+                )}
+
+                {/* Archived Accounts */}
+                {archivedAccounts.length > 0 && (
+                    <div className="space-y-4 pt-4 border-t border-border">
+                        <h2 className="text-lg font-semibold text-foreground-muted flex items-center gap-2 grayscale opacity-70">
+                            <Archive size={20} />
+                            {t('brokers.archivedAccounts', 'Conti Chiusi')}
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 grayscale opacity-70">
+                            {archivedAccounts.map(account => (
+                                <div
+                                    key={account.id}
+                                    className="cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+                                    onClick={() => { setSelectedAccount(account); setIsAccountModalOpen(true); }}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 rounded-lg bg-background-subtle text-foreground-muted">
+                                                <Archive size={16} />
+                                            </div>
+                                            <span className="font-medium text-foreground">{account.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setAccountToDelete(account);
+                                                    setIsArchiveDeleteConfirmOpen(true);
+                                                }}
+                                                className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
+                                                title={t('common.delete')}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-2xl font-bold text-foreground">
+                                        {formatMoney(accountBalances[account.id] || 0, account.currency)}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             {/* Modals */}
@@ -382,50 +524,75 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                 editBrokerId={brokerId}
             />
 
-            {editBalanceAccountId && (() => {
-                const account = accounts.find(a => a.id === editBalanceAccountId);
-                if (!account) return null;
-                return (
-                    <EditBalanceModal
-                        isOpen={true}
-                        onClose={() => setEditBalanceAccountId(null)}
-                        accountId={account.id}
-                        accountName={account.name}
-                        currentBalance={accountBalances[account.id] || 0}
-                        currency={account.currency}
-                        hasManualBalance={account.manualBalance !== undefined}
-                        onBalanceUpdated={() => {
-                            refreshData();
-                            setEditBalanceAccountId(null);
-                        }}
-                    />
-                );
-            })()}
+            {editBalanceAccountId && (
+                <EditBalanceModal
+                    isOpen={true}
+                    onClose={() => setEditBalanceAccountId(null)}
+                    accountId={editBalanceAccountId}
+                    accountName={accounts.find(a => a.id === editBalanceAccountId)?.name || ''}
+                    currentBalance={accountBalances[editBalanceAccountId] || 0}
+                    currency={accounts.find(a => a.id === editBalanceAccountId)?.currency || 'EUR'}
+                    hasManualBalance={accounts.find(a => a.id === editBalanceAccountId)?.manualBalance !== undefined}
+                    onBalanceUpdated={() => {
+                        refreshData();
+                        setEditBalanceAccountId(null);
+                    }}
+                />
+            )}
 
             {/* Context-Aware Action Modals */}
-            {isImportModalOpen && (
-                <ImportModal
-                    isOpen={isImportModalOpen}
-                    onClose={() => setIsImportModalOpen(false)}
-                    preselectedBrokerId={brokerId}
-                />
-            )}
+            {
+                isImportModalOpen && (
+                    <ImportModal
+                        isOpen={isImportModalOpen}
+                        onClose={() => setIsImportModalOpen(false)}
+                        preselectedBrokerId={brokerId}
+                    />
+                )
+            }
 
-            {isInvestmentModalOpen && (
-                <AddInvestmentModal
-                    isOpen={isInvestmentModalOpen}
-                    onClose={() => setIsInvestmentModalOpen(false)}
-                    preselectedBrokerId={brokerId}
-                />
-            )}
+            {
+                isInvestmentModalOpen && (
+                    <AddInvestmentModal
+                        isOpen={isInvestmentModalOpen}
+                        onClose={() => setIsInvestmentModalOpen(false)}
+                        preselectedBrokerId={brokerId}
+                    />
+                )
+            }
 
-            {isDepositModalOpen && (
-                <AddDepositModal
-                    isOpen={isDepositModalOpen}
-                    onClose={() => setIsDepositModalOpen(false)}
-                    preselectedBrokerId={broker.id} // Modified preselectedBrokerId
-                />
-            )}
+            {
+                isDepositModalOpen && (
+                    <AddDepositModal
+                        isOpen={isDepositModalOpen}
+                        onClose={() => { setIsDepositModalOpen(false); setTimeout(() => setSelectedDeposit(undefined), 300); }}
+                        preselectedBrokerId={broker.id}
+                        initialData={selectedDeposit}
+                    />
+                )
+            }
+
+            {
+                isTransactionModalOpen && (
+                    <AddTransactionModal
+                        isOpen={isTransactionModalOpen}
+                        onClose={() => setIsTransactionModalOpen(false)}
+                        limitToBrokerId={brokerId}
+                    />
+                )
+            }
+
+            {
+                isAccountModalOpen && (
+                    <AddAccountModal
+                        isOpen={isAccountModalOpen}
+                        onClose={() => { setIsAccountModalOpen(false); setTimeout(() => setSelectedAccount(undefined), 300); }}
+                        preselectedBrokerId={brokerId}
+                        initialData={selectedAccount}
+                        defaultType={addAccountType}
+                    />
+                )
+            }
 
             <ConfirmationModal // Added ConfirmationModal
                 isOpen={isDeleteConfirmOpen}
@@ -441,6 +608,108 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                 confirmText={t('common.delete')}
                 variant="danger"
             />
-        </div>
+
+            {/* Account Close/Delete Modal */}
+            <CloseDeleteAccountModal
+                isOpen={isCloseDeleteModalOpen}
+                onClose={() => {
+                    setIsCloseDeleteModalOpen(false);
+                    setAccountToDelete(null);
+                }}
+                onCloseAccount={async () => {
+                    if (accountToDelete) {
+                        try {
+                            // Archive the account using window.api directly as store doesn't expose generic update
+                            await window.api.saveAccount({ ...accountToDelete, isArchived: true });
+                            toast.success(t('accounts.archivedSuccess', 'Account archived'));
+                            await refreshData();
+                        } catch (err) {
+                            toast.error(t('accounts.archiveError', 'Failed to archive account'));
+                            console.error(err);
+                        }
+                    }
+                    setIsCloseDeleteModalOpen(false);
+                }}
+                onDeleteAccount={async () => {
+                    if (accountToDelete) {
+                        await deleteAccount(accountToDelete.id);
+                        refreshData();
+                    }
+                    setIsCloseDeleteModalOpen(false);
+                }}
+                accountName={accountToDelete?.name || ''}
+                hasTransactions={accountToDelete ? Array.from(transactions.values()).some(t => t.accountId === accountToDelete.id) : false}
+            />
+
+            {/* Archive Delete Confirmation */}
+            <ConfirmationModal
+                isOpen={isArchiveDeleteConfirmOpen}
+                onClose={() => setIsArchiveDeleteConfirmOpen(false)}
+                onConfirm={async () => {
+                    if (accountToDelete) {
+                        await deleteAccount(accountToDelete.id);
+                        await refreshData();
+                        toast.success(t('accounts.accountDeleted', 'Account deleted'));
+                    }
+                    setIsArchiveDeleteConfirmOpen(false);
+                }}
+                title={t('accounts.deleteAccount', 'Delete Account')}
+                description={t('accounts.deleteAccountWarning', 'WARNING: All associated transactions will be permanently deleted.')}
+                confirmText={t('common.delete')}
+                variant="danger"
+            />
+
+            {/* Deposit Delete Confirmation */}
+            <ConfirmationModal
+                isOpen={isDepositDeleteConfirmOpen}
+                onClose={() => setIsDepositDeleteConfirmOpen(false)}
+                onConfirm={async () => {
+                    if (depositToDelete) {
+                        await deleteDeposit(depositToDelete.id);
+                        await refreshData();
+                        toast.success(t('deposits.deleted', 'Deposit deleted'));
+                    }
+                    setIsDepositDeleteConfirmOpen(false);
+                }}
+                title={t('deposits.deleteTitle', 'Delete Deposit Account')}
+                description={t('common.confirmDelete', 'Are you sure?')}
+                confirmText={t('common.delete')}
+                variant="danger"
+            />
+        </div >
     );
 };
+
+interface AddCardProps {
+    onClick: () => void;
+    title: string;
+    description: string;
+    icon: React.ElementType;
+    className?: string;
+}
+
+function AddCard({ onClick, title, description, icon: Icon, className }: AddCardProps) {
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                "group flex items-center gap-4 p-4 rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-left",
+                className
+            )}
+        >
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shrink-0">
+                <Icon size={24} />
+            </div>
+            <div>
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {title}
+                </h3>
+                <p className="text-sm text-foreground-muted">
+                    {description}
+                </p>
+            </div>
+        </button>
+    );
+}
+
+

@@ -32,7 +32,9 @@
     "account": "Conto",
     "date": "Data",
     "saving": "Salvataggio...",
-    "error": "Si è verificato un errore"
+    "error": "Si è verificato un errore",
+    "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
+    "close": "Chiudi"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -131,6 +133,7 @@
     "accountNamePlaceholder": "es. Conto Corrente Principale",
     "accountType": "Tipo di Conto",
     "linkedBroker": "Broker Collegato (Opzionale)",
+    "brokerLink": "Broker Collegato",
     "noBroker": "-- Nessuno --",
     "editBalance": "Modifica Saldo",
     "manualBalance": "Saldo Manuale",
@@ -150,8 +153,25 @@
       "cash": "Contanti",
       "loan": "Prestito / Mutuo",
       "deposit": "Conto Deposito",
+      "addDeposit": "Aggiungi Deposito",
+      "addDepositDesc": "Crea un conto deposito",
+      "noDeposits": "Nessun conto deposito",
       "other": "Altro"
-    }
+    },
+    "addAccountDesc": "Crea un nuovo conto",
+    "manageAccount": "Gestisci Conto",
+    "attention": "Attenzione",
+    "deleteWarning": "Stai per rimuovere il conto \"{{name}}\". Scegli come procedere:",
+    "closeAccount": "Chiudi Conto",
+    "closeAccountDesc": "Il conto verrà archiviato. Lo storico delle transazioni verrà mantenuto e incluso nel calcolo del patrimonio, ma il conto non sarà più attivo.",
+    "deleteAccount": "Elimina Conto",
+    "deleteAccountWarning": "ATTENZIONE: Verranno eliminate permanentemente tutte le transazioni associate. Lo storico andrà perso per sempre.",
+    "deleteAccountDesc": "Il conto verrà eliminato definitivamente.",
+    "addSecuritiesAccount": "Aggiungi Conto Titoli",
+    "addSecuritiesAccountDesc": "Per investimenti (ETF, Azioni, ecc)",
+    "archivedSuccess": "Conto archiviato con successo",
+    "archiveError": "Impossibile archiviare il conto",
+    "accountDeleted": "Conto eliminato con successo"
   },
   "brokers": {
     "addBroker": "Aggiungi Broker",
@@ -168,6 +188,8 @@
     "cashBalance": "Saldo Liquidità",
     "investmentsValue": "Investimenti",
     "linkedAccounts": "Conti Collegati",
+    "securitiesAccounts": "Conti Titoli",
+    "archivedAccounts": "Conti Chiusi",
     "portfolio": "Portafoglio",
     "noAccounts": "Nessun conto collegato a questo broker",
     "noHoldings": "Nessun investimento con questo broker",
@@ -291,6 +313,7 @@
     "trackDescription": "Traccia azioni, ETF e crypto in un unico posto. Quotazioni in tempo reale e analisi delle performance.",
     "addFirst": "Aggiungi Primo Investimento",
     "addInvestment": "Aggiungi Investimento",
+    "addInvestmentDesc": "Inserimento manuale investimento",
     "refresh": "Aggiorna",
     "refreshPrices": "Aggiorna tutti i prezzi dal mercato",
     "totalValue": "Valore Totale",
@@ -388,7 +411,9 @@
         "fund": "Fondo",
         "insurance": "Assicurazione",
         "other": "Altro"
-      }
+      },
+      "noAccountTitle": "Nessun Conto Titoli",
+      "noAccountDesc": "Per aggiungere un investimento devi prima creare un \"Conto Titoli\" (Securities Account) all'interno di un Broker."
     }
   },
   "filters": {
@@ -482,7 +507,9 @@
       "travel": "Viaggi",
       "liability": "Responsabilità Civile",
       "other": "Altro"
-    }
+    },
+    "noBrokerTitle": "Nessun Broker Trovato",
+    "noBrokerDesc": "Per aggiungere una polizza assicurativa devi prima creare un Broker (o Compagnia Assicurativa)."
   },
   "deposits": {
     "title": "Conti Deposito",
@@ -513,11 +540,14 @@
       "semiannual": "Semestrale",
       "annual": "Annuale"
     },
+    "noBrokerTitle": "Nessun Broker Trovato",
+    "noBrokerDesc": "Per aggiungere un conto deposito devi prima creare un Broker (es. Banca).",
     "constraintTypes": {
       "free": "Libero",
       "locked": "Vincolato (Non Svincolabile)",
       "flexible": "Svincolabile (con penale)"
     },
+
     "placeholders": {
       "name": "es. Cherry Bank Vincolato 60m"
     },

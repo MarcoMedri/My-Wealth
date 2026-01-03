@@ -5,10 +5,7 @@ import { formatMoney } from '../../../../shared/schemas';
 import type { InvestmentSearchResult } from '../../../../shared/types';
 import { useTranslation } from 'react-i18next';
 
-// Extended type for selected asset (search result + quote data)
-interface SelectedAsset extends InvestmentSearchResult {
-    price: number;
-}
+
 
 interface AddInvestmentModalProps {
     isOpen: boolean;
@@ -19,25 +16,19 @@ interface AddInvestmentModalProps {
 export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: AddInvestmentModalProps) {
     const { accounts, refreshInvestments } = useVaultStore();
     const { t } = useTranslation();
-    const [step, setStep] = useState<'search' | 'configure'>('search');
+
+    // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<InvestmentSearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
 
-    // Filter accounts if broker preselected
-    const availableAccounts = preselectedBrokerId
-        ? accounts.filter(a => a.brokerId === preselectedBrokerId && !a.isArchived)
-        : accounts.filter(a => !a.isArchived);
+    const [showResults, setShowResults] = useState(false);
 
-    // Manual entry mode
-    const [isManualMode, setIsManualMode] = useState(false);
-    const [manualSymbol, setManualSymbol] = useState('');
-    const [manualName, setManualName] = useState('');
-    const [manualType, setManualType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other'>('stock');
-    const [manualCurrency, setManualCurrency] = useState('USD');
-
-    // Configure Form
+    // Form State
+    const [symbol, setSymbol] = useState('');
+    const [name, setName] = useState('');
+    const [type, setType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other'>('stock');
+    const [currency, setCurrency] = useState('USD');
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState(''); // Display price
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -45,74 +36,117 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
     const [accountId, setAccountId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [quoteError, setQuoteError] = useState<string | null>(null);
 
-    // Debounce search
-    const [searchError, setSearchError] = useState<string | null>(null);
+    // Filter accounts
+    const availableAccounts = accounts.filter(a =>
+        !a.isArchived &&
+        a.type === 'investment' &&
+        (!preselectedBrokerId || a.brokerId === preselectedBrokerId)
+    );
 
     // Auto-select account if only one available
     useEffect(() => {
-        if (isOpen && availableAccounts.length > 0 && !accountId) {
-            setAccountId(availableAccounts[0].id);
-        }
-    }, [isOpen, availableAccounts, accountId]);
+        if (isOpen) {
+            // Reset form on open
+            setSearchQuery('');
+            setSearchResults([]);
+            setSymbol('');
+            setName('');
+            setType('stock');
+            setCurrency('USD');
+            setQuantity('');
+            setPrice('');
+            setDate(new Date().toISOString().split('T')[0]);
+            setFees('0');
+            setErrorMessage(null);
 
+            if (availableAccounts.length > 0) {
+                setAccountId(availableAccounts[0].id);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, availableAccounts.length]); // Dependencies adjusted to avoid infinite loop but react to open
+
+    // Search Logic
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (searchQuery.length > 2 && step === 'search') {
+            if (searchQuery.length > 2) {
                 setIsSearching(true);
-                setSearchError(null);
+                // setSearchError(null);
                 try {
                     const results = await window.api.searchInvestments(searchQuery);
                     setSearchResults(results);
-                    if (results.length === 0 && searchQuery.length > 0) {
-                        setSearchError(t('modals.investmentModal.noResults', 'Nessun risultato trovato. Prova con l\'inserimento manuale.'));
+                    setShowResults(true);
+                    if (results.length === 0) {
+                        // Optional: setSearchError? Or just show empty
                     }
                 } catch (e) {
                     console.error(e);
-                    setSearchError(t('modals.investmentModal.searchError', 'Errore nella ricerca. Yahoo Finance potrebbe essere temporaneamente non disponibile. Usa l\'inserimento manuale.'));
+                    // setSearchError(t('modals.investmentModal.searchError', 'Errore nella ricerca.'));
                 } finally {
                     setIsSearching(false);
                 }
-            } else if (searchQuery.length === 0) {
+            } else {
                 setSearchResults([]);
-                setSearchError(null);
+                setShowResults(false);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, step, t]);
+    }, [searchQuery, t]);
 
     const handleSelectAsset = async (assetResult: InvestmentSearchResult) => {
         setIsSearching(true);
-        setQuoteError(null);
+        setShowResults(false); // Hide dropdown
+        setErrorMessage(null);
+
+        // Auto-fill basics immediately
+        setSymbol(assetResult.symbol);
+        setName(assetResult.name);
+        setType((assetResult.type as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other') || 'stock');
+        setCurrency(assetResult.currency);
+
         try {
+            // Try to get live quote
             const quote = await window.api.getInvestmentQuote(assetResult.symbol);
-            setSelectedAsset({ ...assetResult, ...quote });
-            setPrice((quote.price / 100).toString()); // Quote price is in cents
-            setStep('configure');
+            setPrice((quote.price / 100).toString());
+            // Update details if quote has better ones
+            setCurrency(quote.currency);
+            if (quote.name) setName(quote.name);
         } catch (e) {
             console.error("Failed to get quote", e);
-            setQuoteError(e instanceof Error ? e.message : 'Failed to get quote');
+            // Non-blocking, user can enter price manually
         } finally {
             setIsSearching(false);
         }
     };
 
-    const handleBuy = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!accountId || !selectedAsset) return;
+
+        if (!accountId || !symbol.trim() || !name.trim() || !quantity || !price) {
+            setErrorMessage(t('errors.missingRequiredFields') || "Please fill required fields");
+            return;
+        }
+
+        const selectedAccount = availableAccounts.find(a => a.id === accountId);
+        const brokerId = selectedAccount?.brokerId;
 
         setIsSubmitting(true);
         setErrorMessage(null);
         try {
-            await window.api.buyInvestment({
-                symbol: selectedAsset.symbol,
+            // We use buyInvestmentManual which accepts all metadata to ensure asset is created/updated correctly
+            await window.api.buyInvestmentManual({
+                symbol: symbol.toUpperCase(),
+                name,
+                type,
+                currency,
                 accountId,
                 quantity: parseFloat(quantity),
                 price: parseFloat(price) * 100, // to cents
                 date,
-                fees: parseFloat(fees) * 100 // to cents
+                fees: parseFloat(fees) * 100, // to cents
+                brokerId
             });
             await refreshInvestments();
             onClose();
@@ -124,311 +158,268 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
         }
     };
 
-    // Handler for manual entry - proceed to configure step
-    const handleProceedManual = () => {
-        if (!manualSymbol.trim() || !manualName.trim()) return;
-        setStep('configure');
-    };
-
-    // Handler for buying with manual entry
-    const handleBuyManual = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!accountId || !manualSymbol.trim()) return;
-
-        setIsSubmitting(true);
-        setErrorMessage(null);
-        try {
-            await window.api.buyInvestmentManual({
-                symbol: manualSymbol,
-                name: manualName,
-                type: manualType,
-                currency: manualCurrency,
-                accountId,
-                quantity: parseFloat(quantity),
-                price: parseFloat(price) * 100, // to cents
-                date,
-                fees: parseFloat(fees) * 100 // to cents
-            });
-            await refreshInvestments();
-            onClose();
-        } catch (e) {
-            console.error("Manual buy failed", e);
-            setErrorMessage(e instanceof Error ? e.message : 'Failed to buy investment');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    // Close Dropdown on click outside (simple version: just close if clicking form)
+    const closeDropdown = () => setShowResults(false);
 
     if (!isOpen) return null;
 
+    // Empty State Check
+    if (availableAccounts.length === 0) {
+        return (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-background-card rounded-2xl w-full max-w-lg shadow-xl border border-border p-6 text-center space-y-4">
+                    <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mx-auto">
+                        <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-foreground">
+                            {accounts.some(a => a.type === 'investment' && !a.isArchived) ?
+                                t('modals.investmentModal.noAccountMatchTitle', 'Nessun Conto Corrispondente') :
+                                t('modals.investmentModal.noAccountTitle', 'Nessun Conto Titoli')
+                            }
+                        </h3>
+                        <p className="text-foreground-muted mt-2">
+                            {t('modals.investmentModal.noAccountDesc', 'Per aggiungere un investimento devi prima creare un "Conto Titoli" (Securities Account) all\'interno di un Broker.')}
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-background-subtle hover:bg-background-muted text-foreground rounded-lg transition-colors"
+                    >
+                        {t('common.close', 'Chiudi')}
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-background-card rounded-2xl w-full max-w-lg shadow-xl border border-border flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeDropdown}>
+            <div className="bg-background-card rounded-2xl w-full max-w-lg shadow-xl border border-border flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="p-4 border-b border-border flex justify-between items-center">
+                <div className="p-4 border-b border-border flex justify-between items-center bg-background-main rounded-t-2xl">
                     <h2 className="text-lg font-semibold text-foreground">
-                        {step === 'search' ? t('modals.investmentModal.addTitle') : `Buy ${selectedAsset?.symbol}`}
+                        {t('modals.investmentModal.addTitle')}
                     </h2>
                     <button onClick={onClose} className="p-2 hover:bg-background-muted dark:hover:bg-background-subtle rounded-full transition-colors">
                         <X className="w-5 h-5 text-foreground-subtle" />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 overflow-y-auto">
-                    {step === 'search' ? (
-                        <div className="space-y-4">
-                            {/* Manual Entry Button */}
-                            {!isManualMode && (
-                                <button
-                                    type="button"
-                                    onClick={() => setIsManualMode(true)}
-                                    className="w-full p-4 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-background-subtle transition-all flex items-center gap-3 group"
-                                >
-                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                        <span className="text-primary text-xl font-bold">+</span>
-                                    </div>
-                                    <div className="text-left">
-                                        <div className="font-semibold text-foreground">{t('modals.investmentModal.manualEntryTitle', 'Inserimento Manuale')}</div>
-                                        <div className="text-sm text-foreground-muted">{t('modals.investmentModal.manualEntryDesc', 'Crea un investimento con dettagli personalizzati')}</div>
-                                    </div>
-                                </button>
-                            )}
+                <div className="p-6 overflow-y-auto space-y-6">
 
-                            {!isManualMode ? (
-                                <>
-                                    {/* Search Mode */}
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-muted" />
-                                        <input
-                                            type="text"
-                                            placeholder={t('modals.investmentModal.searchHint')}
-                                            className="w-full pl-10 pr-4 py-3 bg-background-muted border-none rounded-xl focus:ring-2 focus:ring-indigo-500"
-                                            value={searchQuery}
-                                            onChange={e => setSearchQuery(e.target.value)}
-                                            autoFocus
-                                        />
-                                    </div>
-
-                                    {isSearching && (
-                                        <div className="flex justify-center p-4">
-                                            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
-                                        </div>
-                                    )}
-
-                                    <div className="space-y-2">
-                                        {searchResults.map((result) => (
-                                            <button
-                                                key={result.symbol}
-                                                onClick={() => handleSelectAsset(result)}
-                                                className="w-full flex justify-between items-center p-3 hover:bg-background-muted-subtle rounded-lg group text-left transition-colors"
-                                            >
-                                                <div>
-                                                    <div className="font-semibold text-foreground">{result.symbol}</div>
-                                                    <div className="text-sm text-foreground-subtle">{result.name}</div>
-                                                </div>
-                                                <div className="text-xs text-foreground-muted bg-background-muted px-2 py-1 rounded">
-                                                    {result.exchange}
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Search Error (e.g., rate limiting) */}
-                                    {searchError && !isSearching && (
-                                        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center gap-2 text-amber-700 dark:text-amber-300 text-sm">
-                                            <AlertTriangle className="w-4 h-4" />
-                                            <span>{searchError}</span>
-                                        </div>
-                                    )}
-
-                                    {/* Quote Error */}
-                                    {quoteError && (
-                                        <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg flex items-center gap-2 text-rose-700 dark:text-rose-300 text-sm">
-                                            <AlertTriangle className="w-4 h-4" />
-                                            <span>{quoteError}</span>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                /* Manual Entry Mode */
-                                <div className="space-y-4">
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.symbol') || 'Symbol'}</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. AAPL"
-                                            className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                            value={manualSymbol}
-                                            onChange={e => setManualSymbol(e.target.value.toUpperCase())}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.name') || 'Name'}</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. Apple Inc."
-                                            className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                            value={manualName}
-                                            onChange={e => setManualName(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.type') || 'Type'}</label>
-                                            <select
-                                                className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                                value={manualType}
-                                                onChange={e => setManualType(e.target.value as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other')}
-                                            >
-                                                <option value="stock">{t('modals.investmentModal.types.stock')}</option>
-                                                <option value="etf">{t('modals.investmentModal.types.etf')}</option>
-                                                <option value="crypto">{t('modals.investmentModal.types.crypto')}</option>
-                                                <option value="bond">{t('modals.investmentModal.types.bond')}</option>
-                                                <option value="fund">{t('modals.investmentModal.types.fund')}</option>
-                                                <option value="insurance">{t('modals.investmentModal.types.insurance')}</option>
-                                                <option value="other">{t('modals.investmentModal.types.other')}</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.currency') || 'Currency'}</label>
-                                            <select
-                                                className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                                value={manualCurrency}
-                                                onChange={e => setManualCurrency(e.target.value)}
-                                            >
-                                                <option value="USD">USD</option>
-                                                <option value="EUR">EUR</option>
-                                                <option value="GBP">GBP</option>
-                                                <option value="CHF">CHF</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={handleProceedManual}
-                                        disabled={!manualSymbol.trim() || !manualName.trim()}
-                                        className="w-full py-3 bg-indigo-500 text-white rounded-xl font-medium hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {t('common.continue') || 'Continue'}
-                                    </button>
+                    {/* 1. Search Bar */}
+                    <div className="relative z-20">
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted mb-1.5 ml-1">
+                            {t('modals.investmentModal.searchHint', 'Cerca o Inserisci Simbolo')}
+                        </label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                            <input
+                                type="text"
+                                placeholder="AAPL, VWCE, Bitcoin..."
+                                className="w-full pl-9 pr-4 py-2.5 bg-background-subtle border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                                value={searchQuery}
+                                onChange={e => {
+                                    setSearchQuery(e.target.value);
+                                    // Also update symbol logic if user types manually? 
+                                    // Better to let them select or type in symbol field below specifically if manual
+                                }}
+                                onFocus={() => {
+                                    if (searchResults.length > 0) setShowResults(true);
+                                }}
+                            />
+                            {isSearching && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
                                 </div>
                             )}
                         </div>
-                    ) : (
-                        <form onSubmit={isManualMode ? handleBuyManual : handleBuy} className="space-y-4">
-                            <div className="bg-background-muted p-4 rounded-xl flex justify-between items-center mb-6">
-                                <div>
-                                    <div className="text-sm text-foreground-subtle">Current Price</div>
-                                    <div className="text-xl font-bold text-foreground">
-                                        {formatMoney(selectedAsset?.price ?? 0, selectedAsset?.currency ?? 'USD')}
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm text-foreground-subtle">Currency</div>
-                                    <div className="font-medium">{selectedAsset?.currency ?? 'USD'}</div>
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.quantity')}</label>
-                                    <input
-                                        type="number" step="any" required
-                                        placeholder="0.00"
-                                        className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                        value={quantity}
-                                        onChange={e => setQuantity(e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.buyPrice')}</label>
-                                    <input
-                                        type="number" step="any" required
-                                        className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                        value={price}
-                                        onChange={e => setPrice(e.target.value)}
-                                    />
-                                </div>
+                        {/* Dropdown Results */}
+                        {showResults && searchResults.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-background-card border border-border rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-border/50">
+                                {searchResults.map((result) => (
+                                    <button
+                                        key={result.symbol}
+                                        onClick={() => handleSelectAsset(result)}
+                                        className="w-full flex justify-between items-center p-3 hover:bg-background-subtle transition-colors text-left group"
+                                    >
+                                        <div>
+                                            <div className="font-semibold text-foreground group-hover:text-primary transition-colors">{result.symbol}</div>
+                                            <div className="text-xs text-foreground-muted truncate max-w-[200px]">{result.name}</div>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-background-muted text-foreground-muted uppercase">
+                                                {result.type}
+                                            </span>
+                                            <span className="text-xs text-foreground-subtle">{result.exchange}</span>
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
+                        )}
+                    </div>
 
+                    <div className="h-px bg-border/50" />
+
+                    {/* 2. Asset Details Form */}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground">{t('modals.investmentModal.buyDate')}</label>
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.symbol')}</label>
                                 <input
-                                    type="date" required
-                                    className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    type="text"
+                                    required
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    value={symbol}
+                                    onChange={e => setSymbol(e.target.value.toUpperCase())}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.type')}</label>
+                                <select
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    value={type}
+                                    onChange={e => setType(e.target.value as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other')}
+                                >
+                                    <option value="stock">{t('modals.investmentModal.types.stock')}</option>
+                                    <option value="etf">{t('modals.investmentModal.types.etf')}</option>
+                                    <option value="crypto">{t('modals.investmentModal.types.crypto')}</option>
+                                    <option value="bond">{t('modals.investmentModal.types.bond')}</option>
+                                    <option value="fund">{t('modals.investmentModal.types.fund')}</option>
+                                    <option value="insurance">{t('modals.investmentModal.types.insurance')}</option>
+                                    <option value="other">{t('modals.investmentModal.types.other')}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.name')}</label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-1 col-span-1">
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.currency')}</label>
+                                <select
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    value={currency}
+                                    onChange={e => setCurrency(e.target.value)}
+                                >
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="CHF">CHF</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1 col-span-2">
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.buyDate')}</label>
+                                <input
+                                    type="date"
+                                    required
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={date}
                                     onChange={e => setDate(e.target.value)}
                                 />
                             </div>
+                        </div>
 
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground">Total Fees</label>
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.quantity')}</label>
+                                <input
+                                    type="number" step="any" required
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-semibold"
+                                    value={quantity}
+                                    onChange={e => setQuantity(e.target.value)}
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.buyPrice')}</label>
+                                <input
+                                    type="number" step="any" required
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none text-lg font-semibold"
+                                    value={price}
+                                    onChange={e => setPrice(e.target.value)}
+                                    placeholder="0.00"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-foreground-subtle">Fees</label>
                                 <input
                                     type="number" step="any"
-                                    className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={fees}
                                     onChange={e => setFees(e.target.value)}
                                 />
                             </div>
-
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground">Account (to pay from)</label>
+                                <label className="text-sm font-medium text-foreground-subtle">Account</label>
                                 <select
                                     required
-                                    className="w-full p-2 bg-background-card border border-input-border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={accountId}
                                     onChange={e => setAccountId(e.target.value)}
                                 >
-                                    <option value="">Select Account</option>
+                                    <option value="" disabled>Select Account</option>
                                     {availableAccounts.map(acc => (
                                         <option key={acc.id} value={acc.id}>{acc.name} ({formatMoney(0, acc.currency)})</option>
                                     ))}
                                 </select>
                             </div>
+                        </div>
 
-                            {/* Summary */}
-                            {quantity && price && (
-                                <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg flex justify-between items-center text-sm">
-                                    <span className="text-indigo-900 dark:text-indigo-200 font-medium">Estimated Cost</span>
-                                    <span className="font-bold text-indigo-700 dark:text-indigo-300">
-                                        {formatMoney(
-                                            Math.round(parseFloat(quantity) * parseFloat(price) * 100) + Math.round(parseFloat(fees || '0') * 100),
-                                            selectedAsset?.currency ?? 'USD'
-                                        )}
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Error message */}
-                            {errorMessage && (
-                                <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg flex items-center gap-2 text-rose-700 dark:text-rose-300 text-sm">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    <span>{errorMessage}</span>
-                                </div>
-                            )}
-
-                            <div className="pt-4 flex gap-3">
-                                <button
-                                    type="button"
-                                    className="flex-1 btn btn-ghost"
-                                    onClick={() => setStep('search')}
-                                >
-                                    Back
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 btn btn-primary"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Buy'}
-                                </button>
+                        {/* Summary / Total */}
+                        {quantity && price && (
+                            <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-xl flex justify-between items-center animate-in fade-in zoom-in-95 duration-200">
+                                <span className="text-foreground-muted font-medium">Estimated Total</span>
+                                <span className="font-bold text-xl text-primary">
+                                    {formatMoney(
+                                        Math.round(parseFloat(quantity) * parseFloat(price) * 100) + Math.round(parseFloat(fees || '0') * 100),
+                                        currency
+                                    )}
+                                </span>
                             </div>
-                        </form>
-                    )}
+                        )}
+
+                        {/* Error message */}
+                        {errorMessage && (
+                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-500 text-sm">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span>{errorMessage}</span>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="pt-4 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-border text-foreground hover:bg-background-subtle transition-colors font-medium"
+                            >
+                                {t('common.cancel')}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:shadow-none flex justify-center items-center gap-2"
+                            >
+                                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : t('common.save')}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

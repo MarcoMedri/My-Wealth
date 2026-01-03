@@ -38,6 +38,11 @@ Data is stored in strict JSON files locally. We use a **Relational JSON** approa
 
 **Loading Logic:**
 The `VaultManager` (`src/main/vault.ts`) loads all files into memory. The frontend store (`useVaultStore`) then reconstructs the relationships derived from these IDs.
+**Cascading Deletion:** When an entity (Broker, Account) is deleted, the system performs a cascading delete to remove all dependent data (Transactions, Holdings, Trades) to ensure referential integrity.
+**Account Archiving:** Accounts can be "Closed" (`isArchived: true`), which hides them from active selection but preserves their history and transactions.
+
+### 4. Investment Constraint (Securities Accounts)
+To ensure accurate tracking, Investments (Holdings) must be linked to a specific **Account** of type `investment` (Securities Account / Conto Titoli) within a Broker. This mimics real-world banking where you buy assets using a specific custody account.
 
 ## 🔧 Development workflow
 
@@ -58,3 +63,14 @@ When working on the Import Wizard:
 1.  Ensure you respect the `brokerId` context.
 2.  If an account doesn't exist for the broker, create one with `type: 'investment'` automatically.
 3.  Use the `imported` tag for transactions to bypass strict categorization rules during the initial import.
+
+## 🎨 UI Patterns
+
+### Account Management (Archive vs Delete)
+We use a standardized modal (`CloseDeleteAccountModal`) for account removal:
+1.  **Close (Archive)**: Preferred. Sets `isArchived: true`. Preserves history.
+2.  **Delete (Destructive)**: Secondary option. Only permitted if the user explicitly confirms the loss of all linked data (Transactions, etc.).
+
+### Modal Architecture
+*   **Search-first forms**: (e.g., `AddInvestmentModal`) Combine search and manual entry in a single view to reduce clicks.
+*   **Context-aware**: Modals should know their parent context (e.g., "Adding an investment *to this specific broker*").

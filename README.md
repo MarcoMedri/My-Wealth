@@ -15,8 +15,9 @@
     *   Support for buy/sell transactions with automatic P/L calculation.
 *   **🏦 Comprehensive Net Worth Tracking**:
     *   **Brokers & Institutions**: Organize accounts by broker/bank with a preset-first creation flow (47+ built-in presets) or custom manual entry.
-    *   **Accounts**: Track checking, savings, credit cards, loans, and investment accounts with manual balance override support
- reconciliation.
+    *   **Accounts**: Track checking, savings, credit cards, loans, and investment accounts with manual balance override support.
+    *   **Advanced Management**: Archive unused accounts to preserve history ("Close Account") or permanently remove them ("Delete Account") with **cascading data cleanup** (transactions, holdings, trades).
+    *   **Securities Accounts**: Dedicated accounts for managing investment portfolios, ensuring valid asset tracking.
     *   **Conti Deposito**: Track high-yield deposit accounts with maturity tracking.
     *   **Insurance**: Manage life, auto, and health insurance policies.
     *   **Real Estate**: Track property values and mortgages.

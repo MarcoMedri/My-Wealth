@@ -84,6 +84,9 @@ interface VaultStore {
   // Broker Actions
   saveBroker: (broker: Broker) => Promise<void>;
   deleteBroker: (brokerId: string) => Promise<void>;
+  
+  // Account Actions
+  deleteAccount: (accountId: string) => Promise<void>;
 
   // Category Actions
   addCategory: (category: Category) => void;
@@ -383,6 +386,19 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       throw error;
     } finally {
         set({ isLoading: false });
+    }
+  },
+
+  deleteAccount: async (accountId) => {
+    set({ isLoading: true });
+    try {
+      await window.api.deleteAccount(accountId);
+      await get().refreshData();
+    } catch (error) {
+       set({ error: error instanceof Error ? error.message : 'Failed to delete account' });
+       throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 

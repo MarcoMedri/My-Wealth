@@ -6,7 +6,7 @@ import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs-extra';
-import type { Asset, Holding, AssetType, InvestmentTrade } from '../shared/schemas';
+import type { Asset, Holding, AssetType, InvestmentTrade, Account } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
 
 
@@ -76,6 +76,7 @@ export class InvestmentManager {
     price: number; // in cents
     date: string;
     fees: number; // in cents
+    brokerId?: string;
   }) {
     const vaultManager = getVaultManager();
     const vaultPath = vaultManager.getVaultPath();
@@ -85,6 +86,13 @@ export class InvestmentManager {
     if (params.quantity <= 0) throw new Error('Quantity must be positive');
     if (params.price <= 0) throw new Error('Price must be positive');
     if (params.fees < 0) throw new Error('Fees cannot be negative');
+
+    // Resolve brokerId
+    let brokerId = params.brokerId;
+    if (!brokerId) {
+        const account = vaultManager.accounts.find((a: Account) => a.id === params.accountId);
+        if (account) brokerId = account.brokerId;
+    }
 
     // 1. Get or Create Asset
     let asset = vaultManager.assets.find((a: Asset) => a.symbol === params.symbol);
@@ -224,6 +232,7 @@ export class InvestmentManager {
     price: number; // in cents
     date: string;
     fees: number; // in cents
+    brokerId?: string;
   }) {
     const vaultManager = getVaultManager();
     const vaultPath = vaultManager.getVaultPath();
@@ -235,6 +244,13 @@ export class InvestmentManager {
     if (params.fees < 0) throw new Error('Fees cannot be negative');
     if (!params.symbol.trim()) throw new Error('Symbol is required');
     if (!params.name.trim()) throw new Error('Name is required');
+
+    // Resolve brokerId
+    let brokerId = params.brokerId;
+    if (!brokerId) {
+        const account = vaultManager.accounts.find((a: Account) => a.id === params.accountId);
+        if (account) brokerId = account.brokerId;
+    }
 
     const now = new Date().toISOString();
 
@@ -281,7 +297,8 @@ export class InvestmentManager {
         ...holding,
         quantity: totalQty,
         averageBuyPrice: newAvgPrice,
-        updatedAt: now
+        updatedAt: now,
+        brokerId: brokerId || holding.brokerId
       };
     } else {
       holding = {
@@ -291,7 +308,8 @@ export class InvestmentManager {
         quantity: params.quantity,
         averageBuyPrice: params.price,
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
+        brokerId: brokerId
       };
     }
     await vaultManager.saveHolding(holding);

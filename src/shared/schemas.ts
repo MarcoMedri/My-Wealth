@@ -347,6 +347,10 @@ export const InsurancePolicySchema = z.object({
   
   startDate: ISODate,
   endDate: ISODate.optional(),
+  
+  // Link to Broker
+  brokerId: UUID.optional(),
+  
   autoRenewal: z.boolean().default(false),
   
   coverageAmount: Money.optional(),    // 'Massimale' - cents (max coverage)
@@ -614,6 +618,9 @@ export const TransactionSchema = z.object({
   /** Primary account affected */
   accountId: UUID,
   
+  /** Broker ID for easier aggregation */
+  brokerId: UUID.optional(),
+  
   /**
    * Category for simple transactions (no splits)
    * Can be null if using splits or for transfers
@@ -795,6 +802,7 @@ export interface VaultState {
 export const WorkspaceSettingsSchema = z.object({
   accountsDashboard: z.object({
     dateRange: z.string().optional(), // 'current-month', 'last-3-months', etc.
+    selectedAccountIds: z.array(z.string()).optional(), // IDs of accounts to show in dashboard
   }).optional(),
   investmentsDashboard: z.object({
     dateRange: z.string().optional(),

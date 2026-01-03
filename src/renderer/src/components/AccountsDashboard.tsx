@@ -3,13 +3,11 @@ import {
     TrendingUp,
     TrendingDown,
     Wallet,
-    RefreshCw,
-    Plus
+    RefreshCw
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
 import TransactionTable from './TransactionTable';
-import AddTransactionModal from './AddTransactionModal';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
@@ -26,8 +24,6 @@ export default function AccountsDashboard() {
         workspace,
         setWorkspaceSettings
     } = useVaultStore();
-
-    const [isTxModalOpen, setIsTxModalOpen] = useState(false);
 
     // Load persisted setting or default to current-month
     const [dateRange, setLocalDateRange] = useState<DateRange>(
@@ -112,24 +108,18 @@ export default function AccountsDashboard() {
     }, [transactions, convert]);
 
     // Filter transactions by selected accounts
-    const filteredTransactions = useMemo(() => {
-        // Empty array means all accounts selected
-        if (selectedAccountIds.length === 0) {
-            return transactions;
-        }
-
-        return transactions.filter(tx =>
-            selectedAccountIds.includes(tx.fromAccountId) ||
-            selectedAccountIds.includes(tx.toAccountId)
-        );
-    }, [transactions, selectedAccountIds]);
+    // Note: TransactionTable handles this internally now via selectedAccountIds prop?
+    // Checking previous implementation: TransactionTable was passed selectedAccountIds.
+    // So we don't strictly need to filter here unless we use filteredTransactions for stats? 
+    // Stats use `transactions` (all of them) or filtered?
+    // Usually dashboard stats show EVERYTHING unless filtered. 
+    // The previous code used `transactions` for stats computations (lines 78-90 in previous version used `transactions` from store, not filtered). 
+    // So logic remains same.
 
     const categories = useVaultStore(state => state.categories);
 
     return (
         <div className="h-full flex flex-col">
-            <AddTransactionModal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} />
-
             {/* Header */}
             <header className="px-6 py-4 border-b border-border flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -143,14 +133,6 @@ export default function AccountsDashboard() {
                         selectedAccountIds={selectedAccountIds}
                         onChange={handleAccountFilterChange}
                     />
-
-                    <button
-                        onClick={() => setIsTxModalOpen(true)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500 text-foreground hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span className="text-sm font-medium">{t('accounts.addTransaction')}</span>
-                    </button>
 
                     <button
                         onClick={refreshData}
@@ -205,7 +187,7 @@ export default function AccountsDashboard() {
                 </div>
             </div>
 
-            {/* Charts Row - New Requirement */}
+            {/* Charts Row */}
             <div className="px-6 pb-6">
                 <IncomeExpenseCharts
                     transactions={transactions}

@@ -123,7 +123,7 @@ export function AddDepositModal({ isOpen, onClose, initialData, preselectedBroke
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!name || !principal || !grossRate || !maturityDate) {
+        if (!name || !principal || !grossRate || !maturityDate || !brokerId) {
             setErrorMessage(t('errors.missingRequiredFields') || "Please fill required fields");
             return;
         }
@@ -179,240 +179,263 @@ export function AddDepositModal({ isOpen, onClose, initialData, preselectedBroke
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={initialData ? t('deposits.editTitle') : t('deposits.addTitle')}>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {brokers.length === 0 ? (
+                <div className="p-6 text-center space-y-4">
+                    <div className="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center mx-auto">
+                        <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-foreground">
+                            {t('deposits.noBrokerTitle') || 'No Broker Found'}
+                        </h3>
+                        <p className="text-foreground-muted mt-2">
+                            {t('deposits.noBrokerDesc') || 'You need to create a Broker before adding a Deposit Account.'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-background-subtle hover:bg-background-muted text-foreground rounded-lg transition-colors"
+                    >
+                        {t('common.close')}
+                    </button>
+                </div>
+            ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
 
-                {/* Section 1: Identity & Broker */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-primary" /> {t('common.details')}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.name')} *
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                placeholder={t('deposits.placeholders.name')}
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.brokerLink')}
-                            </label>
-                            <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
-                                value={brokerId}
-                                onChange={e => setBrokerId(e.target.value)}
-                            >
-                                <option value="">{t('accounts.noBroker')}</option>
-                                {brokers.map(b => (
-                                    <option key={b.id} value={b.id}>{b.name}</option>
-                                ))}
-                            </select>
+                    {/* Section 1: Identity & Broker */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-primary" /> {t('common.details')}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.name')} *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder={t('deposits.placeholders.name')}
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.brokerLink')} *
+                                </label>
+                                <select
+                                    required
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
+                                    value={brokerId}
+                                    onChange={e => setBrokerId(e.target.value)}
+                                >
+                                    <option value="" disabled>{t('common.select') || 'Select...'}</option>
+                                    {brokers.map(b => (
+                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="h-px bg-border/50" />
+                    <div className="h-px bg-border/50" />
 
-                {/* Section 2: Financials */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-emerald-500" /> {t('deposits.principal')}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.principal')} (€) *
-                            </label>
-                            <input
-                                type="number"
-                                required
-                                step="0.01"
-                                placeholder="0.00"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground font-semibold text-lg focus:ring-2 focus:ring-primary outline-none"
-                                value={principal}
-                                onChange={e => setPrincipal(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.grossRate')} (%) *
-                            </label>
-                            <div className="relative">
+                    {/* Section 2: Financials */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-emerald-500" /> {t('deposits.principal')}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.principal')} (€) *
+                                </label>
                                 <input
                                     type="number"
                                     required
                                     step="0.01"
                                     placeholder="0.00"
-                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
-                                    value={grossRate}
-                                    onChange={e => handleGrossRateChange(e.target.value)}
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground font-semibold text-lg focus:ring-2 focus:ring-primary outline-none"
+                                    value={principal}
+                                    onChange={e => setPrincipal(e.target.value)}
                                 />
-                                <Percent className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.grossRate')} (%) *
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        required
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
+                                        value={grossRate}
+                                        onChange={e => handleGrossRateChange(e.target.value)}
+                                    />
+                                    <Percent className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.netRate')} (%)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
+                                        value={netRate}
+                                        onChange={e => setNetRate(e.target.value)}
+                                    />
+                                    <Percent className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted" />
+                                </div>
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.interestPeriodicity')}
+                                </label>
+                                <select
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
+                                    value={interestPeriodicity}
+                                    onChange={e => setInterestPeriodicity(e.target.value as InterestPeriodicity)}
+                                >
+                                    <option value="end">{t('deposits.interestPeriodicityTypes.end')}</option>
+                                    <option value="monthly">{t('deposits.interestPeriodicityTypes.monthly')}</option>
+                                    <option value="quarterly">{t('deposits.interestPeriodicityTypes.quarterly')}</option>
+                                    <option value="semiannual">{t('deposits.interestPeriodicityTypes.semiannual')}</option>
+                                    <option value="annual">{t('deposits.interestPeriodicityTypes.annual')}</option>
+                                </select>
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.netRate')} (%)
-                            </label>
-                            <div className="relative">
+                    </div>
+
+                    <div className="h-px bg-border/50" />
+
+                    {/* Section 3: Timeline & Constraint */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-purple-500" /> {t('common.timeline')}
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.activationDate')} *
+                                </label>
+                                <input
+                                    type="date"
+                                    required
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
+                                    value={activationDate}
+                                    onChange={e => handleActivationChange(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.duration')}
+                                </label>
                                 <input
                                     type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none pr-8"
-                                    value={netRate}
-                                    onChange={e => setNetRate(e.target.value)}
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
+                                    value={durationMonths}
+                                    onChange={e => handleDurationChange(e.target.value)}
                                 />
-                                <Percent className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted" />
                             </div>
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.interestPeriodicity')}
-                            </label>
-                            <select
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
-                                value={interestPeriodicity}
-                                onChange={e => setInterestPeriodicity(e.target.value as InterestPeriodicity)}
-                            >
-                                <option value="end">{t('deposits.interestPeriodicityTypes.end')}</option>
-                                <option value="monthly">{t('deposits.interestPeriodicityTypes.monthly')}</option>
-                                <option value="quarterly">{t('deposits.interestPeriodicityTypes.quarterly')}</option>
-                                <option value="semiannual">{t('deposits.interestPeriodicityTypes.semiannual')}</option>
-                                <option value="annual">{t('deposits.interestPeriodicityTypes.annual')}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="h-px bg-border/50" />
-
-                {/* Section 3: Timeline & Constraint */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-foreground-muted flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-purple-500" /> {t('common.timeline')}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.activationDate')} *
-                            </label>
-                            <input
-                                type="date"
-                                required
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
-                                value={activationDate}
-                                onChange={e => handleActivationChange(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.duration')}
-                            </label>
-                            <input
-                                type="number"
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
-                                value={durationMonths}
-                                onChange={e => handleDurationChange(e.target.value)}
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.maturityDate')} *
-                            </label>
-                            <input
-                                type="date"
-                                required
-                                className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
-                                value={maturityDate}
-                                onChange={e => handleMaturityChange(e.target.value)}
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-foreground-muted mb-1">
-                                {t('deposits.constraintType')}
-                            </label>
-                            <div className="flex gap-2">
-                                {(['free', 'locked', 'flexible'] as ConstraintType[]).map(type => (
-                                    <button
-                                        key={type}
-                                        type="button"
-                                        onClick={() => setConstraintType(type)}
-                                        className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${constraintType === type
-                                            ? 'bg-primary border-primary text-white shadow-sm'
-                                            : 'bg-background-subtle border-border text-foreground-muted hover:border-primary/50'
-                                            }`}
-                                    >
-                                        {t(`deposits.constraintTypes.${type}`)}
-                                    </button>
-                                ))}
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.maturityDate')} *
+                                </label>
+                                <input
+                                    type="date"
+                                    required
+                                    className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none"
+                                    value={maturityDate}
+                                    onChange={e => handleMaturityChange(e.target.value)}
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium text-foreground-muted mb-1">
+                                    {t('deposits.constraintType')}
+                                </label>
+                                <div className="flex gap-2">
+                                    {(['free', 'locked', 'flexible'] as ConstraintType[]).map(type => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setConstraintType(type)}
+                                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all ${constraintType === type
+                                                ? 'bg-primary border-primary text-white shadow-sm'
+                                                : 'bg-background-subtle border-border text-foreground-muted hover:border-primary/50'
+                                                }`}
+                                        >
+                                            {t(`deposits.constraintTypes.${type}`)}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="h-px bg-border/50" />
+                    <div className="h-px bg-border/50" />
 
-                {/* Section 4: Notes */}
-                <div>
-                    <label className="block text-sm font-medium text-foreground-muted mb-1">
-                        {t('deposits.notes')}
-                    </label>
-                    <textarea
-                        className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none min-h-[80px]"
-                        placeholder={t('deposits.notes')}
-                        value={notes}
-                        onChange={e => setNotes(e.target.value)}
-                    />
-                </div>
-
-                {/* Error message */}
-                {errorMessage && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-500 text-sm">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>{errorMessage}</span>
-                    </div>
-                )}
-
-                {/* Actions */}
-                <div className="pt-4 flex justify-between items-center">
+                    {/* Section 4: Notes */}
                     <div>
-                        {initialData && (
+                        <label className="block text-sm font-medium text-foreground-muted mb-1">
+                            {t('deposits.notes')}
+                        </label>
+                        <textarea
+                            className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary outline-none min-h-[80px]"
+                            placeholder={t('deposits.notes')}
+                            value={notes}
+                            onChange={e => setNotes(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Error message */}
+                    {errorMessage && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-500 text-sm">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>{errorMessage}</span>
+                        </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="pt-4 flex justify-between items-center">
+                        <div>
+                            {initialData && (
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    className="text-sm font-medium text-error hover:text-error/80 transition-colors"
+                                >
+                                    {t('common.delete')}
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex gap-3">
                             <button
                                 type="button"
-                                onClick={handleDelete}
-                                className="text-sm font-medium text-error hover:text-error/80 transition-colors"
+                                onClick={onClose}
+                                className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
                             >
-                                {t('common.delete')}
+                                {t('common.cancel')}
                             </button>
-                        )}
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-6 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary-hover transition-all flex items-center gap-2 shadow-sm active:scale-95"
+                            >
+                                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                                {t('common.save')}
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
-                        >
-                            {t('common.cancel')}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="px-6 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary-hover transition-all flex items-center gap-2 shadow-sm active:scale-95"
-                        >
-                            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                            {t('common.save')}
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            )}
         </Modal>
     );
 }

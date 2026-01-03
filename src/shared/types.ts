@@ -59,6 +59,7 @@ export const IPC_CHANNELS = {
   // Account operations
   ACCOUNT_SAVE: 'account:save',
   ACCOUNT_SET_MANUAL_BALANCE: 'account:setManualBalance',
+  ACCOUNT_DELETE: 'account:delete',
   
   // Category operations
   CATEGORY_SAVE: 'category:save',

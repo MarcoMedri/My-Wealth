@@ -241,15 +241,27 @@ export default function ImportModal({ isOpen, onClose, preselectedBrokerId }: Im
                         setAccountId(e.target.value);
                         setError(null); // Clear error on selection
                     }}
-                    options={[
-                        // Combine all valid targets
-                        // 1. Brokers (Preferred for investments)
-                        ...(brokers || []).map(b => ({ value: `broker:${b.id}`, label: `Broker: ${b.name}` })),
-                        // 2. Existing Accounts (Only manual ones, not linked to brokers)
-                        ...(accounts || []).filter(a => !a.brokerId).map(acc => ({ value: `account:${acc.id}`, label: acc.name })),
-                        // 3. Deposits
-                        ...(deposits || []).map(dep => ({ value: `deposit:${dep.id}`, label: `${t('accounts.types.deposit')}: ${dep.name}` }))
-                    ]}
+                    options={
+                        preselectedBrokerId
+                            ? [
+                                // Context-aware options for specific broker
+                                // 1. The Broker itself (to create new account)
+                                ...(brokers || []).filter(b => b.id === preselectedBrokerId).map(b => ({ value: `broker:${b.id}`, label: `Broker: ${b.name} (Nuovo Conto)` })),
+                                // 2. Linked Accounts
+                                ...(accounts || []).filter(a => a.brokerId === preselectedBrokerId).map(acc => ({ value: `account:${acc.id}`, label: acc.name })),
+                                // 3. Linked Deposits
+                                ...(deposits || []).filter(d => d.brokerId === preselectedBrokerId).map(dep => ({ value: `deposit:${dep.id}`, label: `${t('accounts.types.deposit')}: ${dep.name}` }))
+                            ]
+                            : [
+                                // Global options
+                                // 1. Brokers
+                                ...(brokers || []).map(b => ({ value: `broker:${b.id}`, label: `Broker: ${b.name}` })),
+                                // 2. Independent Accounts (not linked to brokers)
+                                ...(accounts || []).filter(a => !a.brokerId).map(acc => ({ value: `account:${acc.id}`, label: acc.name })),
+                                // 3. All Deposits
+                                ...(deposits || []).map(dep => ({ value: `deposit:${dep.id}`, label: `${t('accounts.types.deposit')}: ${dep.name}` }))
+                            ]
+                    }
                     placeholder={t('import.selectAccountPlaceholder', 'Select an account or broker...')}
                 />
 

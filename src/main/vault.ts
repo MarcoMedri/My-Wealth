@@ -188,6 +188,13 @@ export class VaultManager {
   }
 
   /**
+   * Get all accounts
+   */
+  get accounts(): Account[] {
+    return Array.from(this.vaultState.accounts.values());
+  }
+
+  /**
    * Open a folder selection dialog
    */
   async selectVaultPath(): Promise<string | null> {
@@ -959,6 +966,145 @@ export class VaultManager {
     this.calculateBalances();
 
     return fullAccount;
+  }
+
+  /**
+   * Delete an account from disk
+   */
+  async deleteAccount(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    const { vaultPath } = this.settings;
+    
+    // 1. Delete Account
+    const accountsPath = path.join(vaultPath, VAULT_STRUCTURE.ACCOUNTS_FILE);
+    let accountsFile = { version: 1 as const, accounts: [] as Account[] };
+    if (await fs.pathExists(accountsPath)) {
+      try {
+        const existing = await fs.readJson(accountsPath);
+        const parsed = AccountsFileSchema.safeParse(existing);
+        if (parsed.success) {
+          accountsFile = parsed.data;
+        }
+      } catch (e) {
+        throw new Error(`Failed to read accounts file: ${e}`);
+      }
+    }
+
+    const initialLength = accountsFile.accounts.length;
+    accountsFile.accounts = accountsFile.accounts.filter(a => a.id !== id);
+
+    if (accountsFile.accounts.length === initialLength) {
+        return; // Account not found, nothing to do
+    }
+
+    await this.atomicWriteJson(accountsPath, accountsFile);
+    this.vaultState.accounts.delete(id);
+
+    // 2. Delete Associated Transactions (Cascading)
+    // Iterate through all transaction files
+    const transactionsDir = path.join(vaultPath, VAULT_STRUCTURE.TRANSACTIONS_DIR);
+    if (await fs.pathExists(transactionsDir)) {
+      const years = await fs.readdir(transactionsDir);
+      for (const year of years) {
+        const yearPath = path.join(transactionsDir, year);
+        if (!(await fs.stat(yearPath)).isDirectory()) continue;
+
+        const months = await fs.readdir(yearPath);
+        for (const month of months) {
+          const monthPath = path.join(yearPath, month);
+          if (!(await fs.stat(monthPath)).isDirectory()) continue;
+
+          const transFilePath = path.join(monthPath, 'transactions.json');
+          if (await fs.pathExists(transFilePath)) {
+             try {
+               const fileData = await fs.readJson(transFilePath);
+               const parsed = TransactionsFileSchema.safeParse(fileData);
+               if (parsed.success) {
+                 const initialCount = parsed.data.transactions.length;
+                 // Filter out transactions belonging to this account or transfers TO this account
+                 const newTransactions = parsed.data.transactions.filter(t => 
+                   t.accountId !== id && t.toAccountId !== id
+                 );
+
+                 if (newTransactions.length !== initialCount) {
+                   await this.atomicWriteJson(transFilePath, { ...parsed.data, transactions: newTransactions });
+                 }
+               }
+             } catch (e) {
+               console.error(`Failed to process transactions file ${transFilePath}`, e);
+             }
+          }
+        }
+      }
+    }
+
+    // Update in-memory transactions
+    const txDeleteIds: string[] = [];
+    for (const [txId, tx] of this.vaultState.transactions.entries()) {
+        if (tx.accountId === id || tx.toAccountId === id) {
+            txDeleteIds.push(txId);
+        }
+    }
+    txDeleteIds.forEach(txId => this.vaultState.transactions.delete(txId));
+
+    // 3. Delete Associated Holdings
+    const holdingsPath = path.join(vaultPath, 'holdings.json');
+    if (await fs.pathExists(holdingsPath)) {
+        try {
+            const data = await fs.readJson(holdingsPath);
+            const parsed = HoldingsFileSchema.safeParse(data);
+            if (parsed.success) {
+                const newHoldings = parsed.data.holdings.filter(h => h.accountId !== id);
+                if (newHoldings.length !== parsed.data.holdings.length) {
+                    await this.atomicWriteJson(holdingsPath, { ...parsed.data, holdings: newHoldings });
+                    this.vaultState.holdings = newHoldings;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to clean up holdings', e);
+        }
+    }
+
+    // 4. Delete Associated Trades
+    const tradesPath = path.join(vaultPath, 'trades.json');
+    if (await fs.pathExists(tradesPath)) {
+        try {
+            const data = await fs.readJson(tradesPath);
+            const parsed = TradesFileSchema.safeParse(data);
+            if (parsed.success) {
+                const newTrades = parsed.data.trades.filter(t => t.accountId !== id);
+                if (newTrades.length !== parsed.data.trades.length) {
+                    await this.atomicWriteJson(tradesPath, { ...parsed.data, trades: newTrades });
+                    this.vaultState.trades = newTrades;
+                }
+            }
+        } catch (e) {
+             console.warn('Failed to clean up trades', e);
+        }
+    }
+
+    // 5. Delete Associated Dividends
+    const dividendsPath = path.join(vaultPath, 'dividends.json');
+    if (await fs.pathExists(dividendsPath)) {
+        try {
+            const data = await fs.readJson(dividendsPath);
+            const parsed = DividendsFileSchema.safeParse(data);
+            if (parsed.success) {
+                const newDividends = parsed.data.dividends.filter(d => d.accountId !== id);
+                if (newDividends.length !== parsed.data.dividends.length) {
+                    await this.atomicWriteJson(dividendsPath, { ...parsed.data, dividends: newDividends });
+                    this.vaultState.dividends = newDividends;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to clean up dividends', e);
+        }
+    }
+
+    this.calculateBalances();
   }
 
   /**

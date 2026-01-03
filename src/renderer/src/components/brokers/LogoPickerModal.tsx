@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Search, Globe } from 'lucide-react';
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import type { LogoMetadata } from '../../../../shared/types';
 
 // Finance & Building icons from lucide-react
@@ -97,7 +97,7 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
     };
 
     // Emoji selection handler
-    const handleEmojiSelect = (emojiData: any) => {
+    const handleEmojiSelect = (emojiData: EmojiClickData) => {
         // Convert emoji to data URL or store as text
         onSelectLogo(emojiData.emoji, 'emoji');
         onClose();
