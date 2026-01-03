@@ -23,7 +23,7 @@ import {
 interface LogoPickerModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelectLogo: (logoUrl: string, source: 'brand' | 'icon' | 'emoji' | 'upload') => void;
+    onSelectLogo: (logoUrl: string, source: 'brand' | 'icon' | 'emoji' | 'upload', metadata?: LogoMetadata) => void;
     logoRegistry: LogoMetadata[];
 }
 
@@ -218,7 +218,7 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                         <button
                                             key={preset.name}
                                             onClick={() => {
-                                                onSelectLogo(`asset://${preset.icon}`, 'brand');
+                                                onSelectLogo(`asset://${preset.icon}`, 'brand', preset);
                                                 onClose();
                                             }}
                                             className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"

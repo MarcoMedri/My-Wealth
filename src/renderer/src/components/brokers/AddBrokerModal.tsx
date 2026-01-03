@@ -110,12 +110,18 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     };
 
     // Logo picker handler
-    const handleLogoSelect = (logoUrl: string, source: 'brand' | 'icon' | 'emoji' | 'upload') => {
+    const handleLogoSelect = (logoUrl: string, source: 'brand' | 'icon' | 'emoji' | 'upload', metadata?: LogoMetadata) => {
         setLogoUrl(logoUrl);
         setLogoPreviewError(false);
         setUseCustomLogo(source === 'upload');
         if (source === 'upload') {
             setCustomLogoPath(logoUrl.replace('file://', ''));
+        }
+
+        // Auto-fill name and type from metadata if available (preset selection)
+        if (metadata) {
+            setName(metadata.name);
+            setType(metadata.type);
         }
     };
 
