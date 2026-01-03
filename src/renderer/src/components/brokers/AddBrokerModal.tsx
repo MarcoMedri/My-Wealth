@@ -5,6 +5,7 @@ import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
 import { LogoPickerModal } from './LogoPickerModal';
 import type { LogoMetadata } from '../../../../shared/types';
+import { toast } from 'sonner';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
