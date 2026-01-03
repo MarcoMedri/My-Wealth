@@ -4,19 +4,18 @@ import {
     TrendingDown,
     Wallet,
     RefreshCw,
-    Plus,
-    Upload
+    Plus
 } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
 import TransactionTable from './TransactionTable';
 import AddTransactionModal from './AddTransactionModal';
-import ImportModal from './ImportModal';
 import { useNetWorth } from '../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { DateRangeFilter, type DateRange } from './DateRangeFilter';
+import { AccountFilter } from './AccountFilter';
 
 export default function AccountsDashboard() {
     const {
@@ -29,7 +28,6 @@ export default function AccountsDashboard() {
     } = useVaultStore();
 
     const [isTxModalOpen, setIsTxModalOpen] = useState(false);
-    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     // Load persisted setting or default to current-month
     const [dateRange, setLocalDateRange] = useState<DateRange>(
@@ -43,6 +41,21 @@ export default function AccountsDashboard() {
             accountsDashboard: {
                 ...workspace.accountsDashboard,
                 dateRange: range
+            }
+        });
+    };
+
+    // Account filter state
+    const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(
+        workspace.accountsDashboard?.selectedAccountIds || []
+    );
+
+    const handleAccountFilterChange = (accountIds: string[]) => {
+        setSelectedAccountIds(accountIds);
+        setWorkspaceSettings({
+            accountsDashboard: {
+                ...workspace.accountsDashboard,
+                selectedAccountIds: accountIds
             }
         });
     };
@@ -98,12 +111,24 @@ export default function AccountsDashboard() {
         };
     }, [transactions, convert]);
 
+    // Filter transactions by selected accounts
+    const filteredTransactions = useMemo(() => {
+        // Empty array means all accounts selected
+        if (selectedAccountIds.length === 0) {
+            return transactions;
+        }
+
+        return transactions.filter(tx =>
+            selectedAccountIds.includes(tx.fromAccountId) ||
+            selectedAccountIds.includes(tx.toAccountId)
+        );
+    }, [transactions, selectedAccountIds]);
+
     const categories = useVaultStore(state => state.categories);
 
     return (
         <div className="h-full flex flex-col">
             <AddTransactionModal isOpen={isTxModalOpen} onClose={() => setIsTxModalOpen(false)} />
-            <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
 
             {/* Header */}
             <header className="px-6 py-4 border-b border-border flex items-center justify-between">
@@ -114,13 +139,10 @@ export default function AccountsDashboard() {
                 <div className="flex items-center gap-3">
                     <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
 
-                    <button
-                        onClick={() => setIsImportModalOpen(true)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-muted text-foreground-muted hover:bg-background-subtle hover:text-foreground transition-colors border border-border"
-                    >
-                        <Upload className="w-4 h-4" />
-                        <span className="text-sm font-medium">{t('accounts.importCSV')}</span>
-                    </button>
+                    <AccountFilter
+                        selectedAccountIds={selectedAccountIds}
+                        onChange={handleAccountFilterChange}
+                    />
 
                     <button
                         onClick={() => setIsTxModalOpen(true)}
@@ -196,7 +218,7 @@ export default function AccountsDashboard() {
             <div className="flex-1 min-h-[650px] flex gap-6 px-6 pb-6">
                 {/* Main Feed - Full Width */}
                 <div className="flex-1 flex flex-col bg-background-card rounded-xl border border-border overflow-hidden shadow-sm">
-                    <TransactionTable dateRange={dateRange} />
+                    <TransactionTable transactions={filteredTransactions} dateRange={dateRange} />
                 </div>
             </div>
         </div>
