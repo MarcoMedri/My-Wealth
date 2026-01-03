@@ -57,7 +57,7 @@ export default function BrokersSidebar() {
                 onClose={() => setIsAddBrokerOpen(false)}
             />
 
-            <div className="flex-1 overflow-y-auto px-2">
+            <div className="flex-1 overflow-y-auto px-2" data-tour="brokers-section">
                 <div className={cn("flex items-center mb-2 px-2 py-2", isCollapsed ? "justify-center" : "justify-between")}>
                     {!isCollapsed && (
                         <h3 className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">
