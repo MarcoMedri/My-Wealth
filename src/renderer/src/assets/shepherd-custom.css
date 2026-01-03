@@ -82,10 +82,16 @@
     backdrop-filter: blur(2px);
 }
 
-/* Arrow - remove default border */
+/* Arrow - improved aesthetics */
+.shepherd-theme-custom .shepherd-arrow {
+    width: 16px !important;
+    height: 16px !important;
+}
+
 .shepherd-theme-custom .shepherd-arrow::before {
     background: rgb(var(--background-card)) !important;
     border: none !important;
+    box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
 }
 
 /* Highlight element */
