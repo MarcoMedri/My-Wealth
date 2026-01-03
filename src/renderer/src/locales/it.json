@@ -173,10 +173,31 @@
     "logo": "Logo",
     "preview": "Anteprima",
     "uploadLogo": "Carica Logo Personalizzato",
-    "customLogo": "Logo Personalizzato",
+    "customLogo": "Logo personalizzato caricato",
     "useAutoFetch": "Usa Auto-Recupero",
     "choosePreset": "Scegli da Preset",
+    "newBroker": "Nuovo Broker",
     "presetSelector": "Seleziona un Broker",
+    "categories": {
+      "bank": "Banche",
+      "fintech": "Fintech",
+      "broker": "Broker",
+      "crypto": "Crypto",
+      "insurance": "Assicurazioni",
+      "other": "Altro"
+    },
+    "logoPicker": {
+      "title": "Aggiungi logo",
+      "tabs": {
+        "brand": "Brand",
+        "icon": "Icona",
+        "emoji": "Emoji",
+        "upload": "Carica"
+      },
+      "searchPlaceholder": "Cerca un logo o dominio",
+      "webResults": "Risultati web",
+      "localResults": "Risultati locali"
+    },
     "noPresetFound": "Non trovi il tuo broker?",
     "searchByUrl": "Cerca per URL del Sito",
     "orUploadCustom": "Oppure carica un logo personalizzato",

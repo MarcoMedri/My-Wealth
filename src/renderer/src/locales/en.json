@@ -74,15 +74,37 @@
     "customLogo": "Custom Logo",
     "useAutoFetch": "Use Auto-Fetch",
     "choosePreset": "Choose from Presets",
+    "newBroker": "New Broker",
     "presetSelector": "Select a Broker",
+    "categories": {
+      "bank": "Banks",
+      "fintech": "Fintech",
+      "broker": "Brokers",
+      "crypto": "Crypto",
+      "insurance": "Insurance",
+      "other": "Other"
+    },
+    "logoPicker": {
+      "title": "Add logo",
+      "tabs": {
+        "brand": "Brand",
+        "icon": "Icon",
+        "emoji": "Emoji",
+        "upload": "Upload"
+      },
+      "searchPlaceholder": "Search for a logo or domain",
+      "webResults": "Web results",
+      "localResults": "Local results"
+    },
     "noPresetFound": "Can't find your broker?",
     "searchByUrl": "Search by Website URL",
     "orUploadCustom": "Or upload a custom logo",
-    "importHint": "Usa \"Importa CSV\" per creare automaticamente conti investimento.",
+    "importHint": "Use \"Import CSV\" to automatically create investment accounts.",
     "types": {
         "bank": "Bank",
         "broker": "Broker",
         "crypto_exchange": "Crypto Exchange",
+        "insurance": "Insurance",
         "other": "Other"
     }
   },

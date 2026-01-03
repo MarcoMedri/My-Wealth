@@ -246,6 +246,7 @@ export interface LogoMetadata {
   name: string;
   icon: string;
   category: LogoCategory;
+  type: 'bank' | 'broker' | 'crypto_exchange' | 'insurance';
   website?: string;
 }
 
