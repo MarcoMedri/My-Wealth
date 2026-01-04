@@ -149,7 +149,7 @@ export default function AccountsDashboard() {
             </header>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
                 <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-emerald-500/10">
