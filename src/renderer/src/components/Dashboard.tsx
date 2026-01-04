@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Wallet,
@@ -46,6 +46,15 @@ export default function Dashboard() {
 
     // --- Filter State ---
     const [period] = useState<DashboardPeriod>('all');
+    const [viewMode, setViewMode] = useState<'gross' | 'net'>(workspace.defaultViewMode || 'gross');
+
+    // Update view mode when default settings change, but only if user hasn't manually interacted?
+    // Actually, simple initialization is enough. If user changes defaults, it should probably reflect here.
+    useEffect(() => {
+        if (workspace.defaultViewMode) {
+            setViewMode(workspace.defaultViewMode);
+        }
+    }, [workspace.defaultViewMode]);
 
     // --- Aggregations ---
 
@@ -95,6 +104,55 @@ export default function Dashboard() {
     // --- Chart Data ---
 
 
+
+    // --- Tax Calculation ---
+    const totalUnrealizedTax = useMemo(() => {
+        let totalTax = 0;
+
+        // 1. Holdings
+        for (const h of holdings) {
+            const asset = assets.find(a => a.id === h.assetId);
+            if (asset) {
+                const marketValue = h.quantity * asset.currentPrice;
+                const costBasis = h.quantity * h.averageBuyPrice;
+                const gain = marketValue - costBasis;
+                if (gain > 0) {
+                    const rate = h.taxRate ?? workspace.taxDefaults?.[asset.type] ?? 26;
+                    const tax = gain * (rate / 100);
+                    // Convert tax (in asset currency) to base currency
+                    totalTax += convert(tax, asset.currency);
+                }
+            }
+        }
+
+        // 2. Properties
+        for (const p of properties) {
+            const marketValue = p.currentValue || 0;
+            const costBasis = p.purchasePrice || 0;
+            const gain = marketValue - costBasis;
+            if (gain > 0) {
+                const rate = p.taxRate ?? workspace.taxDefaults?.[p.type] ?? 0;
+                const tax = gain * (rate / 100);
+                totalTax += convert(tax, p.currency);
+            }
+        }
+
+        // 3. Collectibles
+        for (const c of collectibles) {
+            const marketValue = c.currentValue || 0;
+            const costBasis = c.purchasePrice || 0;
+            const gain = marketValue - costBasis;
+            if (gain > 0) {
+                const rate = c.taxRate ?? workspace.taxDefaults?.['collectible'] ?? 0;
+                const tax = gain * (rate / 100);
+                totalTax += convert(tax, c.currency);
+            }
+        }
+
+        return totalTax;
+    }, [holdings, assets, properties, collectibles, workspace.taxDefaults, convert]);
+
+    const displayedNetWorth = viewMode === 'net' ? netWorth - totalUnrealizedTax : netWorth;
 
     // --- User Actions ---
     const handleSnapshotAction = async (refresh: boolean) => {
@@ -179,17 +237,44 @@ export default function Dashboard() {
                     <div className="relative z-10">
                         <p className="text-sm font-medium text-success uppercase tracking-wider mb-2">{t('dashboard.netWorth')}</p>
                         <h2 className="text-5xl font-bold text-foreground tracking-tight">
-                            {formatMoney(netWorth, baseCurrency)}
+                            {formatMoney(displayedNetWorth, baseCurrency)}
                         </h2>
+                        {viewMode === 'net' && (
+                            <p className="text-sm font-medium text-red-500 mt-1">
+                                {t('dashboard.taxLiability')}: -{formatMoney(totalUnrealizedTax, baseCurrency)}
+                            </p>
+                        )}
                         <div className="mt-3">
                             <ExchangeRateIndicator />
                         </div>
                     </div>
                     <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
+
+                    {/* View Mode Toggle */}
+                    <div className="absolute top-6 right-6 z-20 bg-background-subtle/50 backdrop-blur-sm p-1 rounded-lg border border-border flex text-xs font-medium">
+                        <button
+                            onClick={() => setViewMode('gross')}
+                            className={cn(
+                                "px-3 py-1.5 rounded-md transition-all",
+                                viewMode === 'gross' ? "bg-background text-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"
+                            )}
+                        >
+                            {t('dashboard.gross')}
+                        </button>
+                        <button
+                            onClick={() => setViewMode('net')}
+                            className={cn(
+                                "px-3 py-1.5 rounded-md transition-all",
+                                viewMode === 'net' ? "bg-background text-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"
+                            )}
+                        >
+                            {t('dashboard.net')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Summary Cards Grid (6 cols) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <SummaryCard
                         title={t('dashboard.cashAccounts')}
                         value={cashTotal}
@@ -257,6 +342,7 @@ export default function Dashboard() {
                     period={period}
                     transactions={transactions}
                     snapshots={snapshots}
+                    viewMode={viewMode}
                 />
 
 

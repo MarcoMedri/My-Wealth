@@ -9,11 +9,12 @@ interface DashboardChartsProps {
     period: DashboardPeriod;
     transactions: Transaction[];
     snapshots: Snapshot[];
+    viewMode?: 'gross' | 'net';
 }
 
 import { useTranslation } from 'react-i18next';
 
-export default function DashboardCharts({ period, snapshots }: DashboardChartsProps) {
+export default function DashboardCharts({ period, snapshots, viewMode }: DashboardChartsProps) {
     const { t } = useTranslation();
 
     // Filter Logic (Centralized here or passed down?)
@@ -69,6 +70,7 @@ export default function DashboardCharts({ period, snapshots }: DashboardChartsPr
                 snapshots={snapshots}
                 startDate={startDate}
                 endDate={endDate}
+                viewMode={viewMode}
             />
         </div>
     );

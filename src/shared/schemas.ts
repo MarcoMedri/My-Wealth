@@ -145,6 +145,7 @@ export const HoldingSchema = z.object({
   assetId: UUID,   // Links to Asset
   quantity: z.number(),         // Float is acceptable for quantity
   averageBuyPrice: Money, // In cents (unit cost)
+  taxRate: z.number().min(0).max(100).default(26), // Capital gains tax rate %
   createdAt: ISODate,
   updatedAt: ISODate,
 });
@@ -177,6 +178,7 @@ export const InvestmentTradeSchema = z.object({
   quantity: z.number(),
   pricePerUnit: Money,        // In cents
   fees: Money.default(0),
+  tax: z.number().optional(),
   date: ISODate,
   // For sells only - realized profit/loss
   realizedGain: Money.optional(),
@@ -237,6 +239,7 @@ export const PropertySchema = z.object({
   currentValue: Money,                 // cents (stima manuale)
   lastValuationDate: ISODate,
   currency: CurrencyCode,
+  taxRate: z.number().min(0).max(100).default(0), // Capital gains tax rate %
   
   // Details
   squareMeters: z.number().optional(),
@@ -275,6 +278,7 @@ export const SnapshotSchema = z.object({
     deposits: Money.default(0),
     // Add liabilities if implemented later
   }),
+  unrealizedTax: Money.default(0), // Estimated tax liability on unrealized gains
 });
 export type Snapshot = z.infer<typeof SnapshotSchema>;
 
@@ -311,6 +315,7 @@ export const CollectibleSchema = z.object({
   purchaseDate: ISODate.optional(),
   purchasePrice: Money.optional(),   // cents
   currentValue: Money,               // cents
+  taxRate: z.number().min(0).max(100).default(0), // Capital gains tax rate %
   currency: CurrencyCode,
   
   // Image
@@ -824,6 +829,7 @@ export const WorkspaceSettingsSchema = z.object({
    * false = snapshot directly
    */
   autoRefreshOnSnapshot: z.boolean().nullable().optional(),
+  defaultViewMode: z.enum(['net', 'gross']).optional(),
   
   /**
    * Investments Dashboard preferences
@@ -840,6 +846,22 @@ export const WorkspaceSettingsSchema = z.object({
     dateRange: z.string().optional(),
     selectedAccountIds: z.array(z.string()).optional(),
   }).optional(),
+
+  /**
+   * Tax Default Rates (Percentage)
+   * Key: AssetType (stock, etf, etc.) or PropertyType
+   * Value: Rate 0-100
+   */
+  taxDefaults: z.record(z.string(), z.number()).default({
+    stock: 26,
+    etf: 26,
+    crypto: 26,
+    bond: 12.5,
+    fund: 26,
+    residence: 0,
+    rental: 0,
+    collectible: 0
+  }),
 });
 
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
@@ -866,7 +888,18 @@ export function createEmptyVaultState(): VaultState {
     dividends: [],
     brokers: [],
     snapshots: [],
-    workspace: {},
+    workspace: {
+      taxDefaults: {
+        stock: 26,
+        etf: 26,
+        crypto: 26,
+        bond: 12.5,
+        fund: 26,
+        residence: 0,
+        rental: 0,
+        collectible: 0
+      }
+    },
   };
 }
 

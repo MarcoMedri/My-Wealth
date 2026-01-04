@@ -17,12 +17,14 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
 
     const [quantity, setQuantity] = useState(holding.quantity.toString());
     const [averageBuyPrice, setAverageBuyPrice] = useState((holding.averageBuyPrice / 100).toString());
+    const [taxRate, setTaxRate] = useState((holding.taxRate ?? 26).toString());
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             setQuantity(holding.quantity.toString());
             setAverageBuyPrice((holding.averageBuyPrice / 100).toString());
+            setTaxRate((holding.taxRate ?? 26).toString());
         }
     }, [isOpen, holding]);
 
@@ -37,6 +39,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                 ...holding,
                 quantity: parseFloat(quantity),
                 averageBuyPrice: Math.round(parseFloat(averageBuyPrice) * 100),
+                taxRate: parseFloat(taxRate),
                 updatedAt: new Date().toISOString()
             };
 
@@ -94,6 +97,23 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                             value={averageBuyPrice}
                             onChange={e => setAverageBuyPrice(e.target.value)}
                         />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-foreground-subtle">
+                            {t('modals.investmentModal.taxRate')}
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                step="any"
+                                required
+                                className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                value={taxRate}
+                                onChange={e => setTaxRate(e.target.value)}
+                            />
+                            <div className="absolute right-3 top-2 text-foreground-muted text-sm">%</div>
+                        </div>
                     </div>
 
                     <div className="pt-4 flex gap-3">

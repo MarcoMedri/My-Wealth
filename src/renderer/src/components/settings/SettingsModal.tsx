@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Globe, Moon, Sun, DollarSign, Monitor, Database, Camera, RefreshCw, HelpCircle, Download } from 'lucide-react';
+import { X, Globe, Moon, Sun, DollarSign, Monitor, Database, Camera, RefreshCw, HelpCircle, Download, Percent } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useVaultStore } from '../../store/useVaultStore';
@@ -215,6 +215,137 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     <span className="text-center text-xs sm:text-sm">{t('settings.snapshotAsk')}</span>
                                 </button>
                             </div>
+                        </div>
+                    </section>
+
+                    <div className="border-t border-border" />
+
+                    {/* Taxation */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide flex items-center gap-2">
+                            <Percent className="w-4 h-4" />
+                            {t('settings.taxation')}
+                        </h3>
+                        <p className="text-xs text-foreground-muted">
+                            {t('settings.taxDefaultsDesc')}
+                        </p>
+
+                        <div className="bg-background-card p-4 rounded-xl border border-border flex items-center justify-between mb-4">
+                            <div>
+                                <h4 className="text-sm font-medium text-foreground">{t('settings.defaultViewMode')}</h4>
+                                <p className="text-xs text-foreground-muted mt-1">{t('settings.defaultViewModeDesc')}</p>
+                            </div>
+                            <div className="flex bg-background-subtle p-1 rounded-lg">
+                                <button
+                                    onClick={() => setWorkspaceSettings({ defaultViewMode: 'gross' })}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${(workspace.defaultViewMode || 'gross') === 'gross'
+                                            ? 'bg-background shadow-sm text-foreground'
+                                            : 'text-foreground-muted hover:text-foreground'
+                                        }`}
+                                >
+                                    {t('settings.gross')}
+                                </button>
+                                <button
+                                    onClick={() => setWorkspaceSettings({ defaultViewMode: 'net' })}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${workspace.defaultViewMode === 'net'
+                                            ? 'bg-background shadow-sm text-foreground'
+                                            : 'text-foreground-muted hover:text-foreground'
+                                        }`}
+                                >
+                                    {t('settings.net')}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Investments */}
+                            {['stock', 'etf', 'crypto', 'bond', 'fund'].map(type => (
+                                <div key={type} className="space-y-2">
+                                    <label className="text-sm font-medium text-foreground capitalize">
+                                        {t(`modals.investmentModal.types.${type}`)}
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            value={workspace.taxDefaults?.[type] ?? 26}
+                                            onChange={(e) => {
+                                                const val = parseFloat(e.target.value);
+                                                if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                    setWorkspaceSettings({
+                                                        taxDefaults: {
+                                                            ...workspace.taxDefaults,
+                                                            [type]: val
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                            className="w-full pl-3 pr-8 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                        <div className="absolute right-3 top-2 text-foreground-muted text-sm">%</div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Properties / Collectibles */}
+                            {['residence', 'rental'].map(type => (
+                                <div key={type} className="space-y-2">
+                                    <label className="text-sm font-medium text-foreground capitalize">
+                                        {t(`modals.propertyModal.types.${type}`)}
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            value={workspace.taxDefaults?.[type] ?? 0}
+                                            onChange={(e) => {
+                                                const val = parseFloat(e.target.value);
+                                                if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                    setWorkspaceSettings({
+                                                        taxDefaults: {
+                                                            ...workspace.taxDefaults,
+                                                            [type]: val
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                            className="w-full pl-3 pr-8 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                        />
+                                        <div className="absolute right-3 top-2 text-foreground-muted text-sm">%</div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Collectibles Generic */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground capitalize">
+                                    {t('nav.collectibles')}
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={workspace.taxDefaults?.['collectible'] ?? 0}
+                                        onChange={(e) => {
+                                            const val = parseFloat(e.target.value);
+                                            if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                setWorkspaceSettings({
+                                                    taxDefaults: {
+                                                        ...workspace.taxDefaults,
+                                                        collectible: val
+                                                    }
+                                                });
+                                            }
+                                        }}
+                                        className="w-full pl-3 pr-8 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    <div className="absolute right-3 top-2 text-foreground-muted text-sm">%</div>
+                                </div>
+                            </div>
+
                         </div>
                     </section>
 

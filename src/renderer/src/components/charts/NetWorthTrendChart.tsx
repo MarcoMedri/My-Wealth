@@ -29,11 +29,12 @@ interface NetWorthTrendProps {
     startDate: Date;
     endDate: Date;
     baseCurrency?: string;
+    viewMode?: 'gross' | 'net';
 }
 
 import { useFormatDate } from '../../hooks/useFormatDate';
 
-export default function NetWorthTrendChart({ snapshots, startDate, endDate }: NetWorthTrendProps) {
+export default function NetWorthTrendChart({ snapshots, startDate, endDate, viewMode = 'gross' }: NetWorthTrendProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
     const { formatDate } = useFormatDate();
@@ -53,42 +54,54 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate }: Ne
         const collectiblesData = filteredSnapshots.map(s => (s.breakdown?.collectibles || 0) / 100);
         const insuranceData = filteredSnapshots.map(s => (s.breakdown?.insurance || 0) / 100);
 
+        const datasets = [
+            {
+                label: t('dashboard.cashAccounts') || 'Cash',
+                data: cashData,
+                backgroundColor: AREA_CHART_COLORS.accounts,
+                stack: 'Stack 0',
+            },
+            {
+                label: t('nav.investments') || 'Investments',
+                data: investmentsData,
+                backgroundColor: AREA_CHART_COLORS.investments,
+                stack: 'Stack 0',
+            },
+            {
+                label: t('nav.properties') || 'Real Estate',
+                data: realEstateData,
+                backgroundColor: AREA_CHART_COLORS.properties,
+                stack: 'Stack 0',
+            },
+            {
+                label: t('nav.collectibles') || 'Collectibles',
+                data: collectiblesData,
+                backgroundColor: AREA_CHART_COLORS.collectibles,
+                stack: 'Stack 0',
+            },
+            {
+                label: t('insurance.title') || 'Insurance',
+                data: insuranceData,
+                backgroundColor: AREA_CHART_COLORS.insurance,
+                stack: 'Stack 0',
+            }
+        ];
+
+        if (viewMode === 'net') {
+            const taxData = filteredSnapshots.map(s => -((s.unrealizedTax || 0) / 100));
+            datasets.push({
+                label: t('dashboard.taxLiability') || 'Tax Liability',
+                data: taxData,
+                backgroundColor: '#ef4444', // Red-500
+                stack: 'Stack 0'
+            });
+        }
+
         return {
             labels: filteredSnapshots.map(s => formatDate(s.date)),
-            datasets: [
-                {
-                    label: t('dashboard.cashAccounts') || 'Cash',
-                    data: cashData,
-                    backgroundColor: AREA_CHART_COLORS.accounts,
-                    stack: 'Stack 0',
-                },
-                {
-                    label: t('nav.investments') || 'Investments',
-                    data: investmentsData,
-                    backgroundColor: AREA_CHART_COLORS.investments,
-                    stack: 'Stack 0',
-                },
-                {
-                    label: t('nav.properties') || 'Real Estate',
-                    data: realEstateData,
-                    backgroundColor: AREA_CHART_COLORS.properties,
-                    stack: 'Stack 0',
-                },
-                {
-                    label: t('nav.collectibles') || 'Collectibles',
-                    data: collectiblesData,
-                    backgroundColor: AREA_CHART_COLORS.collectibles,
-                    stack: 'Stack 0',
-                },
-                {
-                    label: t('insurance.title') || 'Insurance',
-                    data: insuranceData,
-                    backgroundColor: AREA_CHART_COLORS.insurance,
-                    stack: 'Stack 0',
-                }
-            ]
+            datasets
         };
-    }, [snapshots, startDate, endDate, t, formatDate]);
+    }, [snapshots, startDate, endDate, t, formatDate, viewMode]);
 
     const options = {
         responsive: true,

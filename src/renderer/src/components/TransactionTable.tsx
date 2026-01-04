@@ -33,6 +33,7 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
     const { t } = useTranslation();
     const allTransactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
+    const accounts = useVaultStore(state => state.accounts);
     const formatMoney = useFormatMoney();
     const { getCategoryName } = useCategoryName();
     const [sorting, setSorting] = useState<SortingState>([
@@ -116,10 +117,14 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
         }
     }, [t]);
 
-    // Memoize category lookup
+    // Memoize category and account lookup
     const categoryMap = useMemo(() => {
         return new Map(categories.map(c => [c.id, c]));
     }, [categories]);
+
+    const accountMap = useMemo(() => {
+        return new Map(accounts.map(a => [a.id, a]));
+    }, [accounts]);
 
     // Define columns
     const columns = useMemo(() => [
@@ -145,6 +150,16 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
         columnHelper.accessor('categoryId', {
             header: t('transactions.category'),
             cell: (info) => {
+                const tx = info.row.original;
+                if (tx.type === 'transfer' && tx.toAccountId) {
+                    const toAccount = accountMap.get(tx.toAccountId);
+                    return (
+                        <span className="text-foreground-muted text-sm flex items-center gap-1">
+                            <span className="opacity-70">→</span>
+                            {toAccount ? toAccount.name : t('common.unknownAccount')}
+                        </span>
+                    );
+                }
                 const categoryId = info.getValue();
                 const category = categoryId ? categoryMap.get(categoryId) : null;
                 return (
@@ -204,7 +219,7 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
             ),
 
         })
-    ], [categoryMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate, getCategoryName]);
+    ], [categoryMap, accountMap, t, formatMoney, handleDelete, handleEdit, handleDuplicate, getCategoryName]);
 
     // Sort transactions (sorted by date desc by default in table state)
     const table = useReactTable({

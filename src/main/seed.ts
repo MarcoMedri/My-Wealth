@@ -150,6 +150,7 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 120,
     notes: 'Beautiful apartment in city center',
     imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Lake House',
@@ -161,6 +162,7 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 85,
     notes: 'Summer getaway',
     imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Rental Apartment - Berlin',
@@ -172,6 +174,7 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 65,
     notes: 'Long-term rental property',
     imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Agricultural Land - Tuscany',
@@ -183,6 +186,7 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 50000,
     notes: 'Vineyard land',
     imageUrl: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Office Space - Milan',
@@ -194,6 +198,7 @@ const DEMO_PROPERTIES: Omit<Property, 'id' | 'createdAt' | 'updatedAt' | 'lastVa
     squareMeters: 150,
     notes: 'Commercial office space',
     imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   }
 ];
 
@@ -206,6 +211,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2022-03-10T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Vintage Gibson Les Paul',
@@ -215,6 +221,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2018-11-20T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1550985543-f4423c8d361e?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Gold Coin Collection',
@@ -224,6 +231,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2020-01-15T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1610375461246-83648bfd149c?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Rare Wine Collection',
@@ -233,6 +241,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2021-06-12T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Contemporary Art Piece',
@@ -242,6 +251,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2023-01-30T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Vintage Porsche 911',
@@ -251,6 +261,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2021-08-10T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Engagement Ring',
@@ -260,6 +271,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2019-12-20T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   },
   {
     name: 'Charizard First Edition',
@@ -269,6 +281,7 @@ const DEMO_COLLECTIBLES: Omit<Collectible, 'id' | 'createdAt' | 'updatedAt' | 'c
     purchaseDate: '2020-05-15T00:00:00.000Z',
     currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1613771404721-1f92d799e49f?auto=format&fit=crop&w=1000&q=80',
+    taxRate: 0,
   }
 ];
 
@@ -645,6 +658,7 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       assetId: asset.id,
       quantity,
       averageBuyPrice,
+      taxRate: 26,
       createdAt: nowISO,
       updatedAt: nowISO
     };
@@ -732,6 +746,7 @@ export async function generateDemoData(vaultPath: string): Promise<SeedResult> {
       id: randomUUID(),
       date: date.toISOString(),
       totalNetWorth: total,
+      unrealizedTax: 0,
       currency: 'EUR',
       breakdown: {
         cash: Math.round(total * 0.15),

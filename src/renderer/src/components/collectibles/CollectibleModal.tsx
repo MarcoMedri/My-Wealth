@@ -75,6 +75,7 @@ export function CollectibleModal({ isOpen, onClose, collectible }: CollectibleMo
                 purchaseDate: purchaseDate ? new Date(purchaseDate).toISOString() : undefined,
                 imageUrl: imageUrl || undefined,
                 currency: collectible ? collectible.currency : 'EUR',
+                taxRate: collectible ? collectible.taxRate : 0,
                 createdAt: collectible ? collectible.createdAt : now,
                 updatedAt: now,
             };

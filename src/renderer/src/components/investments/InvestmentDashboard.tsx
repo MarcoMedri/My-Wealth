@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Plus, RefreshCw, Activity, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Plus, RefreshCw, Activity, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import type { Holding, Asset } from '../../../../shared/schemas';
 import { AddInvestmentModal } from './AddInvestmentModal';
 import { SellInvestmentModal } from './SellInvestmentModal';
@@ -12,6 +12,7 @@ import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import { cn } from '../../lib/utils';
 import { ReturnMetricsCard } from './ReturnMetricsCard';
 import { PerformanceChart } from './PerformanceChart';
+import { HoldingsTable } from './HoldingsTable';
 
 import {
     Chart as ChartJS,
@@ -380,92 +381,19 @@ export function InvestmentDashboard() {
                         </button>
                     </div>
                 </div>
-                <div className="overflow-x-auto flex-1">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-background-muted text-foreground-muted font-medium sticky top-0 z-10">
-                            <tr>
-                                <th className="px-6 py-3">{t('investments.asset')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.price')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.day')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.qty')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.value')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.return')}</th>
-                                <th className="px-6 py-3 text-right">{t('investments.actions')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {filteredHoldings.map(holding => {
-                                const asset = assets.find(a => a.id === holding.assetId);
-                                if (!asset) return null;
-
-                                const value = holding.quantity * asset.currentPrice;
-                                const cost = holding.quantity * holding.averageBuyPrice;
-                                const gain = value - cost;
-                                // cost > 0 check handles division by zero. If cost is 0 (e.g. airdrop or error), return is infinite/undefined, display 0 or handle?
-                                // If cost is 0 and value > 0, return is 100% technically (or infinite). Let's stick to 0 or handle logic elsewhere.
-                                const gainPercent = cost > 0 ? (gain / cost) * 100 : 0;
-
-                                const dayChange = asset.previousClose ? asset.currentPrice - asset.previousClose : 0;
-                                const dayChangePercent = asset.previousClose ? ((asset.currentPrice - asset.previousClose) / asset.previousClose) * 100 : 0;
-
-                                return (
-                                    <tr
-                                        key={holding.id}
-                                        className="hover:bg-background-muted-muted/50 group cursor-pointer transition-colors"
-                                        onClick={() => setDetailModal({ holding, asset })}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="font-semibold text-foreground">{asset.symbol}</div>
-                                            <div className="text-xs text-foreground-subtle">{asset.name}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right font-mono text-foreground-muted">
-                                            {formatMoney(asset.currentPrice, asset.currency)}
-                                        </td>
-                                        <td className={`px-6 py-4 text-right font-mono text-sm ${dayChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            <div className="flex items-center justify-end gap-1">
-                                                {dayChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                                {dayChangePercent >= 0 ? '+' : ''}{dayChangePercent.toFixed(2)}%
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right text-foreground-muted">
-                                            {holding.quantity}
-                                        </td>
-                                        <td className="px-6 py-4 text-right font-mono font-medium text-foreground">
-                                            {formatMoney(value, asset.currency)}
-                                        </td>
-                                        <td className={`px-6 py-4 text-right font-mono text-sm ${gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                            <div className="flex flex-col items-end">
-                                                <span>{gain >= 0 ? '+' : ''}{formatMoney(gain, asset.currency)}</span>
-                                                <span className="text-xs opacity-80">{gainPercent.toFixed(2)}%</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                onClick={() => setSellModal({ holding, asset })}
-                                                className="btn btn-ghost btn-sm text-foreground-muted hover:text-foreground"
-                                                title={t('investments.sell')}
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                    {filteredHoldings.length === 0 && (
-                        <div className="p-12 text-center text-foreground-subtle">
-                            {t('common.noData') || 'No holdings found'}
-                        </div>
-                    )}
-                </div>
+                <HoldingsTable
+                    holdings={filteredHoldings}
+                    assets={assets}
+                    onSell={(h, a) => setSellModal({ holding: h, asset: a })}
+                    onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
+                />
             </div>
 
             {/* Modals */}
             {isAddModalOpen && <AddInvestmentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
             {sellModal && <SellInvestmentModal isOpen={!!sellModal} onClose={() => setSellModal(null)} holding={sellModal.holding} asset={sellModal.asset} />}
             {detailModal && <HoldingDetailModal isOpen={!!detailModal} onClose={() => setDetailModal(null)} holding={detailModal.holding} asset={detailModal.asset} />}
-        </div>
+        </div >
     );
 }
 

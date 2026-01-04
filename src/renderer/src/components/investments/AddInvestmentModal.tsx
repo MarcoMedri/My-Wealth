@@ -14,7 +14,7 @@ interface AddInvestmentModalProps {
 }
 
 export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: AddInvestmentModalProps) {
-    const { accounts, refreshInvestments } = useVaultStore();
+    const { accounts, refreshInvestments, workspace } = useVaultStore();
     const { t } = useTranslation();
 
     // Search State
@@ -33,6 +33,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
     const [price, setPrice] = useState(''); // Display price
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [fees, setFees] = useState('0');
+    const [taxRate, setTaxRate] = useState('26');
     const [accountId, setAccountId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
             setPrice('');
             setDate(new Date().toISOString().split('T')[0]);
             setFees('0');
+            // Default tax will be set by the effect below
             setErrorMessage(null);
 
             if (availableAccounts.length > 0) {
@@ -65,7 +67,15 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, availableAccounts.length]); // Dependencies adjusted to avoid infinite loop but react to open
+    }, [isOpen, availableAccounts.length]);
+
+    // Auto-set tax rate based on type
+    useEffect(() => {
+        if (isOpen) {
+            const def = workspace.taxDefaults?.[type] ?? 26;
+            setTaxRate(def.toString());
+        }
+    }, [type, isOpen, workspace.taxDefaults]);
 
     // Search Logic
     useEffect(() => {
@@ -147,7 +157,8 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                 price: parseFloat(price) * 100, // to cents
                 date,
                 fees: parseFloat(fees) * 100, // to cents
-                brokerId
+                brokerId,
+                taxRate: parseFloat(taxRate)
             });
             await refreshInvestments();
             onClose();
@@ -364,8 +375,11 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground-subtle">Fees</label>
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.fees') || 'Fees'}</label>
                                 <input
                                     type="number" step="any"
                                     className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
@@ -373,6 +387,21 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                                     onChange={e => setFees(e.target.value)}
                                 />
                             </div>
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.taxRate')}</label>
+                                <div className="relative">
+                                    <input
+                                        type="number" step="any"
+                                        className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        value={taxRate}
+                                        onChange={e => setTaxRate(e.target.value)}
+                                    />
+                                    <div className="absolute right-3 top-2 text-foreground-muted text-sm">%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium text-foreground-subtle">Account</label>
                                 <select

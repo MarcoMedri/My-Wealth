@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
+import { HoldingsTable } from '../investments/HoldingsTable';
 import { AddBrokerModal } from './AddBrokerModal';
 import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
@@ -246,60 +247,6 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                     </div>
                 </div>
 
-                {/* Securities Accounts (Conto Titoli) */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                        <TrendingUp size={20} className="text-foreground-muted" />
-                        {t('brokers.securitiesAccounts', 'Conti Titoli')}
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {securitiesAccounts.map(account => (
-                            <div
-                                key={account.id}
-                                className="cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
-                                onClick={() => { setSelectedAccount(account); setIsAccountModalOpen(true); }}
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-500">
-                                            <TrendingUp size={16} />
-                                        </div>
-                                        <span className="font-medium text-foreground">{account.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setAccountToDelete(account);
-                                                setIsCloseDeleteModalOpen(true);
-                                            }}
-                                            className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
-                                            title={t('common.delete')}
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                </div>
-                                <p className="text-2xl font-bold text-foreground">
-                                    {formatMoney(accountBalances[account.id] || 0, account.currency)}
-                                </p>
-                                {account.manualBalance !== undefined && (
-                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                        {t('accounts.manualBalance')}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
-                        <AddCard
-                            onClick={() => { setSelectedAccount(undefined); setAddAccountType('investment'); setIsAccountModalOpen(true); }}
-                            title={t('accounts.addSecuritiesAccount', 'Aggiungi Conto Titoli')}
-                            description={t('accounts.addSecuritiesAccountDesc', 'Per investimenti (ETF, Azioni, ecc)')}
-                            icon={Plus}
-                        />
-                    </div>
-                </div>
-
                 {/* Cash & Other Accounts */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -370,8 +317,6 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                     </div>
                 </div>
 
-
-
                 {/* Deposit Accounts */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -427,6 +372,62 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                     </div>
                 </div>
 
+                {/* Securities Accounts (Conto Titoli) */}
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <TrendingUp size={20} className="text-foreground-muted" />
+                        {t('brokers.securitiesAccounts', 'Conti Titoli')}
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {securitiesAccounts.map(account => (
+                            <div
+                                key={account.id}
+                                className="cursor-pointer bg-background-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow"
+                                onClick={() => { setSelectedAccount(account); setIsAccountModalOpen(true); }}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-500">
+                                            <TrendingUp size={16} />
+                                        </div>
+                                        <span className="font-medium text-foreground">{account.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setAccountToDelete(account);
+                                                setIsCloseDeleteModalOpen(true);
+                                            }}
+                                            className="p-1 text-foreground-muted hover:text-red-500 hover:bg-background-muted rounded transition-colors"
+                                            title={t('common.delete')}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {formatMoney(accountBalances[account.id] || 0, account.currency)}
+                                </p>
+                                {account.manualBalance !== undefined && (
+                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                        {t('accounts.manualBalance')}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                        <AddCard
+                            onClick={() => { setSelectedAccount(undefined); setAddAccountType('investment'); setIsAccountModalOpen(true); }}
+                            title={t('accounts.addSecuritiesAccount', 'Aggiungi Conto Titoli')}
+                            description={t('accounts.addSecuritiesAccountDesc', 'Per investimenti (ETF, Azioni, ecc)')}
+                            icon={Plus}
+                        />
+                    </div>
+                </div>
+
+
+
                 {/* Portfolio / Holdings */}
                 {brokerHoldings.length > 0 && (
                     <div className="space-y-4">
@@ -435,53 +436,15 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                             {t('brokers.portfolio')}
                         </h2>
 
-                        <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden">
-                            <table className="w-full text-left">
-                                <thead className="bg-background-subtle text-xs uppercase text-foreground-muted font-medium">
-                                    <tr>
-                                        <th className="px-6 py-3">{t('investments.symbol')}</th>
-                                        <th className="px-6 py-3 text-right">{t('investments.quantity')}</th>
-                                        <th className="px-6 py-3 text-right">{t('investments.price')}</th>
-                                        <th className="px-6 py-3 text-right">{t('investments.value')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {brokerHoldings.map(holding => {
-                                        const asset = assets.find(a => a.id === holding.assetId);
-                                        if (!asset) return null;
-                                        // TODO: Use real-time price if available, otherwise fallback to something reasonable
-                                        const price = asset.currentPrice;
-                                        const value = holding.quantity * price;
-
-                                        return (
-                                            <tr
-                                                key={holding.id}
-                                                className="hover:bg-background-subtle transition-colors cursor-pointer"
-                                                onClick={() => {
-                                                    setEditingItem({ holding, asset });
-                                                }}
-                                            >
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-foreground">{asset.symbol}</div>
-                                                    <div className="text-xs text-foreground-muted">{asset.name}</div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-foreground font-mono">
-                                                    {holding.quantity}
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-foreground font-mono">
-                                                    {formatMoney(price, asset.currency)}
-                                                </td>
-                                                <td className="px-6 py-4 text-right font-bold text-foreground font-mono">
-                                                    {formatMoney(value, asset.currency)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <HoldingsTable
+                            holdings={brokerHoldings}
+                            assets={assets}
+                            onEdit={(h, a) => setEditingItem({ holding: h, asset: a })}
+                        />
                     </div>
                 )}
+
+
 
                 {/* Archived Accounts */}
                 {archivedAccounts.length > 0 && (
@@ -535,21 +498,23 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                 editBrokerId={brokerId}
             />
 
-            {editBalanceAccountId && (
-                <EditBalanceModal
-                    isOpen={true}
-                    onClose={() => setEditBalanceAccountId(null)}
-                    accountId={editBalanceAccountId}
-                    accountName={accounts.find(a => a.id === editBalanceAccountId)?.name || ''}
-                    currentBalance={accountBalances[editBalanceAccountId] || 0}
-                    currency={accounts.find(a => a.id === editBalanceAccountId)?.currency || 'EUR'}
-                    hasManualBalance={accounts.find(a => a.id === editBalanceAccountId)?.manualBalance !== undefined}
-                    onBalanceUpdated={() => {
-                        refreshData();
-                        setEditBalanceAccountId(null);
-                    }}
-                />
-            )}
+            {
+                editBalanceAccountId && (
+                    <EditBalanceModal
+                        isOpen={true}
+                        onClose={() => setEditBalanceAccountId(null)}
+                        accountId={editBalanceAccountId}
+                        accountName={accounts.find(a => a.id === editBalanceAccountId)?.name || ''}
+                        currentBalance={accountBalances[editBalanceAccountId] || 0}
+                        currency={accounts.find(a => a.id === editBalanceAccountId)?.currency || 'EUR'}
+                        hasManualBalance={accounts.find(a => a.id === editBalanceAccountId)?.manualBalance !== undefined}
+                        onBalanceUpdated={() => {
+                            refreshData();
+                            setEditBalanceAccountId(null);
+                        }}
+                    />
+                )
+            }
 
             {/* Context-Aware Action Modals */}
             {
@@ -688,14 +653,16 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                 variant="danger"
             />
             {/* Edit Holding Modal */}
-            {editingItem && (
-                <EditHoldingModal
-                    isOpen={!!editingItem}
-                    onClose={() => setEditingItem(null)}
-                    holding={editingItem.holding}
-                    asset={editingItem.asset}
-                />
-            )}
+            {
+                editingItem && (
+                    <EditHoldingModal
+                        isOpen={!!editingItem}
+                        onClose={() => setEditingItem(null)}
+                        holding={editingItem.holding}
+                        asset={editingItem.asset}
+                    />
+                )
+            }
         </div >
     );
 };

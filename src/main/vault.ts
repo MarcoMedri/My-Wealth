@@ -646,14 +646,14 @@ export class VaultManager {
           this.vaultState.workspace = result.data;
         } else {
           console.warn('Invalid workspace settings, using defaults:', result.error);
-          this.vaultState.workspace = {};
+          this.vaultState.workspace = { taxDefaults: {} };
         }
       } else {
-        this.vaultState.workspace = {};
+        this.vaultState.workspace = { taxDefaults: {} };
       }
     } catch (error) {
       console.error('Failed to load workspace settings:', error);
-      this.vaultState.workspace = {};
+      this.vaultState.workspace = { taxDefaults: {} };
     }
   }
 
@@ -1991,12 +1991,52 @@ export class VaultManager {
           depositsTotal += deposit.principal;
       }
 
+      // 7. Calculate Unrealized Tax
+      let totalUnrealizedTax = 0;
+      const ws = this.vaultState.workspace;
+
+      // Holdings Tax
+      for (const holding of this.vaultState.holdings) {
+          const asset = this.vaultState.assets.find(a => a.id === holding.assetId);
+          if (asset) {
+              const marketValue = holding.quantity * asset.currentPrice;
+              const costBasis = holding.quantity * holding.averageBuyPrice;
+              const gain = marketValue - costBasis;
+              if (gain > 0) {
+                  const rate = holding.taxRate ?? ws?.taxDefaults?.[asset.type] ?? 26;
+                  const tax = gain * (rate / 100);
+                  totalUnrealizedTax += tax;
+              }
+          }
+      }
+
+      // Properties Tax
+      for (const p of this.vaultState.properties) {
+          const gain = p.currentValue - (p.purchasePrice || 0);
+          if (gain > 0) {
+              const rate = p.taxRate ?? ws?.taxDefaults?.[p.type] ?? 0;
+              const tax = gain * (rate / 100);
+              totalUnrealizedTax += tax;
+          }
+      }
+
+      // Collectibles Tax
+      for (const c of this.vaultState.collectibles) {
+           const gain = c.currentValue - (c.purchasePrice || 0);
+           if (gain > 0) {
+               const rate = c.taxRate ?? ws?.taxDefaults?.['collectible'] ?? 0;
+               const tax = gain * (rate / 100);
+               totalUnrealizedTax += tax;
+           }
+      }
+
       const totalNetWorth = cashTotal + investmentsTotal + realEstateTotal + collectiblesTotal + insuranceTotal + depositsTotal;
 
       const snapshot: Snapshot = {
           id: randomUUID(),
           date: now,
           totalNetWorth: Math.round(totalNetWorth),
+          unrealizedTax: Math.round(totalUnrealizedTax),
           currency: 'EUR', // Hardcoded base currency for now, or use settings
           breakdown: {
               cash: Math.round(cashTotal),

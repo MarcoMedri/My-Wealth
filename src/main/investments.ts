@@ -9,8 +9,6 @@ const yahooFinance = (typeof pkg === 'function') ? new pkg() : pkg;
 console.log('[InvestmentManager] Yahoo Finance initialized. Type:', typeof yahooFinance, 'Is search function?', typeof yahooFinance.search);
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
-import path from 'path';
-import fs from 'fs-extra';
 import type { Asset, Holding, AssetType, InvestmentTrade, Account } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
 
@@ -82,6 +80,7 @@ export class InvestmentManager {
     date: string;
     fees: number; // in cents
     brokerId?: string;
+    taxRate?: number;
   }) {
     const vaultManager = getVaultManager();
     const vaultPath = vaultManager.getVaultPath();
@@ -168,6 +167,7 @@ export class InvestmentManager {
         ...holding,
         quantity: totalQty,
         averageBuyPrice: newAvgPrice,
+        taxRate: params.taxRate ?? holding.taxRate ?? 26,
         updatedAt: now
       };
     } else {
@@ -177,6 +177,7 @@ export class InvestmentManager {
         assetId: asset.id,
         quantity: params.quantity,
         averageBuyPrice: params.price,
+        taxRate: params.taxRate ?? 26,
         createdAt: now,
         updatedAt: now
       };
@@ -238,6 +239,7 @@ export class InvestmentManager {
     date: string;
     fees: number; // in cents
     brokerId?: string;
+    taxRate?: number;
   }) {
     const vaultManager = getVaultManager();
     const vaultPath = vaultManager.getVaultPath();
@@ -302,6 +304,7 @@ export class InvestmentManager {
         ...holding,
         quantity: totalQty,
         averageBuyPrice: newAvgPrice,
+        taxRate: params.taxRate ?? holding.taxRate ?? 26,
         updatedAt: now,
         brokerId: brokerId || holding.brokerId
       };
@@ -312,6 +315,7 @@ export class InvestmentManager {
         assetId: asset.id,
         quantity: params.quantity,
         averageBuyPrice: params.price,
+        taxRate: params.taxRate ?? 26,
         createdAt: now,
         updatedAt: now,
         brokerId: brokerId
@@ -365,12 +369,15 @@ export class InvestmentManager {
    * 4. Create income transaction
    * 5. Create trade record
    */
-  async sell(params: {
-    holdingId: string;
-    quantity: number;
-    price: number; // in cents per unit
-    date: string;
-    fees: number; // in cents
+
+  async sell(params: { 
+    holdingId: string, 
+    quantity: number, 
+    price: number, 
+    fees: number, 
+    date: string,
+    taxRate?: number, 
+    buyPrice?: number 
   }): Promise<SellResult> {
     const vaultManager = getVaultManager();
     const vaultPath = vaultManager.getVaultPath();
@@ -393,10 +400,27 @@ export class InvestmentManager {
     const now = new Date().toISOString();
 
     // 2. Calculate realized gain/loss
-    // Gain = (Sell Price - Avg Buy Price) * Quantity - Fees
+    // Gain = (Sell Price - Cost Basis Price) * Quantity - Fees
+    const buyPrice = params.buyPrice ?? holding.averageBuyPrice;
     const proceeds = params.quantity * params.price;
-    const costBasis = params.quantity * holding.averageBuyPrice;
-    const realizedGain = proceeds - costBasis - params.fees;
+    const costBasis = params.quantity * buyPrice;
+    
+    // Tax Calculation (if applicable)
+    // Gain before tax
+    const grossGain = proceeds - costBasis - params.fees;
+    
+    let taxAmount = 0;
+    if (grossGain > 0 && params.taxRate !== undefined) {
+      taxAmount = grossGain * (params.taxRate / 100);
+    }
+    
+    // Final Realized Gain (can be net of tax, or just gross gain? usually realized gain is pre-tax in accounting, but for cash flow we care about net)
+    // For this app, let's track the Realized Gain as the pre-tax gain for performance metrics, but use the tax for the transaction amount.
+    // Actually, "Realized Gain" in the P&L usually means pre-tax. 
+    // But if we deduct tax from the transaction, the "Income" transaction amount will be lower.
+    // Let's store the tax in the transaction notes.
+    
+    const realizedGain = grossGain; 
 
     // 3. Update or delete holding
     const remainingQty = holding.quantity - params.quantity;
@@ -408,7 +432,7 @@ export class InvestmentManager {
         ...holding,
         quantity: remainingQty,
         updatedAt: now,
-        // Note: averageBuyPrice stays the same (FIFO would require more complex logic)
+        // averageBuyPrice stays the same unless we implement specific lot identification
       };
       await vaultManager.saveHolding(updatedHolding);
     } else {
@@ -417,41 +441,41 @@ export class InvestmentManager {
     }
 
     // 4. Create income transaction (money coming back)
-    const netProceeds = proceeds - params.fees;
+    // Net Cash = Proceeds - Fees - Tax
+    const netProceeds = proceeds - params.fees - taxAmount;
     
     // Parse date to ensure valid ISO format
-    // Handle both "YYYY-MM-DD" and "YYYY-MM-DDTHH:mm:ss.sssZ" formats
     let isoDate = params.date;
     if (!params.date.includes('T')) {
-      // Convert YYYY-MM-DD to full ISO at noon to avoid timezone issues
+      // Convert YYYY-MM-DD to full ISO at noon
       const [year, month, day] = params.date.split('-').map(Number);
       isoDate = new Date(year, month - 1, day, 12, 0, 0).toISOString();
     }
     
-    // Find an investment category or use "Investment Income" placeholder
+    // Find investment category
     let investmentCategoryId: string | null = null;
-    // Read categories from the vault JSON file directly
-    const currentVaultPath = vaultManager.getVaultPath();
-    if (currentVaultPath) {
-      try {
-        const categoriesPath = path.join(currentVaultPath, 'categories.json');
-        const categoriesExist = await fs.pathExists(categoriesPath);
-        if (categoriesExist) {
-          const categoriesData = await fs.readJson(categoriesPath) as Array<{id: string, name: string, type: string}>;
-          const investmentCategory = categoriesData.find(c => 
-            c.type === 'income' && (c.name.toLowerCase().includes('investment') || c.name.toLowerCase().includes('capital'))
-          );
-          if (investmentCategory) {
-            investmentCategoryId = investmentCategory.id;
-          } else {
-            const firstIncomeCategory = categoriesData.find(c => c.type === 'income');
-            if (firstIncomeCategory) {
-              investmentCategoryId = firstIncomeCategory.id;
-            }
-          }
-        }
-      } catch {
-        console.warn('Could not read categories for investment transaction');
+    const categoriesData = vaultManager.categories;
+    
+    // Safety check for categories
+    if (!Array.isArray(categoriesData)) {
+      console.error('[InvestmentManager] vaultManager.categories returned non-array:', categoriesData);
+      throw new Error('Internal Error: Failed to load categories (invalid data structure).');
+    }
+
+    const investmentCategory = categoriesData.find(c => 
+      c.type === 'income' && 
+      (c.name.toLowerCase().includes('investment') || c.name.toLowerCase().includes('capital') || c.name.toLowerCase().includes('finan'))
+    );
+    
+    if (investmentCategory) {
+      investmentCategoryId = investmentCategory.id;
+    } else {
+      // Fallback: Try to find ANY income category
+      const anyIncomeCategory = categoriesData.find(c => c.type === 'income');
+      if (anyIncomeCategory) {
+        investmentCategoryId = anyIncomeCategory.id;
+      } else {
+         throw new Error('No income category found. Please create at least one income category before selling.');
       }
     }
     
@@ -464,7 +488,10 @@ export class InvestmentManager {
       accountId: holding.accountId,
       categoryId: investmentCategoryId,
       toAccountId: null,
-      notes: `Sold ${params.quantity} of ${asset.symbol} @ ${params.price/100}. Gain/Loss: ${realizedGain/100}`,
+      notes: `Sold ${params.quantity} of ${asset.symbol} @ ${params.price/100}. 
+Cost Basis: ${buyPrice/100}.
+Gross Gain: ${grossGain/100}.
+Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
       status: 'cleared',
       tags: ['investment', 'sale'],
       splits: [],
@@ -480,6 +507,7 @@ export class InvestmentManager {
       quantity: params.quantity,
       pricePerUnit: params.price,
       fees: params.fees,
+      tax: taxAmount > 0 ? taxAmount : undefined,
       date: params.date,
       realizedGain: realizedGain,
       createdAt: now,

@@ -106,6 +106,17 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
         e.preventDefault();
         if (!formData.accountId) return;
 
+        if (formData.type === 'transfer') {
+            if (!formData.toAccountId) {
+                setError(t('transactions.errorSelectDestAccount') || 'Please select a destination account');
+                return;
+            }
+            if (formData.accountId === formData.toAccountId) {
+                setError(t('transactions.errorSameAccount') || 'Source and destination accounts must be different');
+                return;
+            }
+        }
+
         setIsLoading(true);
         setError(null);
 
@@ -188,9 +199,8 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                     </div>
                 )}
 
-                {/* Transaction Type Tabs */}
                 <div className="flex p-1 bg-background-subtle rounded-lg border border-border">
-                    {(['expense', 'income'] as const).map((type) => (
+                    {(['expense', 'income', 'transfer'] as const).map((type) => (
                         <button
                             key={type}
                             type="button"

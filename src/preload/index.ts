@@ -175,7 +175,15 @@ const api = {
   }): Promise<{ asset: Asset, holding: Holding }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_BUY_MANUAL, params)
   },
-  sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
+  sellInvestment: (params: { 
+    holdingId: string, 
+    quantity: number, 
+    price: number, 
+    fees: number, 
+    date: string,
+    taxRate?: number,
+    buyPrice?: number
+  }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_SELL, params)
   },
   refreshInvestmentPrices: (): Promise<{ updated: number, failed: number, total: number }> => {

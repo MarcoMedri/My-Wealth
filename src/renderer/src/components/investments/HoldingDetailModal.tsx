@@ -1,8 +1,8 @@
-import React from 'react';
-import { X, TrendingUp, TrendingDown, Calendar, DollarSign, Percent } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Calendar, Percent, Hash, Coins, Tag, Wallet } from 'lucide-react';
 import { formatMoney } from '../../../../shared/schemas';
 import type { Holding, Asset } from '../../../../shared/schemas';
 import { useFormatDate } from '../../hooks/useFormatDate';
+import { useTranslation } from 'react-i18next';
 
 interface HoldingDetailModalProps {
     isOpen: boolean;
@@ -12,6 +12,7 @@ interface HoldingDetailModalProps {
 }
 
 export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingDetailModalProps) {
+    const { t } = useTranslation();
     const { formatDateTime } = useFormatDate();
     if (!isOpen) return null;
 
@@ -49,14 +50,14 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
 
                     {/* Current Price */}
                     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-xl">
-                        <div className="text-sm text-foreground-muted mb-1">Current Price</div>
+                        <div className="text-sm text-foreground-muted mb-1">{t('investments.currentPrice')}</div>
                         <div className="text-3xl font-bold text-foreground">
                             {formatMoney(asset.currentPrice, asset.currency)}
                         </div>
                         {asset.previousClose && (
                             <div className={`flex items-center gap-1 mt-2 text-sm ${dayChangePercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                                 {dayChangePercent >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                                <span>{dayChangePercent >= 0 ? '+' : ''}{dayChangePercent.toFixed(2)}% today</span>
+                                <span>{dayChangePercent >= 0 ? '+' : ''}{dayChangePercent.toFixed(2)}%</span>
                             </div>
                         )}
                     </div>
@@ -65,17 +66,17 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-background-muted p-4 rounded-xl">
                             <div className="flex items-center gap-2 text-foreground-muted text-sm mb-2">
-                                <DollarSign className="w-4 h-4" />
-                                <span>Holdings</span>
+                                <Hash className="w-4 h-4" />
+                                <span>{t('investments.quantity')}</span>
                             </div>
                             <div className="text-xl font-bold text-foreground">{holding.quantity}</div>
-                            <div className="text-xs text-foreground-subtle mt-1">shares</div>
+                            {/* <div className="text-xs text-foreground-subtle mt-1">shares</div> */}
                         </div>
 
                         <div className="bg-background-muted p-4 rounded-xl">
                             <div className="flex items-center gap-2 text-foreground-muted text-sm mb-2">
-                                <DollarSign className="w-4 h-4" />
-                                <span>Current Value</span>
+                                <Coins className="w-4 h-4" />
+                                <span>{t('investments.currentValue')}</span>
                             </div>
                             <div className="text-xl font-bold text-foreground">
                                 {formatMoney(currentValue, asset.currency)}
@@ -84,19 +85,19 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
 
                         <div className="bg-background-muted p-4 rounded-xl">
                             <div className="flex items-center gap-2 text-foreground-muted text-sm mb-2">
-                                <DollarSign className="w-4 h-4" />
-                                <span>Avg Cost</span>
+                                <Tag className="w-4 h-4" />
+                                <span>{t('investments.buyPrice')}</span>
                             </div>
                             <div className="text-xl font-bold text-foreground">
                                 {formatMoney(holding.averageBuyPrice, asset.currency)}
                             </div>
-                            <div className="text-xs text-foreground-subtle mt-1">per share</div>
+                            {/* <div className="text-xs text-foreground-subtle mt-1">per share</div> */}
                         </div>
 
                         <div className="bg-background-muted p-4 rounded-xl">
                             <div className="flex items-center gap-2 text-foreground-muted text-sm mb-2">
-                                <DollarSign className="w-4 h-4" />
-                                <span>Cost Basis</span>
+                                <Wallet className="w-4 h-4" />
+                                <span>{t('investments.costBasis')}</span>
                             </div>
                             <div className="text-xl font-bold text-foreground">
                                 {formatMoney(costBasis, asset.currency)}
@@ -110,7 +111,7 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                             <div className="flex items-center gap-2">
                                 <Percent className={`w-5 h-5 ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`} />
                                 <span className={`font-semibold ${isProfit ? 'text-emerald-900 dark:text-emerald-200' : 'text-rose-900 dark:text-rose-200'}`}>
-                                    Total {isProfit ? 'Gain' : 'Loss'}
+                                    {isProfit ? t('investments.totalGain') : t('investments.totalLoss')}
                                 </span>
                             </div>
                             <div className={`text-2xl font-bold ${isProfit ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
@@ -118,7 +119,7 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                             </div>
                         </div>
                         <div className={`text-sm ${isProfit ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
-                            {gainPercent >= 0 ? '+' : ''}{gainPercent.toFixed(2)}% return
+                            {gainPercent >= 0 ? '+' : ''}{gainPercent.toFixed(2)}% {t('investments.return')}
                         </div>
                     </div>
 
@@ -127,7 +128,7 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                         <div className="bg-background-muted p-4 rounded-xl">
                             <div className="flex items-center gap-2 text-foreground-muted text-sm mb-2">
                                 <Calendar className="w-4 h-4" />
-                                <span>Today&apos;s Change</span>
+                                <span>{t('investments.todayChange')}</span>
                             </div>
                             <div className={`text-xl font-bold ${dayChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                                 {dayChange >= 0 ? '+' : ''}{formatMoney(dayChange, asset.currency)}
@@ -138,24 +139,24 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                     {/* Metadata */}
                     {asset.metadata && (
                         <div className="border-t border-border pt-4">
-                            <h3 className="text-sm font-semibold text-foreground mb-3">Asset Information</h3>
+                            <h3 className="text-sm font-semibold text-foreground mb-3">{t('investments.assetInfo')}</h3>
                             <div className="grid grid-cols-2 gap-3 text-sm">
                                 {asset.metadata.exchange && (
                                     <div>
-                                        <span className="text-foreground-muted">Exchange:</span>
+                                        <span className="text-foreground-muted">{t('investments.exchange')}:</span>
                                         <span className="ml-2 text-foreground">{asset.metadata.exchange}</span>
                                     </div>
                                 )}
                                 <div>
-                                    <span className="text-foreground-muted">Type:</span>
-                                    <span className="ml-2 text-foreground capitalize">{asset.type}</span>
+                                    <span className="text-foreground-muted">{t('investments.type')}:</span>
+                                    <span className="ml-2 text-foreground capitalize">{t(`investments.types.${asset.type}`) || asset.type}</span>
                                 </div>
                                 <div>
-                                    <span className="text-foreground-muted">Currency:</span>
+                                    <span className="text-foreground-muted">{t('investments.currency')}:</span>
                                     <span className="ml-2 text-foreground">{asset.currency}</span>
                                 </div>
                                 <div>
-                                    <span className="text-foreground-muted">Last Updated:</span>
+                                    <span className="text-foreground-muted">{t('investments.lastUpdated')}:</span>
                                     <span className="ml-2 text-foreground">
                                         {formatDateTime(asset.lastUpdated)}
                                     </span>
@@ -171,7 +172,7 @@ export function HoldingDetailModal({ isOpen, onClose, holding, asset }: HoldingD
                         onClick={onClose}
                         className="w-full btn btn-ghost"
                     >
-                        Close
+                        {t('modals.close')}
                     </button>
                 </div>
             </div>

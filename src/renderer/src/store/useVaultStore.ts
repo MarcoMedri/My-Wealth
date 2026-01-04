@@ -67,7 +67,7 @@ interface VaultStore {
   // Investment Actions
   refreshInvestments: () => Promise<void>; // Re-fetches prices? For now just reloads vault data
   refreshAllPrices: () => Promise<void>; // Batch update all asset prices from Yahoo
-  sellInvestment: (holdingId: string, quantity: number, price: number, fees: number, date: string) => Promise<void>;
+  sellInvestment: (holdingId: string, quantity: number, price: number, fees: number, date: string, taxRate?: number, buyPrice?: number) => Promise<void>;
   deleteHolding: (holdingId: string) => Promise<void>; // Snapshot mode
   
   // Collectible Actions
@@ -133,7 +133,7 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
   snapshots: [],
   accountBalances: {},
   loadedMonths: [],
-  workspace: {},
+  workspace: { taxDefaults: {} },
   netWorth: 0,
 
   // ========== BASIC SETTERS ==========
@@ -252,10 +252,10 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
     }
   },
 
-  sellInvestment: async (holdingId, quantity, price, fees, date) => {
+  sellInvestment: async (holdingId, quantity, price, fees, date, taxRate, buyPrice) => {
     set({ isLoading: true });
     try {
-      await window.api.sellInvestment({ holdingId, quantity, price, fees, date });
+      await window.api.sellInvestment({ holdingId, quantity, price, fees, date, taxRate, buyPrice });
       await get().refreshData(); // Reload to get updated holdings
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to sell investment' });

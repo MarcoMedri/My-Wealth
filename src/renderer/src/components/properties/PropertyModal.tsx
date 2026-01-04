@@ -79,6 +79,7 @@ export function PropertyModal({ isOpen, onClose, property }: PropertyModalProps)
                 lastValuationDate: property ? property.lastValuationDate : now, // Preserve original valuation date unless explicitly updated logic added later
                 currency: property ? property.currency : 'EUR',
                 createdAt: property ? property.createdAt : now,
+                taxRate: property ? property.taxRate : 0,
                 updatedAt: now,
             };
 
