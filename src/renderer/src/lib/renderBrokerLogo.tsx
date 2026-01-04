@@ -33,9 +33,6 @@ export const renderBrokerLogo = (
                 src={logoPath}
                 alt="Logo"
                 className={className}
-                onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                }}
             />
         );
     }
@@ -50,9 +47,6 @@ export const renderBrokerLogo = (
                 src={src}
                 alt="Logo"
                 className={className}
-                onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                }}
             />
         );
     }
@@ -63,9 +57,6 @@ export const renderBrokerLogo = (
             src={logoPath}
             alt="Logo"
             className={className}
-            onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-            }}
         />
     );
 };
