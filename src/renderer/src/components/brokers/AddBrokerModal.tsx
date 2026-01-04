@@ -7,6 +7,7 @@ import { LogoPickerModal } from './LogoPickerModal';
 import { isValidUrl, sanitizeDomain } from '../../lib/security';
 import type { LogoMetadata } from '../../../../shared/types';
 import { toast } from 'sonner';
+import * as LucideIcons from 'lucide-react';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
@@ -243,9 +244,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                                 // Handle icon: URLs (Lucide icons)
                                 if (logoUrl && logoUrl.startsWith('icon:')) {
                                     const iconName = logoUrl.replace('icon:', '');
-                                    // Dynamically import the icon from lucide-react
-                                    const LucideIcons = require('lucide-react');
-                                    const IconComponent = LucideIcons[iconName];
+                                    const IconComponent = (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[iconName];
                                     if (IconComponent) {
                                         return <IconComponent className="w-10 h-10 text-primary" />;
                                     }
