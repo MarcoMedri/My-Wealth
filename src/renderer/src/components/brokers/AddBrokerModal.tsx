@@ -10,6 +10,17 @@ import { toast } from 'sonner';
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
 // If that fails, we can use a simple helper
+// Helper to validate image URLs
+const isValidUrl = (url: string): boolean => {
+    if (!url) return false;
+    try {
+        const u = new URL(url);
+        return ['http:', 'https:', 'file:', 'asset:'].includes(u.protocol);
+    } catch {
+        return false;
+    }
+};
+
 const generateId = () => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
@@ -222,7 +233,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                             onClick={() => setShowLogoPicker(true)}
                             className="w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary flex items-center justify-center transition-colors bg-background-subtle overflow-hidden flex-shrink-0"
                         >
-                            {logoUrl && !logoPreviewError ? (
+                            {logoUrl && !logoPreviewError && isValidUrl(logoUrl) ? (
                                 <img
                                     src={logoUrl}
                                     alt="Logo"

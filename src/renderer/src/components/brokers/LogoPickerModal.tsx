@@ -178,38 +178,43 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                         {t('brokers.logoPicker.webResults')}
                                     </h4>
                                     <div className="space-y-2">
-                                        {webResults.map((result, idx) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    onSelectLogo(result.url, 'brand');
-                                                    onClose();
-                                                }}
-                                                className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
-                                            >
-                                                <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden">
-                                                    <img
-                                                        src={result.url}
-                                                        alt={result.name}
-                                                        className="w-full h-full object-cover"
-                                                        onError={(e) => {
-                                                            (e.target as HTMLImageElement).style.display = 'none';
-                                                        }}
-                                                        // Security: Ensure URL is http/https to prevent XSS
-                                                        onLoad={(e) => {
-                                                            const src = (e.target as HTMLImageElement).src;
-                                                            if (!src.startsWith('http://') && !src.startsWith('https://')) {
+                                        {webResults.map((result, idx) => {
+                                            // Validate URL protocol prevents XSS
+                                            const isValid = (url: string) => {
+                                                try {
+                                                    const p = new URL(url).protocol;
+                                                    return p === 'http:' || p === 'https:';
+                                                } catch { return false; }
+                                            };
+
+                                            if (!isValid(result.url)) return null;
+
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        onSelectLogo(result.url, 'brand');
+                                                        onClose();
+                                                    }}
+                                                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
+                                                >
+                                                    <div className="w-12 h-12 rounded-full bg-background-subtle flex items-center justify-center overflow-hidden">
+                                                        <img
+                                                            src={result.url}
+                                                            alt={result.name}
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => {
                                                                 (e.target as HTMLImageElement).style.display = 'none';
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="flex-1 text-left">
-                                                    <p className="font-medium text-foreground">{result.name}</p>
-                                                    <p className="text-xs text-foreground-muted">{result.source}</p>
-                                                </div>
-                                            </button>
-                                        ))}
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 text-left">
+                                                        <p className="font-medium text-foreground">{result.name}</p>
+                                                        <p className="text-xs text-foreground-muted">{result.source}</p>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
