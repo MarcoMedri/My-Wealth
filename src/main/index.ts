@@ -382,6 +382,13 @@ function registerIpcHandlers(): void {
     return service.calculatePortfolioPerformance(startDate, endDate);
   });
 
+  // ========== EXPORT ==========
+  ipcMain.handle(IPC_CHANNELS.EXPORT_DATA, async (_event, options: { format: 'json' | 'csv'; dataType?: 'transactions' | 'accounts' | 'holdings'; startDate?: string; endDate?: string }) => {
+    const { exportService } = await import('./services/ExportService');
+    const state = vaultManager.getSerializableState();
+    return exportService.export(state, options);
+  });
+
   // ========== DEVELOPER (dev-only) ==========
   
   ipcMain.handle(IPC_CHANNELS.DEV_SEED, async () => {

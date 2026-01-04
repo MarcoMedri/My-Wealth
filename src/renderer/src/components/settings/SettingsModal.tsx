@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Globe, Moon, Sun, DollarSign, Monitor, Database, Camera, RefreshCw, HelpCircle } from 'lucide-react';
+import { X, Globe, Moon, Sun, DollarSign, Monitor, Database, Camera, RefreshCw, HelpCircle, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useVaultStore } from '../../store/useVaultStore';
@@ -7,6 +7,7 @@ import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat,
 import { cn } from '../../lib/utils';
 import { CategoryManager } from './CategoryManager';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
+import { ExportModal } from './ExportModal';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -24,6 +25,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const { workspace, setWorkspaceSettings } = useVaultStore();
 
     const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
+    const [isExportOpen, setIsExportOpen] = React.useState(false);
 
     if (!isOpen) return null;
 
@@ -71,6 +73,21 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     {t('settings.switchVault', 'Switch Vault')}
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Export Data */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                                <Download className="w-4 h-4" />
+                                {t('settings.exportData', 'Export Data')}
+                            </label>
+                            <button
+                                onClick={() => setIsExportOpen(true)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                <Download className="w-4 h-4" />
+                                {t('settings.exportBackup', 'Export Backup')}
+                            </button>
                         </div>
 
                         <div className="border-t border-border my-4" />
@@ -305,6 +322,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 confirmText={t('common.confirm')}
                 cancelText={t('common.cancel')}
                 variant="danger"
+            />
+
+            <ExportModal
+                isOpen={isExportOpen}
+                onClose={() => setIsExportOpen(false)}
             />
         </div >
     );

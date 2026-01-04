@@ -123,6 +123,9 @@ export const IPC_CHANNELS = {
   // Performance/Analytics
   PERFORMANCE_GET_METRICS: 'performance:getMetrics',
 
+  // Export operations
+  EXPORT_DATA: 'export:data',
+
   // Developer operations (dev-only)
   DEV_SEED: 'dev:seed',
   DEV_CLEAR: 'dev:clear',

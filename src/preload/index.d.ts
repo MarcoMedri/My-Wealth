@@ -81,6 +81,9 @@ interface API {
   // Performance / Analytics
   getPerformanceMetrics: (params?: { startDate?: string, endDate?: string }) => Promise<{ twr: number, mwr: number, absoluteReturn: number, startValue: number, endValue: number }>;
 
+  // Export
+  exportData: (options: { format: 'json' | 'csv'; dataType?: 'transactions' | 'accounts' | 'holdings'; startDate?: string; endDate?: string }) => Promise<{ success: boolean; filePath?: string; error?: string }>;
+
   // Developer (dev-only)
   generateDemoData: () => Promise<{ accounts: number; categories: number; transactions: number }>
   clearVaultData: () => Promise<{ success: boolean }>

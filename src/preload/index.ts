@@ -243,6 +243,18 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.EXCHANGE_RATES_GET, baseCurrency)
   },
 
+  // ========== EXPORT ==========
+  
+  /** Export vault data to file */
+  exportData: (options: { 
+    format: 'json' | 'csv'; 
+    dataType?: 'transactions' | 'accounts' | 'holdings';
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{ success: boolean; filePath?: string; error?: string }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.EXPORT_DATA, options)
+  },
+
   // ========== DEVELOPER ==========
   
   /** Generate demo data (dev-only) */
