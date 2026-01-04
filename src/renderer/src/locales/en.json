@@ -338,6 +338,8 @@
     "costBasis": "Cost Basis",
     "holdings": "Holdings",
     "asset": "Asset",
+    "symbol": "Symbol",
+    "quantity": "Quantity",
     "price": "Price",
     "day": "Day",
     "qty": "Qty",
@@ -442,7 +444,7 @@
       "symbolPlaceholder": "AAPL, BTC-USD, VWCE.DE",
       "searchHint": "Search by symbol or name",
       "quantity": "Quantity",
-      "buyPrice": "Buy Price (per unit)",
+      "buyPrice": "Average Buy Price",
       "buyDate": "Purchase Date",
       "addToPortfolio": "Add to Portfolio",
       "types": {

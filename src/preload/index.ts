@@ -190,6 +190,9 @@ const api = {
   deleteHolding: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.HOLDING_DELETE, id)
   },
+  saveHolding: (holding: Holding): Promise<Holding> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.HOLDING_SAVE, holding)
+  },
 
   // ========== WORKSPACE ==========
   saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>): Promise<boolean> => {

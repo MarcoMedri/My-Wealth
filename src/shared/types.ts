@@ -92,6 +92,7 @@ export const IPC_CHANNELS = {
   
   // Asset & Holding operations
   ASSET_DELETE: 'asset:delete',
+  HOLDING_SAVE: 'holding:save', // Update existing holding
   HOLDING_DELETE: 'holding:delete', // Snapshot mode - just remove holding
   
   // Dividend operations

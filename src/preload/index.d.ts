@@ -57,6 +57,7 @@ interface API {
   refreshInvestmentPrices: () => Promise<{ updated: number; failed: number; total: number }>;
   deleteAsset: (id: string) => Promise<void>;
   deleteHolding: (id: string) => Promise<void>;
+  saveHolding: (holding: Holding) => Promise<Holding>;
   saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>) => Promise<boolean>;
 
   // Real Estate

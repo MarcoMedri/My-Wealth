@@ -45,7 +45,7 @@ export default function Dashboard() {
     const [showSnapshotModal, setShowSnapshotModal] = useState(false);
 
     // --- Filter State ---
-    const [period] = useState<DashboardPeriod>('1y');
+    const [period] = useState<DashboardPeriod>('all');
 
     // --- Aggregations ---
 

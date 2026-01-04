@@ -324,6 +324,10 @@ function registerIpcHandlers(): void {
     return investmentManager.deleteHolding(id);
   });
 
+  ipcMain.handle(IPC_CHANNELS.HOLDING_SAVE, async (_event, holding) => {
+    return vaultManager.saveHolding(holding);
+  });
+
   // ========== DIVIDENDS ==========
   ipcMain.handle(IPC_CHANNELS.DIVIDEND_SAVE, async (_event, dividend) => {
     return vaultManager.saveDividend(dividend);

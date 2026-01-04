@@ -22,7 +22,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         setCurrency, setLanguage, setTheme, setDecimals, setDateFormat, setTimeFormat
     } = useSettingsStore();
 
-    const { workspace, setWorkspaceSettings } = useVaultStore();
+    const { workspace, setWorkspaceSettings, vaultPath } = useVaultStore();
 
     const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false);
     const [isExportOpen, setIsExportOpen] = React.useState(false);
@@ -61,10 +61,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             </label>
                             <div className="flex items-center gap-3">
                                 <div className="flex-1 bg-background-subtle border border-border rounded-lg px-3 py-2 text-sm text-foreground-muted truncate font-mono">
-                                    {/* Ideally we would show the path here, but we don't have it in store yet. 
-                                        We can add it to store later. For now just generic text or nothing.
-                                    */}
-                                    {t('settings.currentVault')}
+                                    {vaultPath || t('settings.noVaultSelected', 'No vault selected')}
                                 </div>
                                 <button
                                     onClick={() => setIsResetConfirmOpen(true)}

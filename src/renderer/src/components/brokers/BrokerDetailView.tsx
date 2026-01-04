@@ -31,6 +31,8 @@ import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { CloseDeleteAccountModal } from '../accounts/CloseDeleteAccountModal';
 import type { Account, DepositAccount, AccountType } from '../../../../shared/schemas';
 import AddTransactionModal from '../AddTransactionModal';
+import { EditHoldingModal } from '../investments/EditHoldingModal';
+import type { Holding, Asset } from '../../../../shared/schemas';
 
 interface BrokerDetailViewProps {
     brokerId: string;
@@ -64,6 +66,9 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     const [addAccountType, setAddAccountType] = useState<AccountType | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [editBalanceAccountId, setEditBalanceAccountId] = useState<string | null>(null);
+
+    // Edit Holding State
+    const [editingItem, setEditingItem] = useState<{ holding: Holding, asset: Asset } | null>(null);
 
     // Account Archive/Delete State
     const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
@@ -449,7 +454,13 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                                         const value = holding.quantity * price;
 
                                         return (
-                                            <tr key={holding.id} className="hover:bg-background-subtle transition-colors">
+                                            <tr
+                                                key={holding.id}
+                                                className="hover:bg-background-subtle transition-colors cursor-pointer"
+                                                onClick={() => {
+                                                    setEditingItem({ holding, asset });
+                                                }}
+                                            >
                                                 <td className="px-6 py-4">
                                                     <div className="font-medium text-foreground">{asset.symbol}</div>
                                                     <div className="text-xs text-foreground-muted">{asset.name}</div>
@@ -676,6 +687,15 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                 confirmText={t('common.delete')}
                 variant="danger"
             />
+            {/* Edit Holding Modal */}
+            {editingItem && (
+                <EditHoldingModal
+                    isOpen={!!editingItem}
+                    onClose={() => setEditingItem(null)}
+                    holding={editingItem.holding}
+                    asset={editingItem.asset}
+                />
+            )}
         </div >
     );
 };

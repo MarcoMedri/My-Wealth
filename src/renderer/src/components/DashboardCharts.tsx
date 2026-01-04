@@ -3,7 +3,7 @@ import { Transaction, Snapshot } from '../../../shared/schemas';
 import NetWorthTrendChart from './charts/NetWorthTrendChart';
 
 
-export type DashboardPeriod = 'current_month' | 'last_month' | '3m' | '6m' | '1y';
+export type DashboardPeriod = 'current_month' | 'last_month' | '3m' | '6m' | '1y' | 'all';
 
 interface DashboardChartsProps {
     period: DashboardPeriod;
@@ -40,6 +40,10 @@ export default function DashboardCharts({ period, snapshots }: DashboardChartsPr
                 break;
             case '1y':
                 start.setFullYear(now.getFullYear() - 1);
+                break;
+            case 'all':
+                // Show all historical data - set start to very old date
+                start.setFullYear(2000, 0, 1);
                 break;
         }
         start.setHours(0, 0, 0, 0);
