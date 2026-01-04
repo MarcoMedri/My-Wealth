@@ -79,7 +79,7 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             // Pre-fill from preset
             setName(initialPreset.name);
             setType(initialPreset.type);
-            setLogoUrl(`asset://${encodeURIComponent(initialPreset.icon)}`);
+            setLogoUrl(`asset://${initialPreset.icon}`);
             setWebsite('');
             setColor('#6366f1');
             setIcon('');
