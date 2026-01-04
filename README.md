@@ -4,6 +4,31 @@
 
 ![My Wealth Dashboard](resources/dashboard-preview.png)
 
+## 📥 Download
+
+| Platform | Download |
+|----------|----------|
+| **macOS** | [Download .dmg](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/My-Wealth-1.0.0-arm64.dmg) |
+| **Windows** | [Download .exe](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/My-Wealth-Setup-1.0.0.exe) |
+
+> 💡 Always download from the [official releases page](https://github.com/MarcoMedri/My-Wealth/releases) for the latest version.
+
+---
+
+## 📑 Table of Contents
+
+- [Download](#-download)
+- [Key Features](#-key-features)
+- [Tech Stack](#️-tech-stack)
+- [Architecture](#-architecture)
+- [Getting Started](#-getting-started)
+- [Building for Production](#-building-for-production)
+- [Developer Commands](#-developer-commands)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
 ## ✨ Key Features
 
 *   **🔒 Local-First & Private**: Your financial data is stored securely on your local machine. No cloud servers, no tracking, no data selling. You own your data.
