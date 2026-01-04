@@ -8,8 +8,8 @@
 
 | Platform | Download |
 |----------|----------|
-| **macOS** | [Download .dmg](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/My-Wealth-1.0.0-arm64.dmg) |
-| **Windows** | [Download .exe](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/My-Wealth-Setup-1.0.0.exe) |
+| **macOS** | [Download .dmg](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/my-wealth-desktop-1.0.0.dmg) |
+| **Windows** | [Download .exe](https://github.com/MarcoMedri/My-Wealth/releases/latest/download/my-wealth-desktop-1.0.0-setup.exe) |
 
 > 💡 Always download from the [official releases page](https://github.com/MarcoMedri/My-Wealth/releases) for the latest version.
 
