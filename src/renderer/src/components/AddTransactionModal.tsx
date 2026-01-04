@@ -26,7 +26,7 @@ interface AddTransactionModalProps {
 
 export default function AddTransactionModal({ isOpen, onClose, transaction, isDuplicate = false, preselectedAccountId, limitToBrokerId }: AddTransactionModalProps) {
     const { t } = useTranslation();
-    const { accounts, categories, addTransaction, updateTransaction } = useVaultStore();
+    const { accounts, categories, brokers, addTransaction, updateTransaction } = useVaultStore();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +37,13 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
             filtered = filtered.filter(a => a.brokerId === limitToBrokerId);
         }
         return filtered;
+        return filtered;
     }, [accounts, limitToBrokerId]);
+
+    // All active accounts for transfer destination (unrestricted by broker)
+    const allActiveAccounts = useMemo(() => {
+        return accounts.filter((a: Account) => !a.isArchived);
+    }, [accounts]);
 
     // Group categories by type
     const incomeCategories = categories.filter(c => c.type === 'income');
@@ -287,13 +293,54 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                                     className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                                 >
                                     <option value="" disabled>{t('transactions.selectAccount')}</option>
-                                    {activeAccounts
-                                        .filter(a => a.id !== formData.accountId) // Prevent transfer to same account
-                                        .map(account => (
-                                            <option key={account.id} value={account.id}>
-                                                {account.name}
-                                            </option>
-                                        ))}
+                                    <option value="" disabled>{t('transactions.selectAccount')}</option>
+                                    {(() => {
+                                        // 1. Get filtered list of valid destination accounts
+                                        const validDestinations = allActiveAccounts.filter(a => a.id !== formData.accountId);
+
+                                        // 2. Group by Broker
+                                        const brokerGroups = new Map<string, Account[]>();
+                                        const noBrokerAccounts: Account[] = [];
+
+                                        validDestinations.forEach(account => {
+                                            if (account.brokerId) {
+                                                const group = brokerGroups.get(account.brokerId) || [];
+                                                group.push(account);
+                                                brokerGroups.set(account.brokerId, group);
+                                            } else {
+                                                noBrokerAccounts.push(account);
+                                            }
+                                        });
+
+                                        return (
+                                            <>
+                                                {/* Accounts within Brokers */}
+                                                {Array.from(brokerGroups.entries()).map(([brokerId, accounts]) => {
+                                                    const broker = brokers.find(b => b.id === brokerId);
+                                                    return (
+                                                        <optgroup key={brokerId} label={broker?.name || t('common.unknownBroker')}>
+                                                            {accounts.map(account => (
+                                                                <option key={account.id} value={account.id}>
+                                                                    {account.name} ({account.currency})
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                    );
+                                                })}
+
+                                                {/* Accounts without Broker (e.g. manual banks) */}
+                                                {noBrokerAccounts.length > 0 && (
+                                                    <optgroup label={t('common.otherAccounts', 'Other Accounts')}>
+                                                        {noBrokerAccounts.map(account => (
+                                                            <option key={account.id} value={account.id}>
+                                                                {account.name} ({account.currency})
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </select>
                             </div>
                         </div>
