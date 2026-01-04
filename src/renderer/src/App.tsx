@@ -1,22 +1,26 @@
 // App entry point
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 // HMR trigger: 2026-01-02 14:48:51
 import {
     Wallet,
     FolderOpen,
-    Plus
+    Plus,
+    Loader2
 } from 'lucide-react';
 import type { VaultStatus } from '../../shared/types';
 import Layout from './components/Layout';
-import Dashboard from './components/Dashboard';
-import AccountsDashboard from './components/AccountsDashboard';
-import { InvestmentDashboard } from './components/investments/InvestmentDashboard';
-import { PropertiesDashboard } from './components/properties/PropertiesDashboard';
-import { CollectiblesDashboard } from './components/collectibles/CollectiblesDashboard';
-import { InsuranceDashboard } from './components/insurance/InsuranceDashboard';
-import { DepositDashboard } from './components/deposits/DepositDashboard';
-import { BrokerDetailView } from './components/brokers/BrokerDetailView';
+
+// Lazy load dashboard components for better initial bundle size
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const AccountsDashboard = lazy(() => import('./components/AccountsDashboard'));
+const InvestmentDashboard = lazy(() => import('./components/investments/InvestmentDashboard').then(m => ({ default: m.InvestmentDashboard })));
+const PropertiesDashboard = lazy(() => import('./components/properties/PropertiesDashboard').then(m => ({ default: m.PropertiesDashboard })));
+const CollectiblesDashboard = lazy(() => import('./components/collectibles/CollectiblesDashboard').then(m => ({ default: m.CollectiblesDashboard })));
+const InsuranceDashboard = lazy(() => import('./components/insurance/InsuranceDashboard').then(m => ({ default: m.InsuranceDashboard })));
+const DepositDashboard = lazy(() => import('./components/deposits/DepositDashboard').then(m => ({ default: m.DepositDashboard })));
+const BrokerDetailView = lazy(() => import('./components/brokers/BrokerDetailView').then(m => ({ default: m.BrokerDetailView })));
+
 import { CommandPalette, createNavigationCommands, Toaster } from './components';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
@@ -24,6 +28,15 @@ import { useVaultStore } from './store/useVaultStore';
 import { useExchangeRates } from './store/useExchangeRates';
 import { useTutorial } from './hooks/useTutorial';
 import './assets/shepherd-custom.css';
+
+// Loading fallback component
+function LoadingFallback() {
+    return (
+        <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+    );
+}
 
 
 function App(): React.ReactElement {
@@ -217,14 +230,16 @@ function App(): React.ReactElement {
             <Toaster />
             <CommandPalette commands={navigationCommands} />
             <Layout>
-                {activeView === 'dashboard' && <Dashboard />}
-                {activeView === 'accounts' && <AccountsDashboard />}
-                {activeView === 'investments' && <InvestmentDashboard />}
-                {activeView === 'properties' && <PropertiesDashboard />}
-                {activeView === 'collectibles' && <CollectiblesDashboard />}
-                {activeView === 'insurance' && <InsuranceDashboard />}
-                {activeView === 'deposits' && <DepositDashboard />}
-                {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
+                <Suspense fallback={<LoadingFallback />}>
+                    {activeView === 'dashboard' && <Dashboard />}
+                    {activeView === 'accounts' && <AccountsDashboard />}
+                    {activeView === 'investments' && <InvestmentDashboard />}
+                    {activeView === 'properties' && <PropertiesDashboard />}
+                    {activeView === 'collectibles' && <CollectiblesDashboard />}
+                    {activeView === 'insurance' && <InsuranceDashboard />}
+                    {activeView === 'deposits' && <DepositDashboard />}
+                    {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
+                </Suspense>
             </Layout>
         </>
     );
