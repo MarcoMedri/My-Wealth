@@ -450,6 +450,11 @@ app.whenReady().then(async () => {
     
     const filePath = path.join(resourcesPath, 'asset-icons', url)
     
+    console.log('[Asset Protocol] Request:', request.url)
+    console.log('[Asset Protocol] Decoded:', url)
+    console.log('[Asset Protocol] File path:', filePath)
+    console.log('[Asset Protocol] File exists:', fs.existsSync(filePath))
+    
     return net.fetch(`file://${filePath}`)
   })
 
