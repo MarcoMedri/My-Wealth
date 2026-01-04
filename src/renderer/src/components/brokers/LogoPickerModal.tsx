@@ -179,15 +179,8 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                     </h4>
                                     <div className="space-y-2">
                                         {webResults.map((result, idx) => {
-                                            // Validate URL protocol prevents XSS
-                                            const isValid = (url: string) => {
-                                                try {
-                                                    const p = new URL(url).protocol;
-                                                    return p === 'http:' || p === 'https:';
-                                                } catch { return false; }
-                                            };
-
-                                            if (!isValid(result.url)) return null;
+                                            // Double-check validation before rendering
+                                            if (!isValidUrl(result.url)) return null;
 
                                             return (
                                                 <button
