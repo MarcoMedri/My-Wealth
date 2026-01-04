@@ -49,29 +49,29 @@ export function useFormValidation<T extends Record<string, unknown>>(
     config: { [K in keyof T]: FieldConfig<T[K]> }
 ): UseFormValidationReturn<T> {
     // Initialize state from config
-    const getInitialValues = (): T => {
+    const getInitialValues = useCallback((): T => {
         const values = {} as T;
         for (const key in config) {
             values[key] = config[key].initialValue;
         }
         return values;
-    };
+    }, [config]);
 
-    const getInitialErrors = (): Record<keyof T, string | null> => {
+    const getInitialErrors = useCallback((): Record<keyof T, string | null> => {
         const errors = {} as Record<keyof T, string | null>;
         for (const key in config) {
             errors[key] = null;
         }
         return errors;
-    };
+    }, [config]);
 
-    const getInitialTouched = (): Record<keyof T, boolean> => {
+    const getInitialTouched = useCallback((): Record<keyof T, boolean> => {
         const touched = {} as Record<keyof T, boolean>;
         for (const key in config) {
             touched[key] = false;
         }
         return touched;
-    };
+    }, [config]);
 
     const [values, setValues] = useState<T>(getInitialValues);
     const [errors, setErrors] = useState<Record<keyof T, string | null>>(getInitialErrors);
@@ -133,7 +133,7 @@ export function useFormValidation<T extends Record<string, unknown>>(
         setValues(getInitialValues());
         setErrors(getInitialErrors());
         setTouchedState(getInitialTouched());
-    }, []);
+    }, [getInitialValues, getInitialErrors, getInitialTouched]);
 
     const getFieldProps = useCallback((field: keyof T) => ({
         value: values[field],
