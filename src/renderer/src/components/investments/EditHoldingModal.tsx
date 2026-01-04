@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Holding, Asset } from '../../../../shared/schemas';
+import type { Holding, Asset } from '../../../../shared/schemas';
 
 interface EditHoldingModalProps {
     isOpen: boolean;
