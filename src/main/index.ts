@@ -6,6 +6,8 @@ import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
 import type { Transaction, Account, Category, Broker, DepositAccount } from '../shared/schemas'
 import * as fs from 'fs'
 import * as path from 'path'
+import { autoBackupScheduler } from './services/AutoBackupScheduler'
+import { logger } from './services/LoggerService'
 
 async function createWindow(): Promise<void> {
   const vaultManager = getVaultManager();
@@ -416,6 +418,13 @@ app.whenReady().then(async () => {
 
   const vaultManager = getVaultManager()
   await vaultManager.initialize()
+
+  // Start auto-backup scheduler if vault is initialized
+  const status = await vaultManager.getStatus()
+  if (status.isInitialized && status.vaultPath) {
+    logger.setAppPath(status.vaultPath)
+    await autoBackupScheduler.start(status.vaultPath)
+  }
 
   registerIpcHandlers()
 
