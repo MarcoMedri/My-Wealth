@@ -11,7 +11,7 @@ import {
     type Column,
 } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, Copy, Trash2 } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, Copy, Trash2, Search, Filter, X } from 'lucide-react';
 import { useVaultStore } from '../store/useVaultStore';
 import type { Transaction } from '../../../shared/schemas';
 
@@ -26,9 +26,10 @@ const columnHelper = createColumnHelper<Transaction>();
 interface TransactionTableProps {
     dateRange?: DateRange;
     selectedAccountIds?: string[];
+    showFilters?: boolean;
 }
 
-export default function TransactionTable({ dateRange = 'all', selectedAccountIds = [] }: TransactionTableProps) {
+export default function TransactionTable({ dateRange = 'all', selectedAccountIds = [], showFilters = true }: TransactionTableProps) {
     const { t } = useTranslation();
     const allTransactions = useVaultStore(state => state.transactions);
     const categories = useVaultStore(state => state.categories);
@@ -37,6 +38,11 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
     const [sorting, setSorting] = useState<SortingState>([
         { id: 'date', desc: true }
     ]);
+
+    // Advanced filter state
+    const [searchText, setSearchText] = useState('');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+    const [selectedType, setSelectedType] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
 
     // Filter transactions by date range
     const transactions = useMemo(() => {
@@ -48,11 +54,36 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
         });
     }, [allTransactions, dateRange]);
 
-    // Further filter by selected accounts
+    // Further filter by selected accounts, search, category, and type
     const filteredTransactions = useMemo(() => {
-        if (selectedAccountIds.length === 0) return transactions;
-        return transactions.filter(tx => selectedAccountIds.includes(tx.accountId));
-    }, [transactions, selectedAccountIds]);
+        let result = transactions;
+
+        // Account filter
+        if (selectedAccountIds.length > 0) {
+            result = result.filter(tx => selectedAccountIds.includes(tx.accountId));
+        }
+
+        // Search filter (payee and notes)
+        if (searchText.trim()) {
+            const search = searchText.toLowerCase().trim();
+            result = result.filter(tx =>
+                tx.payee.toLowerCase().includes(search) ||
+                (tx.notes?.toLowerCase().includes(search))
+            );
+        }
+
+        // Category filter
+        if (selectedCategoryId) {
+            result = result.filter(tx => tx.categoryId === selectedCategoryId);
+        }
+
+        // Type filter
+        if (selectedType !== 'all') {
+            result = result.filter(tx => tx.type === selectedType);
+        }
+
+        return result;
+    }, [transactions, selectedAccountIds, searchText, selectedCategoryId, selectedType]);
 
     // Modal State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -201,6 +232,69 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
 
     return (
         <div className="flex flex-col h-full">
+            {/* Filter Bar */}
+            {showFilters && (
+                <div className="p-4 border-b border-border flex flex-wrap items-center gap-3">
+                    {/* Search Input */}
+                    <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+                        <input
+                            type="text"
+                            placeholder={t('transactions.search', 'Search transactions...')}
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            className="w-full pl-9 pr-8 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-foreground-subtle focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        />
+                        {searchText && (
+                            <button
+                                onClick={() => setSearchText('')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Category Filter */}
+                    <div className="flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-foreground-muted" />
+                        <select
+                            value={selectedCategoryId || ''}
+                            onChange={(e) => setSelectedCategoryId(e.target.value || null)}
+                            className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground"
+                        >
+                            <option value="">{t('transactions.allCategories', 'All Categories')}</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Type Filter */}
+                    <div className="flex items-center gap-1 bg-background-muted rounded-lg p-1">
+                        {(['all', 'income', 'expense', 'transfer'] as const).map(type => (
+                            <button
+                                key={type}
+                                onClick={() => setSelectedType(type)}
+                                className={cn(
+                                    "px-3 py-1 text-sm rounded-md transition-colors",
+                                    selectedType === type
+                                        ? "bg-indigo-500 text-white"
+                                        : "text-foreground-muted hover:text-foreground"
+                                )}
+                            >
+                                {t(`transactions.type.${type}`, type.charAt(0).toUpperCase() + type.slice(1))}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Result Count */}
+                    <span className="text-sm text-foreground-muted ml-auto">
+                        {filteredTransactions.length} {t('transactions.results', 'transactions')}
+                    </span>
+                </div>
+            )}
+
             {/* Table Header */}
             <div className="border-b border-border bg-background-muted pr-4"> {/* Added pr-4 for scrollbar offset */}
                 {table.getHeaderGroups().map(headerGroup => (
