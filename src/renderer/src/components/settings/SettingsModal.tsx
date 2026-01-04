@@ -296,6 +296,34 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                     <div className="border-t border-border" />
 
+                    {/* Keyboard Shortcuts */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide flex items-center gap-2">
+                            <HelpCircle className="w-4 h-4" />
+                            {t('settings.keyboardShortcuts', 'Keyboard Shortcuts')}
+                        </h3>
+                        <div className="bg-background-subtle rounded-lg p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-foreground">{t('shortcuts.search', 'Open Command Palette')}</span>
+                                <kbd className="px-2 py-1 bg-background-muted rounded text-xs text-foreground-muted font-mono">⌘K</kbd>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-foreground">{t('shortcuts.settings', 'Open Settings')}</span>
+                                <kbd className="px-2 py-1 bg-background-muted rounded text-xs text-foreground-muted font-mono">⌘,</kbd>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-foreground">{t('shortcuts.navigate', 'Navigate with keys')}</span>
+                                <kbd className="px-2 py-1 bg-background-muted rounded text-xs text-foreground-muted font-mono">↑↓↵</kbd>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-foreground">{t('shortcuts.close', 'Close dialogs')}</span>
+                                <kbd className="px-2 py-1 bg-background-muted rounded text-xs text-foreground-muted font-mono">Esc</kbd>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="border-t border-border" />
+
                     {/* Categories */}
                     <section className="space-y-4">
                         <h3 className="text-sm font-semibold text-foreground-muted uppercase tracking-wide">
