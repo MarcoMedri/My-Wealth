@@ -195,6 +195,13 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).style.display = 'none';
                                                         }}
+                                                        // Security: Ensure URL is http/https to prevent XSS
+                                                        onLoad={(e) => {
+                                                            const src = (e.target as HTMLImageElement).src;
+                                                            if (!src.startsWith('http://') && !src.startsWith('https://')) {
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                            }
+                                                        }}
                                                     />
                                                 </div>
                                                 <div className="flex-1 text-left">
