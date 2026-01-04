@@ -12,6 +12,7 @@ export { VirtualList, VariableVirtualList, type VirtualListProps, type VariableV
 export { LazyWrapper, LazyChart, createLazyComponent, preloadComponent } from './ui/LazyWrapper';
 export { CommandPalette, createNavigationCommands, type CommandItem, type CommandPaletteProps } from './ui/CommandPalette';
 export { EmptyState, NoTransactionsEmpty, NoResultsEmpty, NoDataEmpty, NoAccountsEmpty, NoInvestmentsEmpty, NoPropertiesEmpty, NoInsuranceEmpty, NoDepositsEmpty, type EmptyStateProps } from './ui/EmptyState';
+export { Skeleton, SkeletonText, SkeletonCircle, SkeletonCard, SkeletonTableRow, SkeletonTransactionList, SkeletonDashboardStats, SkeletonChart } from './ui/Skeleton';
 
 // Form Components
 export { MoneyInput, type MoneyInputProps } from './forms/MoneyInput';
