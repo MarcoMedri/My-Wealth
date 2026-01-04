@@ -13,6 +13,7 @@ import { Snapshot } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useTranslation } from 'react-i18next';
+import { AREA_CHART_COLORS } from '../../lib/constants';
 
 ChartJS.register(
     CategoryScale,
@@ -58,31 +59,31 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate }: Ne
                 {
                     label: t('dashboard.cashAccounts') || 'Cash',
                     data: cashData,
-                    backgroundColor: '#10b981', // emerald-500
+                    backgroundColor: AREA_CHART_COLORS.accounts,
                     stack: 'Stack 0',
                 },
                 {
                     label: t('nav.investments') || 'Investments',
                     data: investmentsData,
-                    backgroundColor: '#3b82f6', // blue-500
+                    backgroundColor: AREA_CHART_COLORS.investments,
                     stack: 'Stack 0',
                 },
                 {
                     label: t('nav.properties') || 'Real Estate',
                     data: realEstateData,
-                    backgroundColor: '#f59e0b', // amber-500
+                    backgroundColor: AREA_CHART_COLORS.properties,
                     stack: 'Stack 0',
                 },
                 {
                     label: t('nav.collectibles') || 'Collectibles',
                     data: collectiblesData,
-                    backgroundColor: '#8b5cf6', // violet-500
+                    backgroundColor: AREA_CHART_COLORS.collectibles,
                     stack: 'Stack 0',
                 },
                 {
                     label: t('insurance.title') || 'Insurance',
                     data: insuranceData,
-                    backgroundColor: '#fb7185', // rose-400
+                    backgroundColor: AREA_CHART_COLORS.insurance,
                     stack: 'Stack 0',
                 }
             ]

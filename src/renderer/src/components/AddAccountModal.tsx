@@ -11,6 +11,7 @@ import { cn } from '../lib/utils';
 import { Loader2, Trash } from 'lucide-react';
 import { CloseDeleteAccountModal } from './accounts/CloseDeleteAccountModal';
 import type { Account, AccountType } from '../../../shared/schemas';
+import { ACCOUNT_COLORS } from '../lib/constants';
 
 interface AddAccountModalProps {
     isOpen: boolean;
@@ -21,17 +22,6 @@ interface AddAccountModalProps {
 }
 
 const ACCOUNT_TYPE_KEYS: AccountType[] = ['checking', 'savings', 'credit', 'investment', 'cash', 'loan', 'deposit', 'other'];
-
-const COLORS = [
-    '#3b82f6', // Blue
-    '#10b981', // Emerald
-    '#8b5cf6', // Violet
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#ec4899', // Pink
-    '#6366f1', // Indigo
-    '#14b8a6', // Teal
-];
 
 export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, initialData, defaultType }: AddAccountModalProps) {
     const { t } = useTranslation();
@@ -46,7 +36,7 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
         type: 'checking' as AccountType,
         currency: 'EUR',
         initialBalance: '0.00',
-        color: COLORS[0],
+        color: ACCOUNT_COLORS[0],
         brokerId: preselectedBrokerId || '',
     });
 
@@ -68,7 +58,7 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                 type: defaultType || 'checking',
                 currency: 'EUR',
                 initialBalance: '0.00',
-                color: COLORS[0],
+                color: ACCOUNT_COLORS[0],
                 brokerId: preselectedBrokerId || '',
             });
         }
@@ -140,7 +130,7 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                 type: 'checking',
                 currency: 'EUR',
                 initialBalance: '0.00',
-                color: COLORS[0],
+                color: ACCOUNT_COLORS[0],
                 brokerId: preselectedBrokerId || '',
             });
         } catch (err) {
@@ -248,7 +238,7 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                         {t('accounts.color')}
                     </label>
                     <div className="flex flex-wrap gap-2">
-                        {COLORS.map(color => (
+                        {ACCOUNT_COLORS.map(color => (
                             <button
                                 key={color}
                                 type="button"

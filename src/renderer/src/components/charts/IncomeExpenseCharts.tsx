@@ -9,20 +9,10 @@ import { Doughnut } from 'react-chartjs-2';
 import { Transaction, Category } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { PIE_CHART_COLORS, CHART_TICK_COLOR } from '../../lib/constants';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// PASTEL PALETTE
-const PASTEL_COLORS = [
-    '#86efac', // Green 300
-    '#93c5fd', // Blue 300
-    '#fde047', // Yellow 300
-    '#d8b4fe', // Purple 300
-    '#fca5a5', // Red 300
-    '#fdba74', // Orange 300
-    '#a5f3fc', // Cyan 300
-    '#c4b5fd', // Violet 300
-];
 
 interface IncomeExpenseChartsProps {
     transactions: Transaction[];
@@ -62,7 +52,7 @@ export default function IncomeExpenseCharts({ transactions, categories, startDat
             labels,
             datasets: [{
                 data,
-                backgroundColor: PASTEL_COLORS,
+                backgroundColor: PIE_CHART_COLORS,
                 borderWidth: 0,
             }]
         };
@@ -95,7 +85,7 @@ export default function IncomeExpenseCharts({ transactions, categories, startDat
             labels: sorted.map(e => e[0]),
             datasets: [{
                 data: sorted.map(e => e[1] / 100),
-                backgroundColor: PASTEL_COLORS,
+                backgroundColor: PIE_CHART_COLORS,
                 borderWidth: 0,
             }]
         };
@@ -112,7 +102,7 @@ export default function IncomeExpenseCharts({ transactions, categories, startDat
                         family: '-apple-system, BlinkMacSystemFont, Inter, system-ui',
                         size: 13,
                     },
-                    color: '#94a3b8',
+                    color: CHART_TICK_COLOR,
                     boxWidth: 8,
                     padding: 15
                 }

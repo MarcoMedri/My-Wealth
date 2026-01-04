@@ -148,6 +148,17 @@ npm run build:win
 npm run build:linux
 ```
 
+## 🧪 Developer Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with hot reload |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run lint` | Run ESLint with auto-fix |
+| `npm run test` | Run unit tests (Vitest) |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run build:analyze` | Build with bundle analysis (opens visualization) |
+
 ## 🤝 Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
