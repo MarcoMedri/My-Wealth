@@ -4,23 +4,13 @@ import { X, Check, Building2, Wallet, ImagePlus } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { PresetSelectorModal } from './PresetSelectorModal';
 import { LogoPickerModal } from './LogoPickerModal';
+import { isValidUrl, sanitizeDomain } from '../../lib/security';
 import type { LogoMetadata } from '../../../../shared/types';
 import { toast } from 'sonner';
 
 // We need a UUID generator since crypto might not be available directly in renderer the same way
 // But usually we can use crypto.randomUUID() in modern browsers/Electron
 // If that fails, we can use a simple helper
-// Helper to validate image URLs
-const isValidUrl = (url: string): boolean => {
-    if (!url) return false;
-    try {
-        const u = new URL(url);
-        return ['http:', 'https:', 'file:', 'asset:'].includes(u.protocol);
-    } catch {
-        return false;
-    }
-};
-
 const generateId = () => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
@@ -112,9 +102,13 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
     // Live preview when website changes
     useEffect(() => {
         if (website && website.includes('.')) {
-            setLogoUrl(`https://logo.clearbit.com/${website}`);
-            setLogoPreviewError(false);
-            setUseCustomLogo(false); // If website changes, assume not using custom logo
+            // Security: Sanitize domain to prevent XSS in generated URL
+            const safeDomain = sanitizeDomain(website);
+            if (safeDomain) {
+                setLogoUrl(`https://logo.clearbit.com/${safeDomain}`);
+                setLogoPreviewError(false);
+                setUseCustomLogo(false);
+            }
         } else {
             setLogoUrl('');
         }

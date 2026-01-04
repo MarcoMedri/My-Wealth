@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Search, Globe } from 'lucide-react';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import type { LogoMetadata } from '../../../../shared/types';
+import { isValidUrl, sanitizeDomain } from '../../lib/security';
 
 // Finance & Building icons from lucide-react
 import {
@@ -58,24 +59,6 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [webResults, setWebResults] = useState<Array<{ name: string; url: string; source: string }>>([]);
     const [localResults, setLocalResults] = useState<LogoMetadata[]>([]);
-
-    // Helper: validate protocol
-    const isValidUrl = (url: string): boolean => {
-        try {
-            const u = new URL(url);
-            return ['http:', 'https:', 'asset:', 'file:'].includes(u.protocol);
-        } catch { return false; }
-    };
-
-    // Helper: sanitize domain input
-    const sanitizeDomain = (input: string): string => {
-        // Remove protocol if user pasted it
-        let domain = input.replace(/^https?:\/\//, '');
-        // Keep only valid hostname characters (alphanumeric, dots, dashes)
-        domain = domain.replace(/[^a-zA-Z0-9.-]/g, '');
-        // Remove leading/trailing dots/dashes
-        return domain.replace(/^[-.]+|[-.]+$/g, '');
-    };
 
     // Brand search handler
     const handleBrandSearch = (query: string) => {
