@@ -248,13 +248,19 @@ function registerIpcHandlers(): void {
     
     const registryPath = path.join(resourcesPath, 'logo-registry.json')
     
+    console.log('[Logo Registry] Loading from:', registryPath)
+    console.log('[Logo Registry] File exists:', fs.existsSync(registryPath))
+    
     try {
       if (fs.existsSync(registryPath)) {
         const content = fs.readFileSync(registryPath, 'utf-8')
         const parsed = JSON.parse(content)
+        console.log('[Logo Registry] Loaded', parsed.logos?.length || 0, 'logos')
         return parsed
       } else {
         console.error('Logo registry file not found at:', registryPath)
+        console.error('Resources path:', resourcesPath)
+        console.error('App path:', app.getAppPath())
       }
     } catch (error) {
       console.error('Failed to load logo registry:', error)
