@@ -59,6 +59,24 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
     const [webResults, setWebResults] = useState<Array<{ name: string; url: string; source: string }>>([]);
     const [localResults, setLocalResults] = useState<LogoMetadata[]>([]);
 
+    // Helper: validate protocol
+    const isValidUrl = (url: string): boolean => {
+        try {
+            const u = new URL(url);
+            return ['http:', 'https:', 'asset:', 'file:'].includes(u.protocol);
+        } catch { return false; }
+    };
+
+    // Helper: sanitize domain input
+    const sanitizeDomain = (input: string): string => {
+        // Remove protocol if user pasted it
+        let domain = input.replace(/^https?:\/\//, '');
+        // Keep only valid hostname characters (alphanumeric, dots, dashes)
+        domain = domain.replace(/[^a-zA-Z0-9.-]/g, '');
+        // Remove leading/trailing dots/dashes
+        return domain.replace(/^[-.]+|[-.]+$/g, '');
+    };
+
     // Brand search handler
     const handleBrandSearch = (query: string) => {
         setSearchQuery(query);
@@ -69,17 +87,33 @@ export const LogoPickerModal: React.FC<LogoPickerModalProps> = ({
             return;
         }
 
-        // Auto-append .com if no domain extension
-        const domain = query.includes('.') ? query : `${query}.com`;
+        // Sanitize input to prevent injection
+        const safeDomain = sanitizeDomain(query);
+
+        if (!safeDomain) {
+            setWebResults([]);
+            return;
+        }
+
+        // Auto-append .com if no domain extension (and user hasn't typed one)
+        // We use the sanitized version for this check
+        const finalDomain = safeDomain.includes('.') ? safeDomain : `${safeDomain}.com`;
 
         // Web results
-        const clearbitUrl = `https://logo.clearbit.com/${domain}`;
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        // Now constructed with sanitized input
+        const clearbitUrl = `https://logo.clearbit.com/${finalDomain}`;
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${finalDomain}&sz=128`;
 
-        setWebResults([
-            { name: query, url: clearbitUrl, source: 'Logo HD' },
-            { name: `${query} (alternativo)`, url: faviconUrl, source: 'Google Favicon' }
-        ]);
+        // Only add results if the generated URLs are valid
+        const results = [];
+        if (isValidUrl(clearbitUrl)) {
+            results.push({ name: query, url: clearbitUrl, source: 'Logo HD' });
+        }
+        if (isValidUrl(faviconUrl)) {
+            results.push({ name: `${query} (alternativo)`, url: faviconUrl, source: 'Google Favicon' });
+        }
+
+        setWebResults(results);
 
         // Local results - filter logo registry
         const matches = logoRegistry.filter(preset =>
