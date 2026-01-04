@@ -159,6 +159,9 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
             } else if (logoUrl && logoUrl.startsWith('asset://')) {
                 // Preset logo from registry - save the asset:// URL directly
                 logoPath = logoUrl;
+            } else if (logoUrl && (logoUrl.startsWith('icon:') || (!logoUrl.includes('://') && logoUrl.length <= 2))) {
+                // Lucide icon or emoji - save directly without downloading
+                logoPath = logoUrl;
             } else if (website && !logoPreviewError) {
                 // Auto-fetch from Clearbit (legacy, if website field is re-added)
                 try {
@@ -236,16 +239,38 @@ export const AddBrokerModal: React.FC<AddBrokerModalProps> = ({ isOpen, onClose,
                             onClick={() => setShowLogoPicker(true)}
                             className="w-20 h-20 rounded-full border-2 border-dashed border-border hover:border-primary flex items-center justify-center transition-colors bg-background-subtle overflow-hidden flex-shrink-0"
                         >
-                            {safeLogoUrl ? (
-                                <img
-                                    src={safeLogoUrl}
-                                    alt="Logo"
-                                    className="w-full h-full object-cover"
-                                    onError={() => setLogoPreviewError(true)}
-                                />
-                            ) : (
-                                <ImagePlus className="w-8 h-8 text-foreground-muted" />
-                            )}
+                            {(() => {
+                                // Handle icon: URLs (Lucide icons)
+                                if (logoUrl && logoUrl.startsWith('icon:')) {
+                                    const iconName = logoUrl.replace('icon:', '');
+                                    // Dynamically import the icon from lucide-react
+                                    const LucideIcons = require('lucide-react');
+                                    const IconComponent = LucideIcons[iconName];
+                                    if (IconComponent) {
+                                        return <IconComponent className="w-10 h-10 text-primary" />;
+                                    }
+                                }
+
+                                // Handle emoji URLs
+                                if (logoUrl && !logoUrl.includes('://') && !logoUrl.startsWith('icon:')) {
+                                    return <span className="text-4xl">{logoUrl}</span>;
+                                }
+
+                                // Handle standard URLs (http, https, file, asset)
+                                if (safeLogoUrl) {
+                                    return (
+                                        <img
+                                            src={safeLogoUrl}
+                                            alt="Logo"
+                                            className="w-full h-full object-cover"
+                                            onError={() => setLogoPreviewError(true)}
+                                        />
+                                    );
+                                }
+
+                                // Default placeholder
+                                return <ImagePlus className="w-8 h-8 text-foreground-muted" />;
+                            })()}
                         </button>
 
                         {/* Nome Input */}

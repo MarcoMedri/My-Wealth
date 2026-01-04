@@ -23,6 +23,7 @@ import { AddBrokerModal } from './AddBrokerModal';
 import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
 import { ICON_MAP } from '../../lib/iconMap';
+import { renderBrokerLogo } from '../../lib/renderBrokerLogo';
 
 import AddAccountModal from '../AddAccountModal';
 import ImportModal from '../ImportModal';
@@ -143,13 +144,7 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                             style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
                         >
                             {broker.logoPath ? (
-                                <img
-                                    src={broker.logoPath.startsWith('asset://')
-                                        ? broker.logoPath
-                                        : `file://${vaultPath}/${broker.logoPath}`}
-                                    alt={broker.name}
-                                    className="w-full h-full object-contain"
-                                />
+                                renderBrokerLogo(broker.logoPath, vaultPath, "w-full h-full object-contain")
                             ) : (() => {
                                 const IconComponent = broker.icon ? ICON_MAP[broker.icon] || Building2 : Building2;
                                 return <IconComponent className="w-8 h-8" />;

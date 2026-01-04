@@ -21,6 +21,7 @@ import { BrokerPresetSelectorModal } from './brokers/BrokerPresetSelectorModal';
 import { ConfirmationModal } from './ui/ConfirmationModal';
 import { LogoMetadata } from '@shared/types';
 import { toast } from 'sonner';
+import { renderBrokerLogo } from '../lib/renderBrokerLogo';
 
 // Icon mapping for Broker icons
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -170,13 +171,7 @@ export default function BrokersSidebar() {
                                             style={{ backgroundColor: broker.logoPath ? undefined : broker.color }}
                                         >
                                             {broker.logoPath ? (
-                                                <img
-                                                    src={broker.logoPath.startsWith('asset://')
-                                                        ? broker.logoPath
-                                                        : `file://${vaultPath}/${broker.logoPath}`}
-                                                    alt={broker.name}
-                                                    className="w-full h-full object-contain"
-                                                />
+                                                renderBrokerLogo(broker.logoPath, vaultPath, "w-full h-full object-contain")
                                             ) : (
                                                 (() => {
                                                     const IconComponent = broker.icon ? ICON_MAP[broker.icon] : Building2;
