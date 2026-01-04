@@ -12,10 +12,7 @@ files:
 asarUnpack:
   - resources/**
 extraResources:
-  - from: resources
-    to: resources
-    filter:
-      - '**/*'
+  - resources/**
 win:
   executableName: my-wealth-desktop
 nsis:
