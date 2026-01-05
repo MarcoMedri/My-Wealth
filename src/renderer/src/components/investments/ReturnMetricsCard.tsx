@@ -8,7 +8,6 @@ import { cn } from '../../lib/utils';
 interface PerformanceMetrics {
     twr: number;
     mwr: number;
-    absoluteReturn: number;
     startValue: number;
     endValue: number;
     totalCashFlow: number;
@@ -47,10 +46,10 @@ export function ReturnMetricsCard() {
         );
     }
 
-    if (error || !metrics) {
+    if (!metrics) {
         return (
             <div className="bg-background-card rounded-xl border border-border p-6 flex items-center justify-center min-h-[140px]">
-                <p className="text-sm text-foreground-muted">{error || t('common.noData')}</p>
+                <p className="text-sm text-foreground-muted">{t('common.noData')}</p>
             </div>
         );
     }
@@ -86,12 +85,12 @@ export function ReturnMetricsCard() {
                     isPositive={metrics.mwr >= 0}
                 />
 
-                {/* Absolute Return */}
+                {/* Absolute Gain */}
                 <MetricItem
                     label={t('investments.performance.absoluteReturn', 'Absolute')}
                     description={t('investments.performance.absoluteDescription', 'Total Gain/Loss')}
-                    value={formatMoney(metrics.absoluteReturn, currency)}
-                    isPositive={metrics.absoluteReturn >= 0}
+                    value={formatMoney(metrics.absoluteGain, currency)}
+                    isPositive={metrics.absoluteGain >= 0}
                 />
             </div>
         </div>
