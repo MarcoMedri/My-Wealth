@@ -13,6 +13,8 @@ import { randomUUID } from 'crypto';
 import type { VaultStatus } from '../shared/types';
 import { VAULT_STRUCTURE } from '../shared/types';
 import { BackupService } from './BackupService';
+import { createLogger } from './services/LoggerService';
+import { perfMonitor } from './services/PerformanceMonitor';
 import {
   AppSettingsSchema,
   AccountsFileSchema,
@@ -497,7 +499,8 @@ export class VaultManager {
       if (vaultPath) {
         const vaultFilePath = path.join(vaultPath, 'vault.json'); // Main vault file to backup
         this.backupService = new BackupService(vaultFilePath);
-        console.log('[VaultManager] BackupService initialized');
+        const vaultLogger = createLogger('VaultManager');
+        vaultLogger.info('BackupService initialized', { vaultPath });
       }
 
       this.vaultState.isLoaded = true;
