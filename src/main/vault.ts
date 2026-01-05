@@ -14,7 +14,6 @@ import type { VaultStatus } from '../shared/types';
 import { VAULT_STRUCTURE } from '../shared/types';
 import { BackupService } from './BackupService';
 import { createLogger } from './services/LoggerService';
-import { perfMonitor } from './services/PerformanceMonitor';
 import {
   AppSettingsSchema,
   AccountsFileSchema,

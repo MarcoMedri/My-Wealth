@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
+import { createLogger } from './services/LoggerService';
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
@@ -34,6 +35,7 @@ export interface BackupInfo {
 export class BackupService {
   private backupDir: string;
   private maxBackups: number;
+  private logger = createLogger('BackupService');
 
   constructor(vaultPath: string, maxBackups: number = 10) {
     // Store backups in a 'backups' folder next to the vault
