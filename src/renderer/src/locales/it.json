@@ -34,7 +34,8 @@
     "saving": "Salvataggio...",
     "error": "Si è verificato un errore",
     "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "actions": "Azioni"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
