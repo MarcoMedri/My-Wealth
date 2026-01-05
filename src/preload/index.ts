@@ -207,6 +207,23 @@ const api = {
     return ipcRenderer.invoke(IPC_CHANNELS.WORKSPACE_SAVE, settings)
   },
 
+  // ========== BACKUPS ==========
+  
+  /** List all available backups */
+  listBackups: (): Promise<import('../shared/types').BackupInfo[]> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BACKUP_LIST)
+  },
+
+  /** Restore vault from a backup */
+  restoreBackup: (backupId: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BACKUP_RESTORE, backupId)
+  },
+
+  /** Delete a specific backup */
+  deleteBackup: (backupId: string): Promise<void> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.BACKUP_DELETE, backupId)
+  },
+
   // ========== REAL ESTATE ==========
   
   /** Save a property (creates new or updates existing) */

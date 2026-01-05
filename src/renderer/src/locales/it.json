@@ -685,6 +685,22 @@
     "skip": "Salta Tour",
     "finish": "Inizia"
   },
+  "backups": {
+    "title": "Backup",
+    "description": "Backup automatici ogni 30 minuti. Vengono mantenuti gli ultimi 10 backup.",
+    "noBackups": "Nessun backup disponibile",
+    "noBackupsHint": "I backup vengono creati automaticamente quando salvi i dati",
+    "restore": "Ripristina",
+    "restoreSuccess": "Backup ripristinato con successo",
+    "restoreError": "Errore nel ripristino del backup",
+    "restoreConfirmTitle": "Ripristinare il Backup?",
+    "restoreConfirmDescription": "Questa operazione sostituirà tutti i dati attuali con il backup. I dati attuali verranno salvati in un backup prima del ripristino. Questa azione non può essere annullata.",
+    "deleteSuccess": "Backup eliminato",
+    "deleteError": "Errore nell'eliminazione del backup",
+    "deleteConfirmTitle": "Eliminare il Backup?",
+    "deleteConfirmDescription": "Questo backup verrà eliminato permanentemente. Questa azione non può essere annullata.",
+    "loadError": "Errore nel caricamento dei backup"
+  },
   "help": {
     "showTutorial": "Mostra Tutorial"
   }

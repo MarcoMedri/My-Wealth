@@ -12,6 +12,7 @@ import fs from 'fs-extra';
 import { randomUUID } from 'crypto';
 import type { VaultStatus } from '../shared/types';
 import { VAULT_STRUCTURE } from '../shared/types';
+import { BackupService } from './BackupService';
 import {
   AppSettingsSchema,
   AccountsFileSchema,
@@ -67,11 +68,13 @@ const MAX_CONCURRENT_READS = 10;
  * - Vault initialization and validation
  * - Loading vault data with concurrency limits
  * - Atomic file writes for data integrity
+ * - Automatic backups with intelligent scheduling
  */
 export class VaultManager {
   private settingsPath: string;
   private settings: AppSettings | null = null;
   private vaultState: VaultState = createEmptyVaultState();
+  private backupService: BackupService | null = null;
 
   constructor() {
     // Settings stored in Electron's userData directory
@@ -489,6 +492,13 @@ export class VaultManager {
 
       // Calculate account balances
       this.calculateBalances();
+
+      // Initialize backup service for this vault
+      if (vaultPath) {
+        const vaultFilePath = path.join(vaultPath, 'vault.json'); // Main vault file to backup
+        this.backupService = new BackupService(vaultFilePath);
+        console.log('[VaultManager] BackupService initialized');
+      }
 
       this.vaultState.isLoaded = true;
       return this.getSerializableState();
@@ -1254,6 +1264,9 @@ export class VaultManager {
     try {
       await fs.writeJson(tempPath, data, { spaces: 2 });
       await fs.rename(tempPath, filePath);
+      
+      // Trigger intelligent backup after successful write
+      await this.triggerBackup();
     } catch (error) {
       // Clean up temp file if rename failed
       await fs.remove(tempPath).catch(() => {});
@@ -1944,6 +1957,93 @@ export class VaultManager {
   /**
    * Create a Net Worth Snapshot
    */
+  // ==========================================================================
+  // BACKUP MANAGEMENT
+  // ==========================================================================
+
+  /**
+   * Trigger an intelligent backup (respects 30-min interval)
+   */
+  private async triggerBackup(): Promise<void> {
+    if (!this.backupService || !this.settings?.vaultPath) {
+      return;
+    }
+
+    try {
+      // Create a consolidated vault snapshot for backup
+      const vaultSnapshot = path.join(this.settings.vaultPath, '.vault-snapshot.json');
+      await fs.writeJson(vaultSnapshot, this.getSerializableState(), { spaces: 2 });
+      
+      await this.backupService.createBackup(vaultSnapshot);
+      await this.backupService.cleanOldBackups();
+    } catch (error) {
+      console.error('[VaultManager] Backup failed:', error);
+      // Don't throw - backup failure shouldn't prevent normal operation
+    }
+  }
+
+  /**
+   * List all available backups
+   */
+  async listBackups(): Promise<import('../shared/types').BackupInfo[]> {
+    if (!this.backupService) {
+      return [];
+    }
+    return this.backupService.listBackups();
+  }
+
+  /**
+   * Restore vault from a backup
+   */
+  async restoreBackup(backupId: string): Promise<void> {
+    if (!this.backupService || !this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    const vaultSnapshot = path.join(this.settings.vaultPath, '.vault-snapshot.json');
+    await this.backupService.restoreBackup(backupId, vaultSnapshot);
+    
+    // Reload vault after restore
+    await this.loadVault();
+  }
+
+  /**
+   * Delete a specific backup
+   */
+  async deleteBackup(backupId: string): Promise<void> {
+    if (!this.backupService) {
+      throw new Error('No vault initialized');
+    }
+    await this.backupService.deleteBackup(backupId);
+  }
+
+  /**
+   * Create a manual backup now (bypasses 30-min interval)
+   */
+  async createManualBackup(): Promise<void> {
+    if (!this.backupService || !this.settings?.vaultPath) {
+      throw new Error('No vault initialized');
+    }
+
+    const vaultSnapshot = path.join(this.settings.vaultPath, '.vault-snapshot.json');
+    await fs.writeJson(vaultSnapshot, this.getSerializableState(), { spaces: 2 });
+    
+    // Temporarily create a new backup service instance without interval check
+    const tempBackupService = new BackupService(vaultSnapshot, 10);
+    // Force backup by clearing existing backups check
+    const backups = await tempBackupService.listBackups();
+    if (backups.length > 0) {
+      // Manually trigger backup
+      await tempBackupService.createBackup(vaultSnapshot);
+    }
+    
+    await this.backupService.cleanOldBackups();
+  }
+
+  // ==========================================================================
+  // SNAPSHOTS
+  // ==========================================================================
+
   async createSnapshot(): Promise<Snapshot> {
       if (!this.settings?.vaultPath) {
           throw new Error('No vault initialized');

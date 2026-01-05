@@ -6,6 +6,7 @@ import { useVaultStore } from '../../store/useVaultStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type Theme, type DateFormat, type TimeFormat } from '../../../../shared/types';
 import { cn } from '../../lib/utils';
 import { CategoryManager } from './CategoryManager';
+import { BackupPanel } from './BackupPanel';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { ExportModal } from './ExportModal';
 
@@ -239,8 +240,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 <button
                                     onClick={() => setWorkspaceSettings({ defaultViewMode: 'gross' })}
                                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${(workspace.defaultViewMode || 'gross') === 'gross'
-                                            ? 'bg-background shadow-sm text-foreground'
-                                            : 'text-foreground-muted hover:text-foreground'
+                                        ? 'bg-background shadow-sm text-foreground'
+                                        : 'text-foreground-muted hover:text-foreground'
                                         }`}
                                 >
                                     {t('settings.gross')}
@@ -248,8 +249,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 <button
                                     onClick={() => setWorkspaceSettings({ defaultViewMode: 'net' })}
                                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${workspace.defaultViewMode === 'net'
-                                            ? 'bg-background shadow-sm text-foreground'
-                                            : 'text-foreground-muted hover:text-foreground'
+                                        ? 'bg-background shadow-sm text-foreground'
+                                        : 'text-foreground-muted hover:text-foreground'
                                         }`}
                                 >
                                     {t('settings.net')}
@@ -448,6 +449,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 <kbd className="px-2 py-1 bg-background-muted rounded text-xs text-foreground-muted font-mono">Esc</kbd>
                             </div>
                         </div>
+                    </section>
+
+                    <div className="border-t border-border" />
+
+                    {/* Backups */}
+                    <section className="space-y-4">
+                        <BackupPanel />
                     </section>
 
                     <div className="border-t border-border" />

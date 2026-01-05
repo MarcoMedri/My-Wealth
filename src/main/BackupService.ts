@@ -49,9 +49,26 @@ export class BackupService {
 
   /**
    * Create a new backup of the vault file
+   * 
+   * Intelligent backup: Only creates backup if 30+ minutes have passed since last backup
+   * This prevents excessive backups while ensuring regular protection
    */
-  async createBackup(vaultPath: string): Promise<void> {
+  async createBackup(vaultPath: string): Promise<boolean> {
     try {
+      // Check if we should skip this backup (intelligent backup)
+      const backups = await this.listBackups();
+      
+      if (backups.length > 0) {
+        const lastBackup = new Date(backups[0].timestamp);
+        const now = new Date();
+        const minutesSinceLastBackup = (now.getTime() - lastBackup.getTime()) / 1000 / 60;
+        
+        if (minutesSinceLastBackup < 30) {
+          console.log(`[BackupService] Skipping backup (last backup was ${Math.round(minutesSinceLastBackup)} minutes ago)`);
+          return false; // Skip backup
+        }
+      }
+
       // Read vault file
       const vaultData = await readFile(vaultPath);
 
@@ -66,10 +83,12 @@ export class BackupService {
       // Write compressed backup
       await writeFile(backupPath, compressed);
 
-      console.log(`[BackupService] Created backup: ${backupFilename}`);
+      console.log(`[BackupService] Created backup: ${backupFilename} (${(compressed.length / 1024).toFixed(2)} KB)`);
+      return true;
     } catch (error) {
       console.error('[BackupService] Failed to create backup:', error);
       // Don't throw - backup failure shouldn't prevent save
+      return false;
     }
   }
 

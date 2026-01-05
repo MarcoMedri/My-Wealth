@@ -682,6 +682,22 @@
     "skip": "Skip Tour",
     "finish": "Get Started"
   },
+  "backups": {
+    "title": "Backups",
+    "description": "Automatic backups every 30 minutes. Last 10 backups are kept.",
+    "noBackups": "No backups yet",
+    "noBackupsHint": "Backups are created automatically when you save data",
+    "restore": "Restore",
+    "restoreSuccess": "Backup restored successfully",
+    "restoreError": "Failed to restore backup",
+    "restoreConfirmTitle": "Restore Backup?",
+    "restoreConfirmDescription": "This will replace all current data with the backup. Current data will be backed up first. This action cannot be undone.",
+    "deleteSuccess": "Backup deleted",
+    "deleteError": "Failed to delete backup",
+    "deleteConfirmTitle": "Delete Backup?",
+    "deleteConfirmDescription": "This backup will be permanently deleted. This action cannot be undone.",
+    "loadError": "Failed to load backups"
+  },
   "help": {
     "showTutorial": "Show Tutorial"
   }

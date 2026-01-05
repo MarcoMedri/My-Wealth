@@ -153,6 +153,20 @@ function registerIpcHandlers(): void {
     return vaultManager.saveWorkspace(settings);
   });
 
+  // ========== BACKUPS ==========
+  
+  ipcMain.handle(IPC_CHANNELS.BACKUP_LIST, async () => {
+    return vaultManager.listBackups();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.BACKUP_RESTORE, async (_event, backupId: string) => {
+    return vaultManager.restoreBackup(backupId);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.BACKUP_DELETE, async (_event, backupId: string) => {
+    return vaultManager.deleteBackup(backupId);
+  });
+
   // ========== TRANSACTIONS ==========
   
   ipcMain.handle(IPC_CHANNELS.TRANSACTION_SAVE, async (_event, transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
