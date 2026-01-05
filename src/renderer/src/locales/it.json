@@ -404,9 +404,6 @@
     "gainLoss": "Guadagno/Perdita",
     "avgWithCost": "Prezzo Medio",
     "moreItems": "Altri {{count}} elementi",
-      "other": "Altro"
-    },
-    "moreItems": "+ altri {{count}}",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
     "refreshError": "❌ Impossibile aggiornare le quotazioni"
