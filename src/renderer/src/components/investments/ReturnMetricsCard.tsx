@@ -11,6 +11,9 @@ interface PerformanceMetrics {
     absoluteReturn: number;
     startValue: number;
     endValue: number;
+    totalCashFlow: number;
+    absoluteGain: number;
+    period: string;
 }
 
 export function ReturnMetricsCard() {
@@ -19,28 +22,24 @@ export function ReturnMetricsCard() {
     const currency = useSettingsStore(state => state.currency);
 
     const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchMetrics = async () => {
+        const loadMetrics = async () => {
             try {
-                setIsLoading(true);
-                const data = await window.api.getPerformanceMetrics();
+                const data = await window.api.getPerformanceMetrics('YTD');
                 setMetrics(data);
-                setError(null);
-            } catch (err) {
-                console.error('Failed to fetch performance metrics:', err);
-                setError(t('common.error'));
+            } catch (error) {
+                console.error('Failed to load performance metrics:', error);
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
 
-        fetchMetrics();
-    }, [t]);
+        loadMetrics();
+    }, []);
 
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="bg-background-card rounded-xl border border-border p-6 flex items-center justify-center min-h-[140px]">
                 <Loader2 className="w-6 h-6 animate-spin text-foreground-muted" />
