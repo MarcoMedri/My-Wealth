@@ -57,6 +57,9 @@ export const IPC_CHANNELS = {
   BACKUP_RESTORE: 'backup:restore',
   BACKUP_DELETE: 'backup:delete',
   
+  // Error logging
+  ERROR_LOG: 'error:log',
+  
   // Transaction operations
   TRANSACTION_SAVE: 'transaction:save',
   TRANSACTION_DELETE: 'transaction:delete',

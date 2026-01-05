@@ -195,6 +195,54 @@ Backups are stored in your vault folder:
 - Backup failures don't interrupt normal operations
 - Compressed backups typically use 10-20% of original vault size
 
+## 🛡️ Error Handling & Recovery
+
+My Wealth includes robust error handling to prevent crashes and data loss:
+
+### Error Boundary System
+
+- **React Error Boundaries**: Catches rendering errors and prevents app crashes
+- **Fallback UI**: Shows user-friendly error screen with recovery options
+- **Error Details**: Displays error information in development mode for debugging
+
+### Centralized Error Handler
+
+- **Severity Levels**: INFO, WARNING, ERROR, CRITICAL
+- **File Logging**: Errors logged to `~/Library/Application Support/MyWealth/logs/errors.log` (macOS)
+- **Log Rotation**: Automatic log file rotation when size exceeds 5MB (keeps last 5 files)
+- **User Notifications**: Toast notifications based on error severity
+
+### Error Recovery
+
+1. **Try Again**: Resets error state and attempts to continue
+2. **Reload Page**: Full page reload to recover from critical errors
+3. **Automatic Logging**: All errors logged for debugging
+
+### For Developers
+
+```typescript
+import { handleError, ErrorSeverity, createError } from './shared/errorHandler';
+
+// Handle errors with context
+try {
+  await saveData();
+} catch (error) {
+  handleError(error, {
+    context: { operation: 'save', userId: '123' },
+    showToast: true,
+    logToFile: true
+  });
+}
+
+// Create custom errors
+const error = createError(
+  'SAVE_ERROR',
+  'Failed to save data',
+  ErrorSeverity.ERROR,
+  { retryCount: 3 }
+);
+```
+
 ## 📦 Building for Production
 
 To build the application for your operating system:

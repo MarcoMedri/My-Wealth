@@ -167,6 +167,53 @@ function registerIpcHandlers(): void {
     return vaultManager.deleteBackup(backupId);
   });
 
+  // ========== ERROR LOGGING ==========
+  
+  ipcMain.handle(IPC_CHANNELS.ERROR_LOG, async (_event, errorLog: unknown) => {
+    try {
+      const logsDir = path.join(app.getPath('userData'), 'logs');
+      
+      // Create logs directory if it doesn't exist
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      
+      const logFile = path.join(logsDir, 'errors.log');
+      const timestamp = new Date().toISOString();
+      const logEntry = `[${timestamp}] ${JSON.stringify(errorLog)}\n`;
+      
+      // Append to log file
+      fs.appendFileSync(logFile, logEntry);
+      
+      // Simple log rotation: if file > 5MB, rename it
+      try {
+        const stats = fs.statSync(logFile);
+        if (stats.size > 5 * 1024 * 1024) {
+          const backupFile = path.join(logsDir, `errors-${Date.now()}.log`);
+          fs.renameSync(logFile, backupFile);
+          
+          // Keep only last 5 log files
+          const logFiles = fs.readdirSync(logsDir)
+            .filter((f: string) => f.startsWith('errors-') && f.endsWith('.log'))
+            .sort()
+            .reverse();
+          
+          for (const file of logFiles.slice(5)) {
+            fs.unlinkSync(path.join(logsDir, file));
+          }
+        }
+      } catch (rotationError) {
+        // Ignore rotation errors
+        console.error('[IPC] Log rotation failed:', rotationError);
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('[IPC] Failed to write error log:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
   // ========== TRANSACTIONS ==========
   
   ipcMain.handle(IPC_CHANNELS.TRANSACTION_SAVE, async (_event, transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {

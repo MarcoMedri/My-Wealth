@@ -137,7 +137,7 @@ function logToConsole(error: AppError): void {
 
 /**
  * Log error to file
- * In production, this would use Electron's file system API
+ * Uses Electron IPC to write to log file in main process
  */
 function logToFile_Internal(error: AppError): void {
   try {
@@ -147,11 +147,15 @@ function logToFile_Internal(error: AppError): void {
       url: window.location.href,
     };
 
-    // In a real implementation, this would write to a file
-    console.error('[ErrorHandler] Log entry:', JSON.stringify(logEntry, null, 2));
-
-    // TODO: Implement actual file logging via Electron IPC
-    // window.api.logError(logEntry);
+    // Use IPC to log to file in main process
+    if (window.api?.logError) {
+      window.api.logError(logEntry).catch((err: Error) => {
+        console.error('[ErrorHandler] Failed to log error via IPC:', err);
+      });
+    } else {
+      // Fallback to console in development
+      console.error('[ErrorHandler] Log entry:', JSON.stringify(logEntry, null, 2));
+    }
   } catch (loggingError) {
     console.error('[ErrorHandler] Failed to log error to file:', loggingError);
   }
