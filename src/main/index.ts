@@ -393,8 +393,25 @@ function registerIpcHandlers(): void {
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES, async () => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.refreshAllPrices();
+    const vaultManager = getVaultManager();
+    return vaultManager.refreshInvestmentPrices();
+  });
+
+  // ========== ANALYTICS ==========
+
+  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_PERFORMANCE, async (_event, period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL') => {
+    const vaultManager = getVaultManager();
+    return vaultManager.getPerformanceMetrics(period);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION, async () => {
+    const vaultManager = getVaultManager();
+    return vaultManager.getPortfolioComposition();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_DIVIDENDS, async (_event, monthsAhead: number = 12) => {
+    const vaultManager = getVaultManager();
+    return vaultManager.getDividendPredictions(monthsAhead);
   });
 
   ipcMain.handle(IPC_CHANNELS.ASSET_DELETE, async (_event, id: string) => {

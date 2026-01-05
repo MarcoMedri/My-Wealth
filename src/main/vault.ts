@@ -2177,6 +2177,104 @@ export class VaultManager {
 
       return snapshot;
   }
+
+  // ========== ANALYTICS METHODS (STUB) ==========
+  // TODO: Full integration with SnapshotService, PortfolioAnalyzer, DividendPredictor
+
+  async refreshInvestmentPrices(): Promise<{ updated: number; failed: number; total: number }> {
+    const { investmentManager } = await import('./investments');
+    return investmentManager.refreshAllPrices();
+  }
+
+  async getPerformanceMetrics(period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL'): Promise<{
+    twr: number;
+    mwr: number;
+    startValue: number;
+    endValue: number;
+    totalCashFlow: number;
+    absoluteGain: number;
+    period: string;
+  }> {
+    // TODO: Integrate with SnapshotService and PerformanceCalculator
+    // For now, return mock data
+    return {
+      twr: 12.5,
+      mwr: 10.8,
+      startValue: 4200000,
+      endValue: 5250000,
+      totalCashFlow: 525000,
+      absoluteGain: 525000,
+      period,
+    };
+  }
+
+  async getPortfolioComposition(): Promise<{
+    totalValue: number;
+    sectors: Array<{ name: string; value: number; percentage: number; count: number }>;
+    geographies: Array<{ name: string; value: number; percentage: number; count: number }>;
+    assetClasses: Array<{ name: string; value: number; percentage: number; count: number }>;
+    topHoldings: Array<{ assetId: string; symbol: string; name: string; value: number; percentage: number }>;
+    diversificationScore: number;
+    warnings: string[];
+  }> {
+    // TODO: Integrate with PortfolioAnalyzer
+    // For now, return mock data
+    return {
+      totalValue: 5250000,
+      sectors: [
+        { name: 'Technology', value: 1837500, percentage: 35, count: 5 },
+        { name: 'Healthcare', value: 1050000, percentage: 20, count: 3 },
+        { name: 'Finance', value: 787500, percentage: 15, count: 2 },
+      ],
+      geographies: [
+        { name: 'North America', value: 3150000, percentage: 60, count: 8 },
+        { name: 'Europe', value: 1312500, percentage: 25, count: 5 },
+      ],
+      assetClasses: [
+        { name: 'Stocks', value: 3675000, percentage: 70, count: 12 },
+        { name: 'ETFs', value: 1050000, percentage: 20, count: 3 },
+      ],
+      topHoldings: [
+        { assetId: '1', symbol: 'AAPL', name: 'Apple Inc.', value: 787500, percentage: 15 },
+      ],
+      diversificationScore: 72,
+      warnings: [],
+    };
+  }
+
+  async getDividendPredictions(monthsAhead: number = 12): Promise<Array<{
+    month: string;
+    totalIncome: number;
+    payments: Array<{
+      assetId: string;
+      symbol: string;
+      name: string;
+      expectedDate: string;
+      estimatedAmount: number;
+      amountPerShare: number;
+      confidence: 'high' | 'medium' | 'low';
+    }>;
+  }>> {
+    // TODO: Integrate with DividendPredictor
+    // For now, return mock data
+    return [
+      {
+        month: '2026-01',
+        totalIncome: 45000,
+        payments: [
+          {
+            assetId: '1',
+            symbol: 'AAPL',
+            name: 'Apple Inc.',
+            expectedDate: '2026-01-15',
+            estimatedAmount: 12000,
+            amountPerShare: 24,
+            confidence: 'high',
+          },
+        ],
+      },
+    ];
+  }
 }
 
 // ============================================================================
