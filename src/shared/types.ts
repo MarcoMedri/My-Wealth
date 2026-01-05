@@ -52,6 +52,11 @@ export const IPC_CHANNELS = {
   VAULT_CREATE_SNAPSHOT: 'vault:createSnapshot',
   WORKSPACE_SAVE: 'workspace:save',
   
+  // Backup operations
+  BACKUP_LIST: 'backup:list',
+  BACKUP_RESTORE: 'backup:restore',
+  BACKUP_DELETE: 'backup:delete',
+  
   // Transaction operations
   TRANSACTION_SAVE: 'transaction:save',
   TRANSACTION_DELETE: 'transaction:delete',
@@ -274,4 +279,15 @@ export interface LogoMetadata {
 export interface LogoRegistry {
   version: string;
   logos: LogoMetadata[];
+}
+
+// ============================================================================
+// Backup Types
+// ============================================================================
+
+export interface BackupInfo {
+  id: string;
+  timestamp: string;
+  size: number;
+  filename: string;
 }
