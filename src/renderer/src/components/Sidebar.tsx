@@ -281,6 +281,15 @@ export default function Sidebar() {
                     </div>
                 )}
 
+                {/* Version */}
+                {!isCollapsed && (
+                    <div className="mt-auto pt-4 border-t border-border text-center">
+                        <p className="text-xs text-foreground-subtle">
+                            v1.2.3
+                        </p>
+                    </div>
+                )}
+
                 {/* Collapse Toggle */}
                 <button
                     onClick={() => setSidebarCollapsed('left', !isCollapsed)}
