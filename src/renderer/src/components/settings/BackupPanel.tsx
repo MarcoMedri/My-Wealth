@@ -168,7 +168,7 @@ export function BackupPanel() {
                     'This will replace all current data with the backup. Current data will be backed up first. This action cannot be undone.'
                 )}
                 confirmText={t('backups.restore', 'Restore')}
-                variant="warning"
+                variant="danger"
             />
 
             {/* Delete Confirmation Modal */}

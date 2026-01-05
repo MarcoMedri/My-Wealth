@@ -148,8 +148,9 @@ function logToFile_Internal(error: AppError): void {
     };
 
     // Use IPC to log to file in main process
-    if (window.api?.logError) {
-      window.api.logError(logEntry).catch((err: Error) => {
+    const windowWithApi = window as typeof window & { api?: { logError: (log: unknown) => Promise<unknown> } };
+    if (typeof window !== 'undefined' && windowWithApi.api?.logError) {
+      windowWithApi.api.logError(logEntry).catch((err: Error) => {
         console.error('[ErrorHandler] Failed to log error via IPC:', err);
       });
     } else {
@@ -236,9 +237,9 @@ export function withErrorHandling<T extends (...args: never[]) => Promise<unknow
   errorCode: string,
   options?: ErrorHandlerOptions
 ): T {
-  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+  return (async (...args: Parameters<T>) => {
     try {
-      return await fn(...args);
+      return await fn(...args) as ReturnType<T>;
     } catch (error) {
       const appError = toAppError(error, errorCode);
       handleError(appError, options);

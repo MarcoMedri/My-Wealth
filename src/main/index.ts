@@ -300,36 +300,51 @@ function registerIpcHandlers(): void {
   // ========== LOGO REGISTRY ==========
 
   ipcMain.handle(IPC_CHANNELS.LOGO_GET_REGISTRY, async () => {
-    // In dev mode, resources are in the project root
-    // In production, they're in app.asar or process.resourcesPath
-    const isDev = !app.isPackaged
-    const resourcesPath = isDev 
-      ? path.join(app.getAppPath(), 'resources')
-      : (process.resourcesPath || path.join(__dirname, '../../resources'))
+    const isDev = !app.isPackaged;
     
-    const registryPath = path.join(resourcesPath, 'logo-registry.json')
+    // Try multiple possible paths for the resources folder
+    const possiblePaths = [
+      // Development
+      path.join(app.getAppPath(), 'resources'),
+      // Production - process.resourcesPath (most reliable)
+      process.resourcesPath,
+      // Production - relative to app.asar
+      path.join(process.resourcesPath || '', 'resources'),
+      // Production - alternative
+      path.join(__dirname, '../../resources'),
+      path.join(__dirname, '../../../resources'),
+    ];
     
-    console.log('[Logo Registry] Loading from:', registryPath)
-    console.log('[Logo Registry] File exists:', fs.existsSync(registryPath))
+    console.log('[Logo Registry] Is packaged:', !isDev);
+    console.log('[Logo Registry] App path:', app.getAppPath());
+    console.log('[Logo Registry] Resources path:', process.resourcesPath);
+    console.log('[Logo Registry] __dirname:', __dirname);
     
-    try {
-      if (fs.existsSync(registryPath)) {
-        const content = fs.readFileSync(registryPath, 'utf-8')
-        const parsed = JSON.parse(content)
-        console.log('[Logo Registry] Loaded', parsed.logos?.length || 0, 'logos')
-        return parsed
-      } else {
-        console.error('Logo registry file not found at:', registryPath)
-        console.error('Resources path:', resourcesPath)
-        console.error('App path:', app.getAppPath())
+    // Try each path until we find the file
+    for (const basePath of possiblePaths) {
+      if (!basePath) continue;
+      
+      const registryPath = path.join(basePath, 'logo-registry.json');
+      console.log('[Logo Registry] Trying:', registryPath);
+      
+      try {
+        if (fs.existsSync(registryPath)) {
+          const content = fs.readFileSync(registryPath, 'utf-8');
+          const parsed = JSON.parse(content);
+          console.log('[Logo Registry] ✓ Loaded', parsed.logos?.length || 0, 'logos from:', registryPath);
+          return parsed;
+        }
+      } catch (error) {
+        console.error('[Logo Registry] Error reading from', registryPath, ':', error);
       }
-    } catch (error) {
-      console.error('Failed to load logo registry:', error)
     }
     
-    // Return empty registry if file not found or error
-    return { version: '1.0.0', logos: [] }
-  })
+    console.error('[Logo Registry] ✗ File not found in any of the attempted paths');
+    console.error('[Logo Registry] Attempted paths:', possiblePaths.filter(p => p));
+    
+    // Return empty registry if file not found
+    return { version: '1.0.0', logos: [] };
+  });
 
   // ========== CSV IMPORT ==========
   ipcMain.handle(IPC_CHANNELS.IMPORT_GET_PRESETS, async () => {

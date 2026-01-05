@@ -85,6 +85,14 @@ interface API {
   // Export
   exportData: (options: { format: 'json' | 'csv'; dataType?: 'transactions' | 'accounts' | 'holdings'; startDate?: string; endDate?: string }) => Promise<{ success: boolean; filePath?: string; error?: string }>;
 
+  // Backups
+  listBackups: () => Promise<import('../shared/types').BackupInfo[]>;
+  restoreBackup: (backupId: string) => Promise<void>;
+  deleteBackup: (backupId: string) => Promise<void>;
+  
+  // Error logging
+  logError: (errorLog: unknown) => Promise<{ success: boolean; error?: string }>;
+
   // Developer (dev-only)
   generateDemoData: () => Promise<{ accounts: number; categories: number; transactions: number }>
   clearVaultData: () => Promise<{ success: boolean }>
