@@ -186,11 +186,53 @@ const api = {
   }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_SELL, params)
   },
-  refreshInvestmentPrices: (): Promise<{ updated: number, failed: number, total: number }> => {
+  refreshInvestmentPrices: (): Promise<{ updated: number; failed: number; total: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES)
   },
-  getPerformanceMetrics: (params?: { startDate?: string, endDate?: string }): Promise<{ twr: number, mwr: number, absoluteReturn: number, startValue: number, endValue: number }> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.PERFORMANCE_GET_METRICS, params)
+
+  // ========== ANALYTICS ==========
+  
+  /** Get performance metrics (TWR/MWR) for a specific period */
+  getPerformanceMetrics: (period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL'): Promise<{
+    twr: number;
+    mwr: number;
+    startValue: number;
+    endValue: number;
+    totalCashFlow: number;
+    absoluteGain: number;
+    period: string;
+  }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ANALYTICS_GET_PERFORMANCE, period)
+  },
+
+  /** Get portfolio composition (X-Ray analysis) */
+  getPortfolioComposition: (): Promise<{
+    totalValue: number;
+    sectors: Array<{ name: string; value: number; percentage: number; count: number }>;
+    geographies: Array<{ name: string; value: number; percentage: number; count: number }>;
+    assetClasses: Array<{ name: string; value: number; percentage: number; count: number }>;
+    topHoldings: Array<{ assetId: string; symbol: string; name: string; value: number; percentage: number }>;
+    diversificationScore: number;
+    warnings: string[];
+  }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION)
+  },
+
+  /** Get dividend predictions for next N months */
+  getDividendPredictions: (monthsAhead: number = 12): Promise<Array<{
+    month: string;
+    totalIncome: number;
+    payments: Array<{
+      assetId: string;
+      symbol: string;
+      name: string;
+      expectedDate: string;
+      estimatedAmount: number;
+      amountPerShare: number;
+      confidence: 'high' | 'medium' | 'low';
+    }>;
+  }>> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ANALYTICS_GET_DIVIDENDS, monthsAhead)
   },
   deleteAsset: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.ASSET_DELETE, id)
