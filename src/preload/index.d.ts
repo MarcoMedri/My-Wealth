@@ -79,8 +79,38 @@ interface API {
   // Exchange Rates
   getExchangeRates: (baseCurrency: string) => Promise<Record<string, number>>;
 
-  // Performance / Analytics
-  getPerformanceMetrics: (params?: { startDate?: string, endDate?: string }) => Promise<{ twr: number, mwr: number, absoluteReturn: number, startValue: number, endValue: number }>;
+  // Analytics
+  getPerformanceMetrics: (period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL') => Promise<{
+    twr: number;
+    mwr: number;
+    startValue: number;
+    endValue: number;
+    totalCashFlow: number;
+    absoluteGain: number;
+    period: string;
+  }>;
+  getPortfolioComposition: () => Promise<{
+    totalValue: number;
+    sectors: Array<{ name: string; value: number; percentage: number; count: number }>;
+    geographies: Array<{ name: string; value: number; percentage: number; count: number }>;
+    assetClasses: Array<{ name: string; value: number; percentage: number; count: number }>;
+    topHoldings: Array<{ assetId: string; symbol: string; name: string; value: number; percentage: number }>;
+    diversificationScore: number;
+    warnings: string[];
+  }>;
+  getDividendPredictions: (monthsAhead: number) => Promise<Array<{
+    month: string;
+    totalIncome: number;
+    payments: Array<{
+      assetId: string;
+      symbol: string;
+      name: string;
+      expectedDate: string;
+      estimatedAmount: number;
+      amountPerShare: number;
+      confidence: 'high' | 'medium' | 'low';
+    }>;
+  }>>;
 
   // Export
   exportData: (options: { format: 'json' | 'csv'; dataType?: 'transactions' | 'accounts' | 'holdings'; startDate?: string; endDate?: string }) => Promise<{ success: boolean; filePath?: string; error?: string }>;

@@ -98,6 +98,11 @@ export const IPC_CHANNELS = {
   INVESTMENT_SELL: 'investment:sell', // Sell holding, create income transaction, track gain/loss
   INVESTMENT_REFRESH_PRICES: 'investment:refreshPrices', // Batch update all asset prices
   
+  // Analytics operations
+  ANALYTICS_GET_PERFORMANCE: 'analytics:getPerformance', // Get TWR/MWR metrics
+  ANALYTICS_GET_COMPOSITION: 'analytics:getComposition', // Get portfolio X-Ray data
+  ANALYTICS_GET_DIVIDENDS: 'analytics:getDividends', // Get dividend predictions
+  
   // Asset & Holding operations
   ASSET_DELETE: 'asset:delete',
   HOLDING_SAVE: 'holding:save', // Update existing holding
