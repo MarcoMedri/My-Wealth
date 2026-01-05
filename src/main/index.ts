@@ -409,9 +409,9 @@ function registerIpcHandlers(): void {
     return vaultManager.getPortfolioComposition();
   });
 
-  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_DIVIDENDS, async (_event, monthsAhead: number = 12) => {
+  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_DIVIDENDS, async () => {
     const vaultManager = getVaultManager();
-    return vaultManager.getDividendPredictions(monthsAhead);
+    return vaultManager.getDividendPredictions();
   });
 
   ipcMain.handle(IPC_CHANNELS.ASSET_DELETE, async (_event, id: string) => {

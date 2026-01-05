@@ -2242,7 +2242,7 @@ export class VaultManager {
     };
   }
 
-  async getDividendPredictions(monthsAhead: number = 12): Promise<Array<{
+  async getDividendPredictions(): Promise<Array<{
     month: string;
     totalIncome: number;
     payments: Array<{

@@ -398,6 +398,12 @@
       "crypto": "Crypto",
       "bond": "Obbligazioni",
       "fund": "Fondi",
+      "insurance": "Assicurazioni",
+      "other": "Altro"
+    },
+    "gainLoss": "Guadagno/Perdita",
+    "avgWithCost": "Prezzo Medio",
+    "moreItems": "Altri {{count}} elementi",
       "other": "Altro"
     },
     "moreItems": "+ altri {{count}}",
