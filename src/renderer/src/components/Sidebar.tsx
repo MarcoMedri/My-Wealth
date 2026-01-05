@@ -292,7 +292,7 @@ export default function Sidebar() {
 
                 {!isCollapsed && (
                     <p className="text-xs text-foreground-subtle text-center pt-2">
-                        MyWealth Desktop v1.2.1
+                        MyWealth Desktop v1.2.2
                     </p>
                 )}
             </div>
