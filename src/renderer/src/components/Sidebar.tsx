@@ -18,7 +18,8 @@ import {
     PiggyBank,
     Watch,
     PanelLeftClose,
-    HelpCircle
+    HelpCircle,
+    PieChart
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
@@ -210,6 +211,21 @@ export default function Sidebar() {
                 >
                     <PiggyBank className="w-4 h-4 shrink-0" />
                     {!isCollapsed && <span className="text-sm font-medium">{t('deposits.title')}</span>}
+                </button>
+
+                <button
+                    onClick={() => setActiveView('portfolio-xray')}
+                    className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors",
+                        isCollapsed ? "justify-center px-2" : "",
+                        activeView === 'portfolio-xray'
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "text-foreground-muted hover:bg-background-muted hover:text-foreground border-transparent"
+                    )}
+                    title={isCollapsed ? t('nav.portfolioXRay') : undefined}
+                >
+                    <PieChart className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="text-sm font-medium">{t('nav.portfolioXRay')}</span>}
                 </button>
             </nav>
 

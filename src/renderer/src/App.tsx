@@ -20,6 +20,7 @@ const CollectiblesDashboard = lazy(() => import('./components/collectibles/Colle
 const InsuranceDashboard = lazy(() => import('./components/insurance/InsuranceDashboard').then(m => ({ default: m.InsuranceDashboard })));
 const DepositDashboard = lazy(() => import('./components/deposits/DepositDashboard').then(m => ({ default: m.DepositDashboard })));
 const BrokerDetailView = lazy(() => import('./components/brokers/BrokerDetailView').then(m => ({ default: m.BrokerDetailView })));
+const PortfolioXRay = lazy(() => import('./pages/PortfolioXRay').then(m => ({ default: m.PortfolioXRay })));
 
 import { CommandPalette, createNavigationCommands, Toaster } from './components';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -239,7 +240,8 @@ function App(): React.ReactElement {
                     {activeView === 'collectibles' && <CollectiblesDashboard />}
                     {activeView === 'insurance' && <InsuranceDashboard />}
                     {activeView === 'deposits' && <DepositDashboard />}
-                    {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
+                    {activeView.startsWith('broker-') && <BrokerDetailView brokerId={activeView.replace('broker-', '')} />}
+                    {activeView === 'portfolio-xray' && <PortfolioXRay />}
                 </Suspense>
             </Layout>
         </ErrorBoundary>
