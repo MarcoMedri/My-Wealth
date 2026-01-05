@@ -159,6 +159,42 @@ The frontend handles formatting for display.
     npm run dev
     ```
 
+## 🔄 Automatic Backup System
+
+My Wealth includes an intelligent automatic backup system to protect your financial data:
+
+### Features
+
+- **Intelligent Scheduling**: Backups are created automatically every 30 minutes when you save data
+- **Compression**: Backups are compressed with gzip to save disk space
+- **Automatic Rotation**: Keeps the last 10 backups, automatically deleting older ones
+- **One-Click Restore**: Restore from any backup with a single click
+- **Safe Restore**: Creates a backup of current data before restoring
+
+### Location
+
+Backups are stored in your vault folder:
+```
+/your-vault-folder/
+├── backups/
+│   ├── vault-backup-2026-01-05T12-00-00-000Z.json.gz
+│   ├── vault-backup-2026-01-05T11-30-00-000Z.json.gz
+│   └── ...
+```
+
+### How to Use
+
+1. **View Backups**: Open Settings (⚙️) → Scroll to "Backups" section
+2. **Restore**: Click "Restore" next to any backup → Confirm
+3. **Delete**: Click "Delete" to remove a specific backup
+
+### Technical Details
+
+- Backups include all vault data (accounts, transactions, investments, etc.)
+- 30-minute interval prevents excessive backup creation
+- Backup failures don't interrupt normal operations
+- Compressed backups typically use 10-20% of original vault size
+
 ## 📦 Building for Production
 
 To build the application for your operating system:
