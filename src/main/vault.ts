@@ -14,6 +14,10 @@ import type { VaultStatus } from '../shared/types';
 import { VAULT_STRUCTURE } from '../shared/types';
 import { BackupService } from './BackupService';
 import { createLogger } from './services/LoggerService';
+import { SnapshotService } from './services/SnapshotService';
+import { PerformanceCalculator } from './services/PerformanceCalculator';
+import { PortfolioAnalyzer } from './services/PortfolioAnalyzer';
+import { DividendPredictor } from './services/DividendPredictor';
 import {
   AppSettingsSchema,
   AccountsFileSchema,
@@ -76,6 +80,10 @@ export class VaultManager {
   private settings: AppSettings | null = null;
   private vaultState: VaultState = createEmptyVaultState();
   private backupService: BackupService | null = null;
+  private snapshotService: SnapshotService | null = null;
+  private performanceCalculator: PerformanceCalculator | null = null;
+  private portfolioAnalyzer: PortfolioAnalyzer | null = null;
+  private dividendPredictor: DividendPredictor | null = null;
 
   constructor() {
     // Settings stored in Electron's userData directory
@@ -83,6 +91,11 @@ export class VaultManager {
     // Windows: %APPDATA%/my-wealth-desktop/
     // Linux: ~/.config/my-wealth-desktop/
     this.settingsPath = path.join(app.getPath('userData'), VAULT_STRUCTURE.SETTINGS_FILE);
+    
+    // Initialize analytics services (SnapshotService initialized after vault load)
+    this.performanceCalculator = new PerformanceCalculator();
+    this.portfolioAnalyzer = new PortfolioAnalyzer();
+    this.dividendPredictor = new DividendPredictor();
   }
 
   // ==========================================================================
@@ -496,10 +509,16 @@ export class VaultManager {
 
       // Initialize backup service for this vault
       if (vaultPath) {
-        const vaultFilePath = path.join(vaultPath, 'vault.json'); // Main vault file to backup
-        this.backupService = new BackupService(vaultFilePath);
-        const vaultLogger = createLogger('VaultManager');
+        // Initialize BackupService with vault path
+        this.backupService = new BackupService(vaultPath);
+        const vaultLogger = createLogger('VaultManager'); // Assuming logger is defined or imported
         vaultLogger.info('BackupService initialized', { vaultPath });
+
+        // Initialize SnapshotService with vault path
+        if (!this.snapshotService) {
+          this.snapshotService = new SnapshotService(vaultPath);
+          vaultLogger.info('SnapshotService initialized', { vaultPath });
+        }
       }
 
       this.vaultState.isLoaded = true;
@@ -2195,15 +2214,46 @@ export class VaultManager {
     absoluteGain: number;
     period: string;
   }> {
-    // TODO: Integrate with SnapshotService and PerformanceCalculator
-    // For now, return mock data
+    if (!this.performanceCalculator || !this.snapshotService) {
+      throw new Error('Analytics services not initialized');
+    }
+
+    // Calculate date range based on period
+    const endDate = new Date();
+    let startDate = new Date();
+    
+    switch (period) {
+      case 'YTD':
+        startDate = new Date(endDate.getFullYear(), 0, 1);
+        break;
+      case '1M':
+        startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
+        break;
+      case '3M':
+        startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 3, endDate.getDate());
+        break;
+      case '6M':
+        startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 6, endDate.getDate());
+        break;
+      case '1Y':
+        startDate = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate());
+        break;
+      case '3Y':
+        startDate = new Date(endDate.getFullYear() - 3, endDate.getMonth(), endDate.getDate());
+        break;
+      case 'ALL':
+        startDate = new Date(2000, 0, 1); // Far past date
+        break;
+    }
+
+    // Get snapshots from SnapshotService
+    const snapshots = this.snapshotService.getSnapshots(startDate, endDate);
+    
+    // Calculate metrics using PerformanceCalculator
+    const metrics = this.performanceCalculator.getMetrics(snapshots, period);
+    
     return {
-      twr: 12.5,
-      mwr: 10.8,
-      startValue: 4200000,
-      endValue: 5250000,
-      totalCashFlow: 525000,
-      absoluteGain: 525000,
+      ...metrics,
       period,
     };
   }
@@ -2217,28 +2267,25 @@ export class VaultManager {
     diversificationScore: number;
     warnings: string[];
   }> {
-    // TODO: Integrate with PortfolioAnalyzer
-    // For now, return mock data
+    if (!this.portfolioAnalyzer) {
+      throw new Error('PortfolioAnalyzer not initialized');
+    }
+
+    // Get current holdings and assets from vault state
+    const holdings = Array.from(this.vaultState.holdings.values());
+    const assetsMap = this.vaultState.assets; // Already a Map
+    
+    // Analyze portfolio composition
+    const composition = this.portfolioAnalyzer.analyzePortfolio(holdings, assetsMap);
+    
+    // Calculate diversification score and warnings
+    const diversificationScore = this.portfolioAnalyzer.calculateDiversificationScore(composition);
+    const warnings = this.portfolioAnalyzer.getConcentrationWarnings(composition);
+    
     return {
-      totalValue: 5250000,
-      sectors: [
-        { name: 'Technology', value: 1837500, percentage: 35, count: 5 },
-        { name: 'Healthcare', value: 1050000, percentage: 20, count: 3 },
-        { name: 'Finance', value: 787500, percentage: 15, count: 2 },
-      ],
-      geographies: [
-        { name: 'North America', value: 3150000, percentage: 60, count: 8 },
-        { name: 'Europe', value: 1312500, percentage: 25, count: 5 },
-      ],
-      assetClasses: [
-        { name: 'Stocks', value: 3675000, percentage: 70, count: 12 },
-        { name: 'ETFs', value: 1050000, percentage: 20, count: 3 },
-      ],
-      topHoldings: [
-        { assetId: '1', symbol: 'AAPL', name: 'Apple Inc.', value: 787500, percentage: 15 },
-      ],
-      diversificationScore: 72,
-      warnings: [],
+      ...composition,
+      diversificationScore,
+      warnings,
     };
   }
 
@@ -2255,25 +2302,61 @@ export class VaultManager {
       confidence: 'high' | 'medium' | 'low';
     }>;
   }>> {
-    // TODO: Integrate with DividendPredictor
-    // For now, return mock data
-    return [
-      {
-        month: '2026-01',
-        totalIncome: 45000,
-        payments: [
-          {
-            assetId: '1',
-            symbol: 'AAPL',
-            name: 'Apple Inc.',
-            expectedDate: '2026-01-15',
-            estimatedAmount: 12000,
-            amountPerShare: 24,
-            confidence: 'high',
-          },
-        ],
-      },
-    ];
+    if (!this.dividendPredictor) {
+      throw new Error('DividendPredictor not initialized');
+    }
+
+    // Get current holdings, assets, and dividend history from vault state
+    const holdings = Array.from(this.vaultState.holdings.values());
+    const assets = Array.from(this.vaultState.assets.values());
+    const dividends = Array.from(this.vaultState.dividends.values());
+    
+    // Predict dividends for next 12 months
+    const allPredictions: Array<{
+      assetId: string;
+      symbol: string;
+      name: string;
+      expectedDate: string;
+      estimatedAmount: number;
+      amountPerShare: number;
+      confidence: 'high' | 'medium' | 'low';
+    }> = [];
+    
+    for (const holding of holdings) {
+      const asset = assets.find(a => a.id === holding.assetId);
+      if (!asset) continue;
+      
+      const predictions = this.dividendPredictor.predictDividends(
+        holding,
+        asset,
+        dividends,
+        12 // months ahead
+      );
+      
+      allPredictions.push(...predictions);
+    }
+    
+    // Group by month
+    const byMonth = new Map<string, typeof allPredictions>();
+    
+    for (const pred of allPredictions) {
+      const month = pred.expectedDate.substring(0, 7); // YYYY-MM
+      if (!byMonth.has(month)) {
+        byMonth.set(month, []);
+      }
+      byMonth.get(month)!.push(pred);
+    }
+    
+    // Convert to required format
+    const result = Array.from(byMonth.entries())
+      .map(([month, payments]) => ({
+        month,
+        totalIncome: payments.reduce((sum, p) => sum + p.estimatedAmount, 0),
+        payments,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+    
+    return result;
   }
 }
 
