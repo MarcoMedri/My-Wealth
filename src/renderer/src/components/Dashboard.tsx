@@ -19,6 +19,7 @@ import { ExchangeRateIndicator } from './ExchangeRateIndicator';
 import DashboardCharts, { DashboardPeriod } from './DashboardCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { SnapshotConfirmationModal } from './modals/SnapshotConfirmationModal';
+import { PerformanceMetrics } from './analytics/PerformanceMetrics';
 
 // Force HMR update
 export default function Dashboard() {
@@ -336,6 +337,9 @@ export default function Dashboard() {
                         onClick={() => setActiveView('deposits')}
                     />
                 </div>
+
+                {/* Performance Metrics */}
+                <PerformanceMetrics />
 
                 {/* Charts Row */}
                 <DashboardCharts
