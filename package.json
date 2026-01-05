@@ -45,7 +45,7 @@
     "recharts": "^3.6.0",
     "shepherd.js": "^14.5.1",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^2.2.0",
+    "tailwind-merge": "^3.4.0",
     "yahoo-finance2": "^3.10.2",
     "zod": "^3.22.4",
     "zustand": "^5.0.9"
