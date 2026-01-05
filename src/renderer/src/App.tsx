@@ -22,6 +22,7 @@ const DepositDashboard = lazy(() => import('./components/deposits/DepositDashboa
 const BrokerDetailView = lazy(() => import('./components/brokers/BrokerDetailView').then(m => ({ default: m.BrokerDetailView })));
 
 import { CommandPalette, createNavigationCommands, Toaster } from './components';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
 import { useVaultStore } from './store/useVaultStore';
@@ -226,7 +227,7 @@ function App(): React.ReactElement {
 
     // Main app with vault loaded
     return (
-        <>
+        <ErrorBoundary>
             <Toaster />
             <CommandPalette commands={navigationCommands} />
             <Layout>
@@ -241,7 +242,7 @@ function App(): React.ReactElement {
                     {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.split(':')[1]} />}
                 </Suspense>
             </Layout>
-        </>
+        </ErrorBoundary>
     );
 }
 
