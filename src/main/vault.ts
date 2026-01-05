@@ -2273,7 +2273,11 @@ export class VaultManager {
 
     // Get current holdings and assets from vault state
     const holdings = Array.from(this.vaultState.holdings.values());
-    const assetsMap = this.vaultState.assets; // Already a Map
+    
+    // Convert assets array to Map for PortfolioAnalyzer
+    const assetsMap = new Map(
+      Array.from(this.vaultState.assets.values()).map(asset => [asset.id, asset])
+    );
     
     // Analyze portfolio composition
     const composition = this.portfolioAnalyzer.analyzePortfolio(holdings, assetsMap);
