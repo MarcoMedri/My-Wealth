@@ -139,12 +139,13 @@ export function AllocationPieChart() {
                             paddingAngle={2}
                             dataKey="value"
                             nameKey="name"
-                            // eslint-disable-next-line react/prop-types
                             label={(props: { name?: string }) => {
+                                /* eslint-disable react/prop-types */
                                 if (!props.name) return '';
                                 const data = chartData.find(d => d.name === props.name);
                                 if (!data || data.percentage < 5) return '';
                                 return `${data.percentage.toFixed(0)}%`;
+                                /* eslint-enable react/prop-types */
                             }}
                             labelLine={false}
                         >
