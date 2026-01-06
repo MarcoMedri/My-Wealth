@@ -18,6 +18,8 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
     const [quantity, setQuantity] = useState(holding.quantity.toString());
     const [averageBuyPrice, setAverageBuyPrice] = useState((holding.averageBuyPrice / 100).toString());
     const [taxRate, setTaxRate] = useState((holding.taxRate ?? 26).toString());
+    const [assetName, setAssetName] = useState(asset.name);
+    const [assetSymbol, setAssetSymbol] = useState(asset.symbol);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -25,8 +27,10 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
             setQuantity(holding.quantity.toString());
             setAverageBuyPrice((holding.averageBuyPrice / 100).toString());
             setTaxRate((holding.taxRate ?? 26).toString());
+            setAssetName(asset.name);
+            setAssetSymbol(asset.symbol);
         }
-    }, [isOpen, holding]);
+    }, [isOpen, holding, asset]);
 
     if (!isOpen) return null;
 
@@ -35,6 +39,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
         setIsSubmitting(true);
 
         try {
+            // Update holding
             const updatedHolding = {
                 ...holding,
                 quantity: parseFloat(quantity),
@@ -42,6 +47,17 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                 taxRate: parseFloat(taxRate),
                 updatedAt: new Date().toISOString()
             };
+
+            // Update asset if name or symbol changed
+            if (assetName !== asset.name || assetSymbol !== asset.symbol) {
+                const updatedAsset = {
+                    ...asset,
+                    name: assetName,
+                    symbol: assetSymbol.toUpperCase(),
+                    updatedAt: new Date().toISOString()
+                };
+                await window.api.saveAsset(updatedAsset);
+            }
 
             await window.api.saveHolding(updatedHolding);
             await refreshInvestments();
@@ -71,6 +87,32 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-foreground-subtle">
+                            {t('investments.symbol', 'Simbolo')}
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none uppercase"
+                            value={assetSymbol}
+                            onChange={e => setAssetSymbol(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-foreground-subtle">
+                            {t('investments.name', 'Nome')}
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                            value={assetName}
+                            onChange={e => setAssetName(e.target.value)}
+                        />
+                    </div>
+
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-foreground-subtle">
                             {t('investments.quantity')}
