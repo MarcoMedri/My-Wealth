@@ -139,7 +139,7 @@ export function AllocationPieChart() {
                             paddingAngle={2}
                             dataKey="value"
                             nameKey="name"
-                            label={(props: any) => {
+                            label={(props: { name: string }) => {
                                 const data = chartData.find(d => d.name === props.name);
                                 if (!data || data.percentage < 5) return '';
                                 return `${data.percentage.toFixed(0)}%`;

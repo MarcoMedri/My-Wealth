@@ -424,7 +424,11 @@
     "confirmDelete": "Eliminare {{symbol}}? Questa azione non può essere annullata.",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
-    "refreshError": "❌ Impossibile aggiornare le quotazioni"
+    "refreshError": "❌ Impossibile aggiornare le quotazioni",
+    "rateLimitError": "Yahoo Finance ha temporaneamente bloccato le richieste",
+    "rateLimitSuggestion": "Attendi 30-60 minuti prima di riprovare",
+    "rateLimitTip": "Suggerimento: Limita i refresh a 1 ogni 15 minuti",
+    "rateLimitPossible": "Alcune quotazioni potrebbero essere state bloccate per rate limiting"
   },
   "modals": {
     "cancel": "Annulla",
