@@ -27,6 +27,7 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
     const { t } = useTranslation();
     const { refreshData, deleteAccount } = useVaultStore();
     const transactions = useVaultStore(state => state.transactions);
+    const accountBalances = useVaultStore(state => state.accountBalances);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isCloseDeleteOpen, setIsCloseDeleteOpen] = useState(false);
@@ -36,6 +37,8 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
         type: 'checking' as AccountType,
         currency: 'EUR',
         initialBalance: '0.00',
+        currentBalance: '',
+        useManualBalance: false,
         color: ACCOUNT_COLORS[0],
         brokerId: preselectedBrokerId || '',
     });
@@ -43,11 +46,17 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
     // Load initial data for editing
     useEffect(() => {
         if (initialData) {
+            const calculatedBalance = accountBalances[initialData.id] || 0;
+            const hasManualBalance = initialData.manualBalance !== undefined;
             setFormData({
                 name: initialData.name,
                 type: initialData.type,
                 currency: initialData.currency,
                 initialBalance: (initialData.initialBalance / 100).toFixed(2),
+                currentBalance: hasManualBalance
+                    ? (initialData.manualBalance! / 100).toFixed(2)
+                    : (calculatedBalance / 100).toFixed(2),
+                useManualBalance: hasManualBalance,
                 color: initialData.color,
                 brokerId: initialData.brokerId || '',
             });
@@ -58,11 +67,13 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                 type: defaultType || 'checking',
                 currency: 'EUR',
                 initialBalance: '0.00',
+                currentBalance: '',
+                useManualBalance: false,
                 color: ACCOUNT_COLORS[0],
                 brokerId: preselectedBrokerId || '',
             });
         }
-    }, [initialData, isOpen, preselectedBrokerId, defaultType]);
+    }, [initialData, isOpen, preselectedBrokerId, defaultType, accountBalances]);
 
     const brokers = useVaultStore(state => state.brokers);
 
@@ -110,12 +121,22 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
             if (isNaN(amount)) throw new Error('Invalid balance amount');
             const initialBalanceCents = Math.round(amount * 100);
 
+            // Parse manual balance if enabled
+            let manualBalance: number | undefined = undefined;
+            if (formData.useManualBalance && formData.currentBalance) {
+                const currentAmount = parseFloat(formData.currentBalance);
+                if (!isNaN(currentAmount)) {
+                    manualBalance = Math.round(currentAmount * 100);
+                }
+            }
+
             await window.api.saveAccount({
                 id: initialData?.id, // Pass ID for update
                 name: formData.name,
                 type: formData.type,
                 currency: formData.currency,
                 initialBalance: initialBalanceCents,
+                manualBalance: manualBalance,
                 color: formData.color,
                 brokerId: formData.brokerId || undefined,
                 isArchived: initialData?.isArchived ?? false,
@@ -231,6 +252,42 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                         />
                     </div>
                 </div>
+
+                {/* Current Balance (Edit Mode Only) */}
+                {initialData && (
+                    <div>
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="block text-sm font-medium text-foreground-muted">
+                                {t('accounts.currentBalance', 'Saldo Attuale')}
+                            </label>
+                            <label className="flex items-center gap-2 text-xs text-foreground-muted cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.useManualBalance}
+                                    onChange={e => setFormData({ ...formData, useManualBalance: e.target.checked })}
+                                    className="rounded border-border"
+                                />
+                                {t('accounts.useManualBalance', 'Usa Saldo Manuale')}
+                            </label>
+                        </div>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={formData.currentBalance}
+                            onChange={e => setFormData({ ...formData, currentBalance: e.target.value })}
+                            disabled={!formData.useManualBalance}
+                            className={cn(
+                                "w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none",
+                                !formData.useManualBalance && "opacity-50 cursor-not-allowed"
+                            )}
+                        />
+                        {formData.useManualBalance && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                {t('accounts.manualBalanceWarning', 'Questo sovrascriverà il saldo calcolato dalle transazioni')}
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Color Picker */}
                 <div>
