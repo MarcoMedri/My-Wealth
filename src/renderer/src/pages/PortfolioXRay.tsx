@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Globe, Briefcase, AlertTriangle, TrendingUp } from 'lucide-react';
 
 interface AllocationItem {
@@ -30,6 +31,7 @@ interface PortfolioComposition {
 }
 
 export function PortfolioXRay() {
+    const { t } = useTranslation();
     const [composition, setComposition] = useState<PortfolioComposition | null>(null);
     const [diversificationScore, setDiversificationScore] = useState<number>(0);
     const [warnings, setWarnings] = useState<string[]>([]);
@@ -124,14 +126,14 @@ export function PortfolioXRay() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                            Portfolio X-Ray
+                            {t('analytics.portfolioXRay')}
                         </h1>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Deep dive into your portfolio composition
+                            {t('analytics.portfolioXRayDescription', 'Analisi approfondita della composizione del portafoglio')}
                         </p>
                     </div>
                     <div className="text-center">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Diversification Score</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('analytics.diversificationScore')}</p>
                         <div className={`text-4xl font-bold ${getScoreColor(diversificationScore)}`}>
                             {diversificationScore}
                         </div>
@@ -149,7 +151,7 @@ export function PortfolioXRay() {
                         <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                         <div>
                             <h3 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
-                                Concentration Risks Detected
+                                {t('analytics.concentrationRisks')}
                             </h3>
                             <ul className="space-y-1">
                                 {warnings.map((warning, i) => (
@@ -168,7 +170,7 @@ export function PortfolioXRay() {
                 <div className="flex items-center gap-2 mb-4">
                     <Briefcase className="w-5 h-5 text-blue-600" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Sector Allocation
+                        {t('analytics.sectorAllocation')}
                     </h2>
                 </div>
                 <div className="space-y-3">
@@ -198,7 +200,7 @@ export function PortfolioXRay() {
                 <div className="flex items-center gap-2 mb-4">
                     <Globe className="w-5 h-5 text-green-600" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Geographic Exposure
+                        {t('analytics.geographicExposure')}
                     </h2>
                 </div>
                 <div className="space-y-3">
@@ -228,7 +230,7 @@ export function PortfolioXRay() {
                 <div className="flex items-center gap-2 mb-4">
                     <PieChart className="w-5 h-5 text-purple-600" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Asset Class Breakdown
+                        {t('analytics.assetClassBreakdown')}
                     </h2>
                 </div>
                 <div className="space-y-3">
@@ -258,7 +260,7 @@ export function PortfolioXRay() {
                 <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-5 h-5 text-orange-600" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Top Holdings
+                        {t('analytics.topHoldings')}
                     </h2>
                 </div>
                 <div className="space-y-3">

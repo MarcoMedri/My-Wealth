@@ -708,5 +708,36 @@
   },
   "help": {
     "showTutorial": "Mostra Tutorial"
+  },
+  "analytics": {
+    "performanceMetrics": "Metriche di Performance",
+    "performanceTooltip": "TWR elimina l'impatto dei flussi di cassa. MWR tiene conto del timing.",
+    "twr": "Rendimento Ponderato nel Tempo",
+    "twrDescription": "Elimina l'impatto dei flussi di cassa",
+    "mwr": "Rendimento Ponderato per il Denaro",
+    "mwrDescription": "Tiene conto del timing dei flussi di cassa",
+    "startValue": "Valore Iniziale",
+    "endValue": "Valore Finale",
+    "cashFlow": "Flusso di Cassa",
+    "totalGain": "Guadagno Totale",
+    "explanation": "TWR misura la performance della strategia di investimento (cosa ha guadagnato il portafoglio). MWR misura il tuo rendimento personale (cosa hai guadagnato tu, incluso il timing).",
+    "noData": "Nessun dato di performance disponibile",
+    "noDataHint": "Crea uno snapshot per vedere le metriche di performance",
+    "portfolioXRay": "Analisi Portafoglio",
+    "diversificationScore": "Punteggio Diversificazione",
+    "concentrationRisks": "Rischi di Concentrazione Rilevati",
+    "sectorAllocation": "Allocazione Settoriale",
+    "assetClassBreakdown": "Ripartizione per Classe di Asset",
+    "geographicExposure": "Esposizione Geografica",
+    "topHoldings": "Principali Posizioni",
+    "dividendCalendar": "Calendario Dividendi",
+    "upcomingPayments": "Pagamenti Previsti",
+    "avgMonthlyIncome": "Reddito Mensile Medio",
+    "monthlyIncomeTimeline": "Cronologia Reddito Mensile",
+    "confidence": "Affidabilità",
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Bassa",
+    "confidenceExplanation": "Alta affidabilità indica 2+ anni di pagamenti regolari."
   }
 }

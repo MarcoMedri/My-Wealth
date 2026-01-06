@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, DollarSign, Info } from 'lucide-react';
 
 interface DividendPrediction {
@@ -24,7 +25,12 @@ interface MonthlyIncome {
     payments: DividendPrediction[];
 }
 
-export function DividendCalendar() {
+interface DividendCalendarProps {
+    className?: string;
+}
+
+export function DividendCalendar({ className = '' }: DividendCalendarProps) {
+    const { t } = useTranslation();
     const [monthlyIncome, setMonthlyIncome] = useState<MonthlyIncome[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -138,8 +144,8 @@ export function DividendCalendar() {
         };
 
         return (
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors[confidence as keyof typeof colors]}`}>
-                {confidence}
+            <span className={`px-2 py-1 rounded text-xs font-medium ${colors[confidence as keyof typeof colors]}`}>
+                {t(`analytics.${confidence}`)}
             </span>
         );
     };
@@ -163,16 +169,16 @@ export function DividendCalendar() {
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <Calendar className="w-6 h-6 text-blue-600" />
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                Dividend Calendar
-                            </h1>
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {t('analytics.dividendCalendar')}
+                            </h2>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Upcoming dividend payments and passive income forecast
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {t('analytics.upcomingPayments', 'Pagamenti previsti e previsione reddito passivo')}
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Avg Monthly Income</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('analytics.avgMonthlyIncome')}</p>
                         <p className="text-2xl font-bold text-green-600">
                             {formatCurrency(avgMonthlyIncome)}
                         </p>
@@ -244,10 +250,10 @@ export function DividendCalendar() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 dark:text-gray-400 mb-2">
-                        No dividend payments expected
+                        {t('analytics.noPaymentsExpected')}
                     </p>
                     <p className="text-sm text-gray-400 dark:text-gray-500">
-                        Add dividend-paying stocks to see predictions
+                        {t('analytics.addStocksForPredictions')}
                     </p>
                 </div>
             )}
@@ -258,12 +264,12 @@ export function DividendCalendar() {
                     <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     <div>
                         <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-1">
-                            About Dividend Predictions
+                            {t('analytics.aboutPredictions')}
                         </h4>
                         <p className="text-sm text-blue-800 dark:text-blue-400">
-                            Predictions are based on historical payment patterns and frequencies.
-                            <strong className="ml-1">High confidence</strong> indicates 2+ years of regular payments.
-                            Actual amounts may vary.
+                            {t('analytics.predictionsBasedOnHistory')}
+                            <strong className="ml-1">{t('analytics.high')}</strong> {t('analytics.confidenceExplanation', 'indica 2+ anni di pagamenti regolari.')}
+                            {t('analytics.actualAmountsMayVary')}
                         </p>
                     </div>
                 </div>
