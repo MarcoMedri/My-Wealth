@@ -415,6 +415,8 @@
     "selectSector": "Seleziona Settore",
     "selectRegion": "Seleziona Regione",
     "countryPlaceholder": "es. USA, Italy, Germany",
+    "name": "Nome",
+    "symbol": "Simbolo",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
     "refreshError": "❌ Impossibile aggiornare le quotazioni"
