@@ -139,6 +139,7 @@ export function AllocationPieChart() {
                             paddingAngle={2}
                             dataKey="value"
                             nameKey="name"
+                            // eslint-disable-next-line react/prop-types
                             label={(props: { name?: string }) => {
                                 if (!props.name) return '';
                                 const data = chartData.find(d => d.name === props.name);
