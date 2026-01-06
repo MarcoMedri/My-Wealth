@@ -2197,6 +2197,153 @@ export class VaultManager {
       return snapshot;
   }
 
+  /**
+   * Create automatic snapshot for analytics (uses SnapshotService)
+   * Called after transactions to ensure performance metrics have current data
+   */
+  async createAutoSnapshot(): Promise<void> {
+    if (!this.snapshotService) {
+      console.warn('SnapshotService not initialized, skipping auto snapshot');
+      return;
+    }
+
+    // Check if snapshot already exists for today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const existingSnapshots = this.snapshotService.getSnapshots(today, tomorrow);
+    if (existingSnapshots.length > 0) {
+      // Snapshot already exists for today, skip
+      return;
+    }
+
+    // Calculate total portfolio value
+    const totalValue = this.calculateTotalPortfolioValue();
+
+    // Get account snapshots for SnapshotService
+    const accountSnapshots = this.getAccountSnapshotsForAnalytics();
+
+    // Create snapshot via SnapshotService
+    await this.snapshotService.createSnapshot(
+      totalValue,
+      0, // cashFlow - could be calculated from recent transactions
+      accountSnapshots
+    );
+
+    console.log('[VaultManager] Auto snapshot created', { totalValue });
+  }
+
+  /**
+   * Calculate total portfolio value across all asset types
+   */
+  private calculateTotalPortfolioValue(): number {
+    let total = 0;
+
+    // Cash accounts
+    for (const balance of this.vaultState.accountBalances.values()) {
+      total += balance;
+    }
+
+    // Investments
+    for (const holding of this.vaultState.holdings.values()) {
+      const asset = Array.from(this.vaultState.assets.values()).find(a => a.id === holding.assetId);
+      if (asset) {
+        total += holding.quantity * asset.currentPrice;
+      }
+    }
+
+    // Properties
+    for (const property of this.vaultState.properties.values()) {
+      total += property.currentValue || property.purchasePrice || 0;
+    }
+
+    // Collectibles
+    for (const collectible of this.vaultState.collectibles.values()) {
+      total += collectible.currentValue || collectible.purchasePrice || 0;
+    }
+
+    // Insurance
+    for (const policy of this.vaultState.insurance.values()) {
+      total += policy.currentValue || 0;
+    }
+
+    // Deposits
+    for (const deposit of this.vaultState.deposits.values()) {
+      total += deposit.principal;
+    }
+
+    return total;
+  }
+
+  /**
+   * Get account snapshots in SnapshotService format
+   */
+  private getAccountSnapshotsForAnalytics(): Array<{
+    accountId: string;
+    accountName: string;
+    accountType: string;
+    balance: number;
+    holdings: Array<{
+      investmentId: string;
+      ticker: string;
+      quantity: number;
+      currentPrice: number;
+      marketValue: number;
+      costBasis: number;
+    }>;
+  }> {
+    const snapshots: Array<{
+      accountId: string;
+      accountName: string;
+      accountType: string;
+      balance: number;
+      holdings: Array<{
+        investmentId: string;
+        ticker: string;
+        quantity: number;
+        currentPrice: number;
+        marketValue: number;
+        costBasis: number;
+      }>;
+    }> = [];
+
+    for (const [id, balance] of this.vaultState.accountBalances) {
+      const account = this.vaultState.accounts.get(id);
+      if (account) {
+        // Get holdings for this account
+        const accountHoldings = Array.from(this.vaultState.holdings.values())
+          .filter(h => h.accountId === id)
+          .map(h => {
+            const asset = Array.from(this.vaultState.assets.values()).find(a => a.id === h.assetId);
+            const currentPrice = asset?.currentPrice || 0;
+            const marketValue = h.quantity * currentPrice;
+            const costBasis = h.quantity * h.averageBuyPrice;
+            
+            return {
+              investmentId: h.assetId,
+              ticker: asset?.symbol || 'UNKNOWN',
+              quantity: h.quantity,
+              currentPrice,
+              marketValue,
+              costBasis,
+            };
+          });
+
+        snapshots.push({
+          accountId: id,
+          accountName: account.name,
+          accountType: account.type,
+          balance,
+          holdings: accountHoldings,
+        });
+      }
+    }
+
+    return snapshots;
+  }
+
   // ========== ANALYTICS METHODS (STUB) ==========
   // TODO: Full integration with SnapshotService, PortfolioAnalyzer, DividendPredictor
 

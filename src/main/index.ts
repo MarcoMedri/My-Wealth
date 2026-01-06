@@ -217,11 +217,17 @@ function registerIpcHandlers(): void {
   // ========== TRANSACTIONS ==========
   
   ipcMain.handle(IPC_CHANNELS.TRANSACTION_SAVE, async (_event, transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
-    return vaultManager.saveTransaction(transaction)
+    const result = await vaultManager.saveTransaction(transaction);
+    // Create automatic snapshot for analytics
+    await vaultManager.createAutoSnapshot();
+    return result;
   })
 
   ipcMain.handle(IPC_CHANNELS.TRANSACTION_DELETE, async (_event, id: string) => {
-    return vaultManager.deleteTransaction(id)
+    const result = await vaultManager.deleteTransaction(id);
+    // Create automatic snapshot for analytics
+    await vaultManager.createAutoSnapshot();
+    return result;
   })
 
   // ========== ACCOUNTS ==========
