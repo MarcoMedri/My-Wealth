@@ -749,6 +749,7 @@
     "noData": "Nessun dato di performance disponibile",
     "noDataHint": "Crea uno snapshot per vedere le metriche di performance",
     "portfolioXRay": "Analisi Portafoglio",
+    "portfolioXRayDescription": "Analisi approfondita della composizione del portafoglio",
     "diversificationScore": "Punteggio Diversificazione",
     "concentrationRisks": "Rischi di Concentrazione Rilevati",
     "sectorAllocation": "Allocazione Settoriale",
