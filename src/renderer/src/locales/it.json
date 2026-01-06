@@ -36,7 +36,8 @@
     "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
     "close": "Chiudi",
     "actions": "Azioni",
-    "confirmClear": "Sei sicuro di voler cancellare TUTTI i dati? Questa azione non può essere annullata."
+    "confirmClear": "Sei sicuro di voler cancellare TUTTI i dati? Questa azione non può essere annullata.",
+    "select": "Seleziona"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -564,6 +565,7 @@
     "saveFailed": "Salvataggio fallito"
   },
   "insurance": {
+    "linkedAccount": "Conto Collegato",
     "title": "Assicurazioni",
     "subtitle": "Gestisci le tue polizze assicurative e piani di accumulo.",
     "startTracking": "Inizia a tracciare le tue polizze",
