@@ -738,6 +738,11 @@
     "high": "Alta",
     "medium": "Media",
     "low": "Bassa",
-    "confidenceExplanation": "Alta affidabilità indica 2+ anni di pagamenti regolari."
+    "confidenceExplanation": "Alta affidabilità indica 2+ anni di pagamenti regolari.",
+    "noPaymentsExpected": "Nessun pagamento di dividendi previsto",
+    "addStocksForPredictions": "Aggiungi azioni che pagano dividendi per vedere le previsioni",
+    "aboutPredictions": "Informazioni sulle Previsioni",
+    "predictionsBasedOnHistory": "Le previsioni si basano su modelli e frequenze di pagamento storici.",
+    "actualAmountsMayVary": "Gli importi effettivi possono variare."
   }
 }
