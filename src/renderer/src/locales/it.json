@@ -401,11 +401,18 @@
       "bond": "Obbligazioni",
       "fund": "Fondi",
       "insurance": "Assicurazioni",
-      "other": "Altro"
+    "other": "Altro"
     },
     "gainLoss": "Guadagno/Perdita",
     "avgWithCost": "Prezzo Medio",
     "moreItems": "Altri {{count}} elementi",
+    "metadata": "Metadati",
+    "sector": "Settore",
+    "country": "Paese",
+    "region": "Regione",
+    "selectSector": "Seleziona Settore",
+    "selectRegion": "Seleziona Regione",
+    "countryPlaceholder": "es. USA, Italy, Germany",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
     "refreshError": "❌ Impossibile aggiornare le quotazioni"

@@ -25,11 +25,7 @@ interface MonthlyIncome {
     payments: DividendPrediction[];
 }
 
-interface DividendCalendarProps {
-    className?: string;
-}
-
-export function DividendCalendar({ className = '' }: DividendCalendarProps) {
+export function DividendCalendar() {
     const { t } = useTranslation();
     const [monthlyIncome, setMonthlyIncome] = useState<MonthlyIncome[]>([]);
     const [loading, setLoading] = useState(true);

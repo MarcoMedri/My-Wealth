@@ -38,6 +38,11 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    // Metadata State
+    const [sector, setSector] = useState('');
+    const [country, setCountry] = useState('');
+    const [region, setRegion] = useState('');
+
     // Filter accounts
     const availableAccounts = accounts.filter(a =>
         !a.isArchived &&
@@ -61,6 +66,10 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
             setFees('0');
             // Default tax will be set by the effect below
             setErrorMessage(null);
+            // Reset metadata
+            setSector('');
+            setCountry('');
+            setRegion('');
 
             if (availableAccounts.length > 0) {
                 setAccountId(availableAccounts[0].id);
@@ -158,7 +167,13 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                 date,
                 fees: parseFloat(fees) * 100, // to cents
                 brokerId,
-                taxRate: parseFloat(taxRate)
+                taxRate: parseFloat(taxRate),
+                // Add metadata if provided
+                metadata: (sector || country || region) ? {
+                    sector: sector || undefined,
+                    country: country || undefined,
+                    region: region || undefined,
+                } : undefined
             });
             await refreshInvestments();
             onClose();
@@ -323,6 +338,72 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                             />
+                        </div>
+
+                        {/* Metadata Fields */}
+                        <div className="space-y-4 p-4 bg-background-subtle/50 rounded-lg border border-border/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">
+                                    {t('investments.metadata', 'Metadati')} ({t('common.optional', 'Opzionale')})
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-foreground-subtle">
+                                        {t('investments.sector', 'Settore')}
+                                    </label>
+                                    <select
+                                        className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        value={sector}
+                                        onChange={e => setSector(e.target.value)}
+                                    >
+                                        <option value="">{t('investments.selectSector', 'Seleziona Settore')}</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Consumer">Consumer</option>
+                                        <option value="Energy">Energy</option>
+                                        <option value="Utilities">Utilities</option>
+                                        <option value="Real Estate">Real Estate</option>
+                                        <option value="Materials">Materials</option>
+                                        <option value="Industrials">Industrials</option>
+                                        <option value="Telecommunications">Telecommunications</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-foreground-subtle">
+                                        {t('investments.region', 'Regione')}
+                                    </label>
+                                    <select
+                                        className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                        value={region}
+                                        onChange={e => setRegion(e.target.value)}
+                                    >
+                                        <option value="">{t('investments.selectRegion', 'Seleziona Regione')}</option>
+                                        <option value="North America">North America</option>
+                                        <option value="Europe">Europe</option>
+                                        <option value="Asia">Asia</option>
+                                        <option value="Latin America">Latin America</option>
+                                        <option value="Middle East">Middle East</option>
+                                        <option value="Africa">Africa</option>
+                                        <option value="Oceania">Oceania</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-foreground-subtle">
+                                    {t('investments.country', 'Paese')}
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                                    value={country}
+                                    onChange={e => setCountry(e.target.value)}
+                                    placeholder={t('investments.countryPlaceholder', 'es. USA, Italy, Germany')}
+                                />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
