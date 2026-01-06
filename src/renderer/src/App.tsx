@@ -240,7 +240,7 @@ function App(): React.ReactElement {
                     {activeView === 'collectibles' && <CollectiblesDashboard />}
                     {activeView === 'insurance' && <InsuranceDashboard />}
                     {activeView === 'deposits' && <DepositDashboard />}
-                    {activeView.startsWith('broker-') && <BrokerDetailView brokerId={activeView.replace('broker-', '')} />}
+                    {activeView.startsWith('broker:') && <BrokerDetailView brokerId={activeView.replace('broker:', '')} />}
                     {activeView === 'portfolio-xray' && <PortfolioXRay />}
                 </Suspense>
             </Layout>
