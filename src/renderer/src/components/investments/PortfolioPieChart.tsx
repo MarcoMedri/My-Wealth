@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Label } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../../store/useVaultStore';
 import { formatMoney } from '../../../../shared/schemas';
