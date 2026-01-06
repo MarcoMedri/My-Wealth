@@ -531,7 +531,7 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
     
     // Process in batches to avoid rate limiting
     const BATCH_SIZE = 5;
-    const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds
+    const DELAY_BETWEEN_BATCHES = 6000; // 6 seconds (tripled from 2s)
     
     console.log(`[InvestmentManager] Refreshing prices for ${total} assets...`);
     
