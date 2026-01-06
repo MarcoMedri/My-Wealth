@@ -729,6 +729,7 @@
     "results": "transazioni"
   },
   "exchangeRates": {
+    "stale": "Tassi obsoleti",
     "staleRates": "I tassi potrebbero essere obsoleti, clicca per aggiornare"
   },
   "analytics": {
