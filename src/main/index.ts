@@ -3,7 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
-import type { Transaction, Account, Category, Broker, DepositAccount } from '../shared/schemas'
+import type { Account, Broker, Transaction, Category, Property, Collectible, Insurance, DepositAccount, Asset } from '../shared/schemas';
 import * as fs from 'fs'
 import * as path from 'path'
 import { autoBackupScheduler } from './services/AutoBackupScheduler'
