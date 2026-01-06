@@ -622,6 +622,8 @@
     "noBrokerDesc": "Per aggiungere una polizza assicurativa devi prima creare un Broker (o Compagnia Assicurativa)."
   },
   "deposits": {
+    "addDepositDesc": "Crea un conto deposito",
+    "deleteTitle": "Elimina Conto Deposito",
     "title": "Conti Deposito",
     "subtitle": "Gestisci i tuoi risparmi vincolati e liberi.",
     "startTracking": "Inizia a tracciare i tuoi conti deposito",
