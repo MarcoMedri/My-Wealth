@@ -56,8 +56,9 @@ interface API {
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string, taxRate?: number, buyPrice?: number }) => Promise<{ updatedHolding: Holding | null, realizedGain: number }>;
   refreshInvestmentPrices: () => Promise<{ updated: number; failed: number; total: number }>;
   deleteAsset: (id: string) => Promise<void>;
+  saveAsset: (asset: Asset) => Promise<void>;
   deleteHolding: (id: string) => Promise<void>;
-  saveHolding: (holding: Holding) => Promise<Holding>;
+  saveHolding: (holding: Holding) => Promise<void>;
   saveWorkspaceSettings: (settings: Partial<WorkspaceSettings>) => Promise<boolean>;
 
   // Real Estate

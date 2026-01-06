@@ -237,6 +237,9 @@ const api = {
   deleteAsset: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.ASSET_DELETE, id)
   },
+  saveAsset: (asset: Asset): Promise<Asset> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ASSET_SAVE, asset)
+  },
   deleteHolding: (id: string): Promise<void> => {
     return ipcRenderer.invoke(IPC_CHANNELS.HOLDING_DELETE, id)
   },
