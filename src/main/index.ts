@@ -424,6 +424,10 @@ function registerIpcHandlers(): void {
     return vaultManager.deleteAsset(id);
   });
 
+  ipcMain.handle(IPC_CHANNELS.ASSET_SAVE, async (_event, asset: Asset) => {
+    return vaultManager.saveAsset(asset);
+  });
+
   ipcMain.handle(IPC_CHANNELS.HOLDING_DELETE, async (_event, id: string) => {
     const { investmentManager } = await import('./investments');
     return investmentManager.deleteHolding(id);
