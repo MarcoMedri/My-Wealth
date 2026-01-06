@@ -139,6 +139,12 @@ export function AllocationPieChart() {
                             paddingAngle={2}
                             dataKey="value"
                             nameKey="name"
+                            label={({ percentage }) => {
+                                // Only show label if percentage is > 5% to avoid clutter
+                                if (percentage < 5) return '';
+                                return `${percentage.toFixed(0)}%`;
+                            }}
+                            labelLine={false}
                         >
                             {chartData.map((entry, index) => (
                                 <Cell
