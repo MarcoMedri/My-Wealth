@@ -151,6 +151,8 @@ export default function AddAccountModal({ isOpen, onClose, preselectedBrokerId, 
                 type: 'checking',
                 currency: 'EUR',
                 initialBalance: '0.00',
+                currentBalance: '',
+                useManualBalance: false,
                 color: ACCOUNT_COLORS[0],
                 brokerId: preselectedBrokerId || '',
             });
