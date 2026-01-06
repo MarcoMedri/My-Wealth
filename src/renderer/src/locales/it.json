@@ -35,7 +35,8 @@
     "error": "Si è verificato un errore",
     "confirmDelete": "Sei sicuro di voler eliminare questo elemento?",
     "close": "Chiudi",
-    "actions": "Azioni"
+    "actions": "Azioni",
+    "confirmClear": "Sei sicuro di voler cancellare TUTTI i dati? Questa azione non può essere annullata."
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -715,6 +716,20 @@
   },
   "help": {
     "showTutorial": "Mostra Tutorial"
+  },
+  "transactions": {
+    "search": "Cerca transazioni...",
+    "allCategories": "Tutte le Categorie",
+    "type": {
+      "all": "Tutte",
+      "income": "Entrate",
+      "expense": "Uscite",
+      "transfer": "Trasferimenti"
+    },
+    "results": "transazioni"
+  },
+  "exchangeRates": {
+    "staleRates": "I tassi potrebbero essere obsoleti, clicca per aggiornare"
   },
   "analytics": {
     "performanceMetrics": "Metriche di Performance",
