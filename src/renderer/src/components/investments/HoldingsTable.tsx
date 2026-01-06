@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Holding, Asset } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Trash2 } from 'lucide-react';
 
 interface HoldingsTableProps {
     holdings: Holding[];
@@ -12,7 +12,7 @@ interface HoldingsTableProps {
     onEdit?: (holding: Holding, asset: Asset) => void;
 }
 
-export function HoldingsTable({ holdings, assets, onSell, onEdit }: HoldingsTableProps) {
+export function HoldingsTable({ holdings, assets, onSell, onEdit, onDelete }: HoldingsTableProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
 
