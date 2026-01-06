@@ -66,7 +66,7 @@ interface VaultStore {
 
   // Investment Actions
   refreshInvestments: () => Promise<void>; // Re-fetches prices? For now just reloads vault data
-  refreshAllPrices: () => Promise<void>; // Batch update all asset prices from Yahoo
+  refreshAllPrices: () => Promise<{ updated: number; failed: number; total: number }>; // Batch update all asset prices from Yahoo
   sellInvestment: (holdingId: string, quantity: number, price: number, fees: number, date: string, taxRate?: number, buyPrice?: number) => Promise<void>;
   deleteHolding: (holdingId: string) => Promise<void>; // Snapshot mode
   
@@ -244,9 +244,12 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       } else {
         toast.warning(i18n.t('investments.refreshPartial', { updated: result.updated, failed: result.failed, defaultValue: `⚠️ Updated ${result.updated} prices (${result.failed} failed)` }));
       }
+      
+      return result;
     } catch (error) {
        console.error('Failed to refresh prices:', error);
        toast.error(i18n.t('investments.refreshError', { defaultValue: '❌ Failed to update prices' }));
+       return { updated: 0, failed: 0, total: 0 };
     } finally {
       set({ isLoading: false });
     }
