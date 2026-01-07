@@ -11,7 +11,20 @@ import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import type { Asset, Holding, AssetType, InvestmentTrade, Account } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
+import type { VaultManager } from './vault';
+import type { Dividend } from '../shared/schemas';
+import { logger } from './services/LoggerService';
 
+// Price cache interface
+interface PriceCache {
+  [symbol: string]: {
+    price: number;
+    timestamp: number;
+  }
+}
+
+// Cache TTL: 15 minutes
+const CACHE_TTL_MS = 15 * 60 * 1000;
 
 
 export interface SellResult {
@@ -21,7 +34,34 @@ export interface SellResult {
 }
 
 export class InvestmentManager {
-  
+  private vaultManager: VaultManager;
+  private priceCache: PriceCache = {};
+
+  constructor(vaultManager: VaultManager) {
+    this.vaultManager = vaultManager;
+  }
+
+  // Cache helper methods
+  private isCacheValid(symbol: string): boolean {
+    const cached = this.priceCache[symbol];
+    if (!cached) return false;
+    return Date.now() - cached.timestamp < CACHE_TTL_MS;
+  }
+
+  private getCachedPrice(symbol: string): number | null {
+    if (this.isCacheValid(symbol)) {
+      return this.priceCache[symbol].price;
+    }
+    return null;
+  }
+
+  private setCachedPrice(symbol: string, price: number): void {
+    this.priceCache[symbol] = {
+      price,
+      timestamp: Date.now()
+    };
+  }
+
   /**
    * Search for securities via Yahoo Finance
    */
@@ -521,58 +561,91 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
    * Fetches current price and previousClose from Yahoo Finance
    * Returns statistics about the update operation
    */
-  async refreshAllPrices(): Promise<{ updated: number; failed: number; total: number }> {
-    const vaultManager = getVaultManager();
-    const assets = vaultManager.assets; // Direct property access
+  async refreshAllPrices(): Promise<{ updated: number; failed: number; total: number; cached: number }> {
+    const state = this.vaultManager.getState();
+    const assets = state.assets || [];
     
     let updated = 0;
     let failed = 0;
+    let cached = 0;
     const total = assets.length;
-    
-    // Process in batches to avoid rate limiting
+
+    logger.info('[InvestmentManager] Starting price refresh', { total });
+
+    // Filter assets that need refresh (not in cache or cache expired)
+    const assetsToRefresh = assets.filter(asset => {
+      const cachedPrice = this.getCachedPrice(asset.symbol);
+      if (cachedPrice !== null) {
+        cached++;
+        logger.info(`[InvestmentManager] Using cached price for ${asset.symbol}`, { 
+          price: cachedPrice,
+          age: Math.round((Date.now() - this.priceCache[asset.symbol].timestamp) / 1000) + 's'
+        });
+        return false; // Skip this asset
+      }
+      return true; // Needs refresh
+    });
+
+    logger.info('[InvestmentManager] Assets to refresh', { 
+      total: assets.length,
+      cached,
+      toRefresh: assetsToRefresh.length
+    });
+
+    // Process in batches
     const BATCH_SIZE = 5;
-    const DELAY_BETWEEN_BATCHES = 6000; // 6 seconds (tripled from 2s)
-    
-    console.log(`[InvestmentManager] Refreshing prices for ${total} assets...`);
-    
-    for (let i = 0; i < assets.length; i += BATCH_SIZE) {
-      const batch = assets.slice(i, i + BATCH_SIZE);
+    const DELAY_BETWEEN_BATCHES = 6000; // 6 seconds
+
+    for (let i = 0; i < assetsToRefresh.length; i += BATCH_SIZE) {
+      const batch = assetsToRefresh.slice(i, i + BATCH_SIZE);
       
-      // Process batch in parallel
       await Promise.all(
         batch.map(async (asset) => {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const quote = await yahooFinance.quote(asset.symbol) as any;
-            const now = new Date().toISOString();
-
-            const updatedAsset: Asset = {
-              ...asset,
-              previousClose: Math.round((quote.regularMarketPreviousClose || 0) * 100),
-              currentPrice: Math.round((quote.regularMarketPrice || 0) * 100),
-              lastUpdated: now,
-              updatedAt: now,
-            };
-
-            await vaultManager.saveAsset(updatedAsset);
-            updated++;
-            console.log(`[InvestmentManager] Updated ${asset.symbol}: $${(updatedAsset.currentPrice / 100).toFixed(2)}`);
+            const quote = await yahooFinance.quote(asset.symbol);
+            if (quote && quote.regularMarketPrice) {
+              const newPrice = Math.round(quote.regularMarketPrice * 100);
+              asset.currentPrice = newPrice;
+              
+              // Update cache
+              this.setCachedPrice(asset.symbol, newPrice);
+              
+              updated++;
+              logger.info(`[InvestmentManager] Updated ${asset.symbol}`, { 
+                price: newPrice / 100,
+                cached: true
+              });
+            } else {
+              failed++;
+              logger.warn(`[InvestmentManager] No price data for ${asset.symbol}`);
+            }
           } catch (error) {
-            console.error(`[InvestmentManager] Failed to refresh ${asset.symbol}:`, error);
             failed++;
+            logger.error(`[InvestmentManager] Failed to refresh ${asset.symbol}`, { error });
           }
         })
       );
-      
-      // Wait between batches (except after the last batch)
-      if (i + BATCH_SIZE < assets.length) {
-        console.log(`[InvestmentManager] Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+
+      // Wait between batches (except for the last batch)
+      if (i + BATCH_SIZE < assetsToRefresh.length) {
+        logger.info('[InvestmentManager] Waiting 6000ms before next batch...');
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    console.log(`[InvestmentManager] Price refresh complete: ${updated} updated, ${failed} failed, ${total} total`);
-    return { updated, failed, total };
+    // Save updated assets
+    if (updated > 0) {
+      await this.vaultManager.saveAssets(assets);
+    }
+
+    logger.info('[InvestmentManager] Price refresh complete', { 
+      updated, 
+      failed, 
+      cached,
+      total 
+    });
+
+    return { updated, failed, total, cached };
   }
 
   /**

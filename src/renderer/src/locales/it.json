@@ -419,7 +419,6 @@
     "selectRegion": "Seleziona Regione",
     "countryPlaceholder": "es. USA, Italy, Germany",
     "name": "Nome",
-    "symbol": "Simbolo",
     "confirmDelete": "Eliminare {{symbol}}? Questa azione non può essere annullata.",
     "refreshSuccess": "✅ {{count}} quotazioni aggiornate con successo",
     "refreshPartial": "⚠️ Aggiornate {{updated}} quotazioni ({{failed}} fallite)",
@@ -731,17 +730,6 @@
   },
   "help": {
     "showTutorial": "Mostra Tutorial"
-  },
-  "transactions": {
-    "search": "Cerca transazioni...",
-    "allCategories": "Tutte le Categorie",
-    "type": {
-      "all": "Tutte",
-      "income": "Entrate",
-      "expense": "Uscite",
-      "transfer": "Trasferimenti"
-    },
-    "results": "transazioni"
   },
   "exchangeRates": {
     "stale": "Tassi obsoleti",
