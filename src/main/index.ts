@@ -127,10 +127,6 @@ function registerIpcHandlers(): void {
     }
   })
 
-  // Refresh investment prices
-  ipcMain.handle(IPC_CHANNELS.REFRESH_INVESTMENT_PRICES, async () => {
-    return await getInvestmentManager().refreshAllPrices();
-  });
 
   ipcMain.handle(IPC_CHANNELS.VAULT_SELECT_PATH, async () => {
     return vaultManager.selectVaultPath()
