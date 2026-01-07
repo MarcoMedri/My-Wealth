@@ -363,7 +363,7 @@
     "day": "Giorno",
     "qty": "Qtà",
     "taxRate": "Tax %",
-    "estTax": "Tax Stimate",
+    "estTax": "Tasse Stimate",
     "buyPrice": "Prezzo Medio",
     "value": "Valore",
     "return": "Rendimento",
@@ -406,7 +406,7 @@
       "bond": "Obbligazioni",
       "fund": "Fondi",
       "insurance": "Assicurazioni",
-    "other": "Altro"
+      "other": "Altro"
     },
     "gainLoss": "Guadagno/Perdita",
     "avgWithCost": "Prezzo Medio",
@@ -673,7 +673,7 @@
       "name": "es. Cherry Bank Vincolato 60m"
     },
     "net": "netto",
-    "weightedAvg": "Media Pesante"
+    "weightedAvg": "Media Ponderata"
   },
   "accountTypes": {
     "checking": "Conto Corrente",
@@ -699,7 +699,7 @@
       "text": "Usa la barra laterale per accedere alle diverse sezioni. Iniziamo con Broker per organizzare i tuoi conti."
     },
     "brokers": {
-      "cashAccounts": "Conti Cash",
+      "cashAccounts": "Conti Liquidità",
       "title": "Crea il Tuo Primo Broker 🏦",
       "text": "Clicca qui per aggiungere un broker o istituzione finanziaria. Qui organizzerai tutti i tuoi conti (banca, investimenti, ecc.)."
     },
