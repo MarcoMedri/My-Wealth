@@ -4,7 +4,7 @@
  * Displays list of backups with restore and delete functionality
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Clock, Trash2, RotateCcw, Loader2, HardDrive } from 'lucide-react';
@@ -19,7 +19,7 @@ export function BackupPanel() {
     const [backupToDelete, setBackupToDelete] = useState<string | null>(null);
     const [backupToRestore, setBackupToRestore] = useState<string | null>(null);
 
-    const loadBackups = async () => {
+    const loadBackups = useCallback(async () => {
         setIsLoading(true);
         try {
             const list = await window.api.listBackups();
@@ -30,11 +30,11 @@ export function BackupPanel() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         loadBackups();
-    }, []);
+    }, [loadBackups]);
 
     const handleRestore = async (backupId: string) => {
         setIsRestoring(true);
