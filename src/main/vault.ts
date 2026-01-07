@@ -8,7 +8,9 @@
 
 import { app, dialog } from 'electron';
 import path from 'path';
-import fs from 'fs-extra';
+import { promises as fs } from 'fs';
+import { join, dirname } from 'path';
+import { getInvestmentManager } from './investments';
 import { randomUUID } from 'crypto';
 import type { VaultStatus } from '../shared/types';
 import { VAULT_STRUCTURE } from '../shared/types';
@@ -1452,15 +1454,6 @@ export class VaultManager {
   /**
    * Delete a holding from disk
    */
-  async deleteHolding(id: string): Promise<void> {
-    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
-
-    const filePath = path.join(this.settings.vaultPath, 'holdings.json');
-    let holdings = [] as Holding[];
-
-    if (await fs.pathExists(filePath)) {
-      try {
-        const data = await fs.readJson(filePath);
         if (Array.isArray(data.holdings)) {
           holdings = data.holdings;
         }

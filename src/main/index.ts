@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, dialog, protocol, net } from 'elect
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { getVaultManager } from './vault'
+import { getInvestmentManager } from './investments'
 import { IPC_CHANNELS, type ColumnMapping } from '../shared/types'
 import type { Account, Broker, Transaction, Category, DepositAccount, Asset } from '../shared/schemas';
 import * as fs from 'fs'
@@ -125,6 +126,11 @@ function registerIpcHandlers(): void {
       throw error
     }
   })
+
+  // Refresh investment prices
+  ipcMain.handle(IPC_CHANNELS.REFRESH_INVESTMENT_PRICES, async () => {
+    return await getInvestmentManager().refreshAllPrices();
+  });
 
   ipcMain.handle(IPC_CHANNELS.VAULT_SELECT_PATH, async () => {
     return vaultManager.selectVaultPath()
@@ -374,8 +380,8 @@ function registerIpcHandlers(): void {
 
   // ========== INVESTMENTS ==========
   ipcMain.handle(IPC_CHANNELS.INVESTMENTS_SEARCH, async (_event, query: string) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.search(query);
+    const { getInvestmentManager } = await import('./investments'); // Assuming getInvestmentManager is exported
+    return getInvestmentManager().search(query);
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENTS_GET_QUOTE, async (_event, symbol: string) => {

@@ -654,10 +654,15 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
    * Use this when user just wants to remove a holding without tracking the sale
    */
   async deleteHolding(holdingId: string): Promise<void> {
-    const vaultManager = getVaultManager();
-    await vaultManager.deleteHolding(holdingId);
+    await this.vaultManager.deleteHolding(holdingId);
     // If we're updating a snapshot, we just remove the holding from the list
   }
 }
 
-export const investmentManager = new InvestmentManager();
+/**
+ * Singleton instance
+ */
+export function getInvestmentManager(): InvestmentManager {
+  const vaultManager = getVaultManager();
+  return new InvestmentManager(vaultManager);
+}
