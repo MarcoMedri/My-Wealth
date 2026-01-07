@@ -54,7 +54,7 @@ interface API {
   buyInvestment: (params: { symbol: string, accountId: string, quantity: number, price: number, date: string, fees: number, brokerId?: string, taxRate?: number }) => Promise<{ asset: Asset, holding: Holding }>;
   buyInvestmentManual: (params: { symbol: string, name: string, type: 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other', currency: string, accountId: string, quantity: number, price: number, date: string, fees: number, brokerId?: string, taxRate?: number, metadata?: { sector?: string, industry?: string, region?: string, country?: string, exchange?: string } }) => Promise<{ asset: Asset, holding: Holding }>;
   sellInvestment: (params: { holdingId: string, quantity: number, price: number, fees: number, date: string, taxRate?: number, buyPrice?: number }) => Promise<{ updatedHolding: Holding | null, realizedGain: number }>;
-  refreshInvestmentPrices: () => Promise<{ updated: number; failed: number; total: number }>;
+  refreshInvestmentPrices: () => Promise<{ updated: number; failed: number; total: number; cached: number }>;
   deleteAsset: (id: string) => Promise<void>;
   saveAsset: (asset: Asset) => Promise<void>;
   deleteHolding: (id: string) => Promise<void>;

@@ -186,7 +186,7 @@ const api = {
   }): Promise<{ updatedHolding: Holding | null, realizedGain: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_SELL, params)
   },
-  refreshInvestmentPrices: (): Promise<{ updated: number; failed: number; total: number }> => {
+  refreshInvestmentPrices: (): Promise<{ updated: number; failed: number; total: number; cached: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES)
   },
 

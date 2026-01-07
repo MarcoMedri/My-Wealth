@@ -2348,7 +2348,7 @@ export class VaultManager {
   // ========== ANALYTICS METHODS (STUB) ==========
   // TODO: Full integration with SnapshotService, PortfolioAnalyzer, DividendPredictor
 
-  async refreshInvestmentPrices(): Promise<{ updated: number; failed: number; total: number }> {
+  async refreshInvestmentPrices(): Promise<{ updated: number; failed: number; total: number; cached: number }> {
     return getInvestmentManager().refreshAllPrices();
   }
 
