@@ -385,23 +385,19 @@ function registerIpcHandlers(): void {
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENTS_GET_QUOTE, async (_event, symbol: string) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.getQuote(symbol);
+    return getInvestmentManager().getQuote(symbol);
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENT_BUY, async (_event, params) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.buy(params);
+    return getInvestmentManager().buy(params);
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENT_BUY_MANUAL, async (_event, params) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.buyManual(params);
+    return getInvestmentManager().buyManual(params);
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENT_SELL, async (_event, params) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.sell(params);
+    return getInvestmentManager().sell(params);
   });
 
   ipcMain.handle(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES, async () => {
@@ -435,8 +431,7 @@ function registerIpcHandlers(): void {
   });
 
   ipcMain.handle(IPC_CHANNELS.HOLDING_DELETE, async (_event, id: string) => {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.deleteHolding(id);
+    return getInvestmentManager().deleteHolding(id);
   });
 
   ipcMain.handle(IPC_CHANNELS.HOLDING_SAVE, async (_event, holding) => {

@@ -2349,8 +2349,7 @@ export class VaultManager {
   // TODO: Full integration with SnapshotService, PortfolioAnalyzer, DividendPredictor
 
   async refreshInvestmentPrices(): Promise<{ updated: number; failed: number; total: number }> {
-    const { investmentManager } = await import('./investments');
-    return investmentManager.refreshAllPrices();
+    return getInvestmentManager().refreshAllPrices();
   }
 
   async getPerformanceMetrics(period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL'): Promise<{
