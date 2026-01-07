@@ -1453,6 +1453,15 @@ export class VaultManager {
   /**
    * Delete a holding from disk
    */
+  async deleteHolding(id: string): Promise<void> {
+    if (!this.settings?.vaultPath) throw new Error('No vault initialized');
+
+    const filePath = path.join(this.settings.vaultPath, 'holdings.json');
+    let holdings: Holding[] = [];
+
+    if (await fs.pathExists(filePath)) {
+      try {
+        const data = await fs.readJson(filePath);
         if (Array.isArray(data.holdings)) {
           holdings = data.holdings;
         }
