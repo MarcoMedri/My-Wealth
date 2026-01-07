@@ -8,8 +8,7 @@
 
 import { app, dialog } from 'electron';
 import path from 'path';
-import { promises as fs } from 'fs';
-import { join, dirname } from 'path';
+import fs from 'fs-extra';
 import { getInvestmentManager } from './investments';
 import { randomUUID } from 'crypto';
 import type { VaultStatus } from '../shared/types';
