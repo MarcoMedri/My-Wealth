@@ -12,7 +12,6 @@ import { randomUUID } from 'crypto';
 import type { Asset, Holding, AssetType, InvestmentTrade, Account } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
 import type { VaultManager } from './vault';
-import type { Dividend } from '../shared/schemas';
 import { logger } from './services/LoggerService';
 
 // Price cache interface
@@ -635,7 +634,9 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
 
     // Save updated assets
     if (updated > 0) {
-      await this.vaultManager.saveAssets(assets);
+      for (const asset of assets) {
+        await this.vaultManager.saveAsset(asset);
+      }
     }
 
     logger.info('[InvestmentManager] Price refresh complete', { 
