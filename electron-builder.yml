@@ -35,7 +35,8 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: false  # Imposta a true dopo aver configurato APPLE_ID e APPLE_APP_SPECIFIC_PASSWORD
+  notarize:
+    teamId: ${env:APPLE_TEAM_ID}
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
