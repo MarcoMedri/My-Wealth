@@ -1,6 +1,6 @@
 {
   "name": "my-wealth-desktop",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "An Open Source, Local-First Personal Finance application",
   "main": "./out/main/index.js",
   "author": "Marco Medri",

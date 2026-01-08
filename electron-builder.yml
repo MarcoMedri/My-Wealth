@@ -1,5 +1,6 @@
 appId: com.marcomedri.mywealth
 productName: My Wealth
+afterPack: ./scripts/afterPack.js
 directories:
   buildResources: build
 files:
@@ -35,7 +36,7 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: false
+  notarize: true
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
