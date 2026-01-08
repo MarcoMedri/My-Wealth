@@ -36,8 +36,7 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize:
-    teamId: UDZC3RG9P6
+  notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
