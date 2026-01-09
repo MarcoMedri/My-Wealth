@@ -22,8 +22,8 @@ interface PriceCache {
   }
 }
 
-// Cache TTL: 15 minutes
-const CACHE_TTL_MS = 15 * 60 * 1000;
+// Cache TTL: 4 hours (increased from 15 minutes to reduce API calls)
+const CACHE_TTL_MS = 4 * 60 * 60 * 1000;
 
 
 export interface SellResult {
@@ -591,43 +591,63 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
       toRefresh: assetsToRefresh.length
     });
 
-    // Process in batches
-    const BATCH_SIZE = 5;
-    const DELAY_BETWEEN_BATCHES = 6000; // 6 seconds
+    // Process in batches (conservative to avoid rate limiting)
+    const BATCH_SIZE = 2; // Reduced from 5 to avoid 429 errors
+    const DELAY_BETWEEN_BATCHES = 30000; // 30 seconds (increased from 6s)
 
     for (let i = 0; i < assetsToRefresh.length; i += BATCH_SIZE) {
       const batch = assetsToRefresh.slice(i, i + BATCH_SIZE);
       
+      const MAX_RETRIES = 2;
+      const RETRY_DELAY = 5000; // 5 seconds (increased from 2s)
+      
       await Promise.all(
         batch.map(async (asset) => {
-          try {
-            const quote = await yahooFinance.quote(asset.symbol);
-            if (quote && quote.regularMarketPrice) {
-              const newPrice = Math.round(quote.regularMarketPrice * 100);
-              asset.currentPrice = newPrice;
+          let retries = 0;
+          while (retries <= MAX_RETRIES) {
+            try {
+              const quote = await yahooFinance.quote(asset.symbol);
+              if (quote && quote.regularMarketPrice) {
+                const newPrice = Math.round(quote.regularMarketPrice * 100);
+                asset.currentPrice = newPrice;
+                
+                // Update cache
+                this.setCachedPrice(asset.symbol, newPrice);
+                
+                updated++;
+                logger.info(`[InvestmentManager] Updated ${asset.symbol}`, { 
+                  price: newPrice / 100,
+                  cached: true
+                });
+                break; // Success, exit retry loop
+              } else {
+                failed++;
+                logger.warn(`[InvestmentManager] No price data for ${asset.symbol}`);
+                break; // No data, don't retry
+              }
+            } catch (error) {
+              retries++;
+              // Extract error details for better logging
+              const errorDetails = error instanceof Error 
+                ? { message: error.message, stack: error.stack, name: error.name }
+                : { raw: String(error) };
               
-              // Update cache
-              this.setCachedPrice(asset.symbol, newPrice);
-              
-              updated++;
-              logger.info(`[InvestmentManager] Updated ${asset.symbol}`, { 
-                price: newPrice / 100,
-                cached: true
-              });
-            } else {
-              failed++;
-              logger.warn(`[InvestmentManager] No price data for ${asset.symbol}`);
+              if (retries > MAX_RETRIES) {
+                failed++;
+                logger.error(`[InvestmentManager] Failed to refresh ${asset.symbol} after ${MAX_RETRIES} retries`, errorDetails);
+                console.error(`[InvestmentManager] Full error for ${asset.symbol}:`, error);
+              } else {
+                logger.warn(`[InvestmentManager] Retry ${retries}/${MAX_RETRIES} for ${asset.symbol}`, errorDetails);
+                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * retries));
+              }
             }
-          } catch (error) {
-            failed++;
-            logger.error(`[InvestmentManager] Failed to refresh ${asset.symbol}`, { error });
           }
         })
       );
 
       // Wait between batches (except for the last batch)
       if (i + BATCH_SIZE < assetsToRefresh.length) {
-        logger.info('[InvestmentManager] Waiting 6000ms before next batch...');
+        logger.info(`[InvestmentManager] Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }

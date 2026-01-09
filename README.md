@@ -8,15 +8,10 @@
 
 Download the latest version for your platform from the [**Releases Page**](https://github.com/MarcoMedri/My-Wealth/releases/latest).
 
-### macOS Installation
-
-Since the app is not signed with an Apple Developer ID, macOS will block it by default. After downloading and moving the app to `/Applications`, run this command in Terminal:
-
-```bash
-xattr -cr /Applications/My\ Wealth.app
-```
-
-This removes the quarantine attribute and allows the app to run.
+**Available Downloads:**
+- **macOS**: `.dmg` installer (Apple Silicon & Intel) - Signed and notarized
+- **Windows**: `.exe` installer  
+- **Linux**: `.AppImage` portable executable
 
 ---
 
