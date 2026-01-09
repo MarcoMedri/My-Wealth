@@ -37,7 +37,9 @@ mac:
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   notarize:
-    teamId: ${env:APPLE_TEAM_ID}
+    teamId: UDZC3RG9P6
+    appleId: marco_medri@icloud.com
+    appleIdPassword: axcc-jhvx-rajx-ezwu
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
