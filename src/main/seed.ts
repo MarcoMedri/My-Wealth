@@ -293,6 +293,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     currency: 'EUR',
     currentPrice: 11520, // €115.20
     isin: 'IE00BK5BQT80',
+    autoRefresh: true,
     metadata: { exchange: 'XETRA', region: 'Global' }
   },
   {
@@ -301,6 +302,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     type: 'stock',
     currency: 'USD',
     currentPrice: 18550, // $185.50
+    autoRefresh: true,
     metadata: { exchange: 'NASDAQ', sector: 'Technology' }
   },
   {
@@ -309,6 +311,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     type: 'crypto',
     currency: 'EUR',
     currentPrice: 4250000, // €42,500.00
+    autoRefresh: true,
     metadata: { exchange: 'Coinbase' }
   },
   {
@@ -318,6 +321,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     currency: 'EUR',
     currentPrice: 9850, // €98.50
     isin: 'IT0005514473',
+    autoRefresh: false, // Bond prices typically manual
     metadata: { exchange: 'MOT', region: 'Italy' }
   },
   {
@@ -327,6 +331,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     currency: 'EUR',
     currentPrice: 24500, // €245.00
     isin: 'LU1437016972',
+    autoRefresh: true,
     metadata: { exchange: 'Euronext', region: 'Global' }
   },
   {
@@ -335,6 +340,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     type: 'other',
     currency: 'EUR',
     currentPrice: 500000, // €5,000.00 (unit)
+    autoRefresh: false, // Private asset, manual value
     metadata: { exchange: 'Private', region: 'Switzerland' }
   },
   // ========================================================================
@@ -349,6 +355,7 @@ const DEMO_ASSETS: Omit<Asset, 'id' | 'createdAt' | 'updatedAt' | 'lastUpdated'>
     type: 'etf',
     currency: 'EUR',
     currentPrice: 11000, // €110.00 (current)
+    autoRefresh: false, // Test data, don't auto-refresh
     metadata: { exchange: 'TEST', region: 'Test' }
   }
 ];

@@ -28,6 +28,7 @@ import { renderBrokerLogo } from '../../lib/renderBrokerLogo';
 import AddAccountModal from '../AddAccountModal';
 import ImportModal from '../ImportModal';
 import { AddInvestmentModal } from '../investments/AddInvestmentModal';
+import { SellInvestmentModal } from '../investments/SellInvestmentModal';
 import { AddDepositModal } from '../deposits/AddDepositModal';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { CloseDeleteAccountModal } from '../accounts/CloseDeleteAccountModal';
@@ -71,6 +72,8 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
 
     // Edit Holding State
     const [editingItem, setEditingItem] = useState<{ holding: Holding, asset: Asset } | null>(null);
+    // Sell Holding State
+    const [sellItem, setSellItem] = useState<{ holding: Holding, asset: Asset } | null>(null);
 
     // Account Archive/Delete State
     const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
@@ -127,6 +130,17 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     }, 0);
 
     const totalValue = cashTotal + investmentsTotal + depositsTotal;
+
+    // Helper: Calculate holdings value for a specific account
+    const getSecuritiesAccountValue = (accountId: string): number => {
+        return holdings
+            .filter(h => h.accountId === accountId)
+            .reduce((sum, h) => {
+                const asset = assets.find(a => a.id === h.assetId);
+                if (!asset?.currentPrice) return sum;
+                return sum + (h.quantity * asset.currentPrice);
+            }, 0);
+    };
 
     // Removed handleDelete function, logic moved to ConfirmationModal
 
@@ -403,7 +417,7 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                                     </div>
                                 </div>
                                 <p className="text-2xl font-bold text-foreground">
-                                    {formatMoney(accountBalances[account.id] || 0, account.currency)}
+                                    {formatMoney(getSecuritiesAccountValue(account.id), account.currency)}
                                 </p>
                                 {account.manualBalance !== undefined && (
                                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
@@ -423,18 +437,20 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
 
 
 
-                {/* Portfolio / Holdings */}
+                {/* Posizioni / Holdings */}
                 {brokerHoldings.length > 0 && (
                     <div className="space-y-4">
                         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                             <PieChart size={20} className="text-foreground-muted" />
-                            {t('brokers.portfolio')}
+                            {t('investments.positions', 'Posizioni')}
                         </h2>
 
                         <HoldingsTable
                             holdings={brokerHoldings}
                             assets={assets}
                             onEdit={(h, a) => setEditingItem({ holding: h, asset: a })}
+                            onSell={(h, a) => setSellItem({ holding: h, asset: a })}
+                            showActions={true}
                         />
                     </div>
                 )}
@@ -655,6 +671,17 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
                         onClose={() => setEditingItem(null)}
                         holding={editingItem.holding}
                         asset={editingItem.asset}
+                    />
+                )
+            }
+            {/* Sell Holding Modal */}
+            {
+                sellItem && (
+                    <SellInvestmentModal
+                        isOpen={!!sellItem}
+                        onClose={() => setSellItem(null)}
+                        holding={sellItem.holding}
+                        asset={sellItem.asset}
                     />
                 )
             }

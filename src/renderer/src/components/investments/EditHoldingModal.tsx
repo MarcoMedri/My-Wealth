@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../../store/useVaultStore';
+import { cn } from '../../lib/utils';
 import type { Holding, Asset } from '../../../../shared/schemas';
 
 interface EditHoldingModalProps {
@@ -20,6 +21,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
     const [taxRate, setTaxRate] = useState((holding.taxRate ?? 26).toString());
     const [assetName, setAssetName] = useState(asset.name);
     const [assetSymbol, setAssetSymbol] = useState(asset.symbol);
+    const [autoRefresh, setAutoRefresh] = useState(asset.autoRefresh !== false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -29,6 +31,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
             setTaxRate((holding.taxRate ?? 26).toString());
             setAssetName(asset.name);
             setAssetSymbol(asset.symbol);
+            setAutoRefresh(asset.autoRefresh !== false);
         }
     }, [isOpen, holding, asset]);
 
@@ -48,12 +51,13 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                 updatedAt: new Date().toISOString()
             };
 
-            // Update asset if name or symbol changed
-            if (assetName !== asset.name || assetSymbol !== asset.symbol) {
+            // Update asset if anything changed
+            if (assetName !== asset.name || assetSymbol !== asset.symbol || autoRefresh !== (asset.autoRefresh !== false)) {
                 const updatedAsset = {
                     ...asset,
                     name: assetName,
                     symbol: assetSymbol.toUpperCase(),
+                    autoRefresh: autoRefresh,
                     updatedAt: new Date().toISOString()
                 };
                 await window.api.saveAsset(updatedAsset);
@@ -158,6 +162,38 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                         </div>
                     </div>
 
+                    {/* Auto-refresh toggle */}
+                    <div className="flex items-center justify-between py-2 px-3 bg-background-subtle rounded-lg border border-border">
+                        <div>
+                            <label className="text-sm font-medium text-foreground cursor-pointer" htmlFor="auto-refresh-toggle">
+                                {t('investments.autoRefresh', 'Aggiornamento automatico')}
+                            </label>
+                            <p className="text-xs text-foreground-muted">
+                                {t('investments.autoRefreshDesc', 'Aggiorna prezzi da Yahoo Finance')}
+                            </p>
+                        </div>
+                        <button
+                            id="auto-refresh-toggle"
+                            type="button"
+                            aria-checked={autoRefresh}
+                            role="switch"
+                            onClick={() => setAutoRefresh(!autoRefresh)}
+                            className={cn(
+                                "w-10 h-6 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary border-2",
+                                autoRefresh
+                                    ? "bg-primary border-primary"
+                                    : "bg-gray-300 dark:bg-gray-600 border-gray-300 dark:border-gray-600"
+                            )}
+                        >
+                            <span
+                                className={cn(
+                                    "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-transform",
+                                    autoRefresh ? "translate-x-4" : "translate-x-0"
+                                )}
+                            />
+                        </button>
+                    </div>
+
                     <div className="pt-4 flex gap-3">
                         <button
                             type="button"
@@ -179,3 +215,4 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
         </div>
     );
 }
+

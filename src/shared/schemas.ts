@@ -93,6 +93,7 @@ export const AssetSchema = z.object({
   previousClose: Money.optional(), // Yesterday's close for day change calculation
   priceHistory: z.array(PriceHistoryEntrySchema).optional(), // Historical prices (optional)
   lastUpdated: ISODate, // ISO 8601
+  autoRefresh: z.boolean().default(true), // Enable/disable Yahoo auto-refresh for this asset
   metadata: z.object({
     sector: z.string().optional(),
     industry: z.string().optional(),

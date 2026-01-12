@@ -343,7 +343,7 @@ export function InvestmentDashboard() {
             {/* Row 4: Holdings Table - Full Width */}
             <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden min-h-[650px] flex flex-col">
                 <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                    <span className="font-semibold text-foreground">{t('investments.holdings')}</span>
+                    <span className="font-semibold text-foreground">{t('investments.positions', 'Posizioni')}</span>
 
                     {/* Include Closed Positions Toggle */}
                     <div className="flex items-center gap-3">
@@ -357,13 +357,15 @@ export function InvestmentDashboard() {
                                 role="switch"
                                 onClick={() => handleIncludeClosedChange(!includeClosed)}
                                 className={cn(
-                                    "w-9 h-5 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                                    includeClosed ? "bg-primary" : "bg-input hover:bg-input-hover"
+                                    "w-10 h-6 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary border-2",
+                                    includeClosed
+                                        ? "bg-primary border-primary"
+                                        : "bg-gray-300 dark:bg-gray-600 border-gray-300 dark:border-gray-600"
                                 )}
                             >
                                 <span
                                     className={cn(
-                                        "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform",
+                                        "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-transform",
                                         includeClosed ? "translate-x-4" : "translate-x-0"
                                     )}
                                 />
@@ -384,7 +386,6 @@ export function InvestmentDashboard() {
                 <HoldingsTable
                     holdings={filteredHoldings}
                     assets={assets}
-                    onSell={(h, a) => setSellModal({ holding: h, asset: a })}
                     onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
                 />
             </div>

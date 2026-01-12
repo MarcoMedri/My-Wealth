@@ -3,16 +3,17 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Holding, Asset } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Pencil } from 'lucide-react';
 
 interface HoldingsTableProps {
     holdings: Holding[];
     assets: Asset[];
     onSell?: (holding: Holding, asset: Asset) => void;
     onEdit?: (holding: Holding, asset: Asset) => void;
+    showActions?: boolean; // Controls if actions column is shown
 }
 
-export function HoldingsTable({ holdings, assets, onSell, onEdit }: HoldingsTableProps) {
+export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = false }: HoldingsTableProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
 
@@ -39,7 +40,9 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit }: HoldingsTabl
                             <th className="px-6 py-3 text-right">{t('investments.dayChange')}</th>
                             <th className="px-6 py-3 text-right">{t('investments.value')}</th>
                             <th className="px-6 py-3 text-right">{t('investments.gainLoss')}</th>
-                            <th className="px-6 py-3 text-right w-12">{t('common.actions')}</th>
+                            {showActions && (
+                                <th className="px-6 py-3 text-right w-24">{t('common.actions')}</th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -97,20 +100,36 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit }: HoldingsTabl
                                             <span className="text-xs opacity-80">{gainPercent.toFixed(2)}%</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                                        {onSell && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onSell(holding, asset);
-                                                }}
-                                                className="btn btn-ghost btn-sm text-foreground-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title={t('investments.sell')}
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </td>
+                                    {showActions && (
+                                        <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-1">
+                                                {onEdit && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onEdit(holding, asset);
+                                                        }}
+                                                        className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                                                        title={t('common.edit')}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {onSell && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onSell(holding, asset);
+                                                        }}
+                                                        className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-colors"
+                                                        title={t('investments.sell')}
+                                                    >
+                                                        <Minus className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    )}
                                 </tr>
                             );
                         })}
