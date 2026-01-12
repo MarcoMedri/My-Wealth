@@ -355,32 +355,67 @@ export class VaultManager {
       }
 
 
-      // Load Assets
+      // Load Assets (with sanitization for legacy/malformed data)
       const assetsPath = path.join(vaultPath, 'assets.json');
       if (await fs.pathExists(assetsPath)) {
         try {
             const data = await fs.readJson(assetsPath);
+            
+            // Sanitize assets before validation
+            if (data.assets && Array.isArray(data.assets)) {
+              data.assets = data.assets.map((asset: Record<string, unknown>) => ({
+                ...asset,
+                // Normalize type to lowercase
+                type: typeof asset.type === 'string' ? asset.type.toLowerCase() : asset.type,
+                // Ensure prices are integers (cents)
+                currentPrice: typeof asset.currentPrice === 'number' ? Math.round(asset.currentPrice) : asset.currentPrice,
+                previousClose: typeof asset.previousClose === 'number' ? Math.round(asset.previousClose) : asset.previousClose,
+                // Ensure autoRefresh has a default value
+                autoRefresh: asset.autoRefresh !== undefined ? asset.autoRefresh : true,
+              }));
+            }
+            
             const parsed = AssetsFileSchema.safeParse(data);
             if (parsed.success) {
                 this.vaultState.assets = parsed.data.assets;
             } else {
                 console.error('Invalid assets.json:', parsed.error);
+                // Fallback: load raw data without validation for graceful degradation
+                if (data.assets && Array.isArray(data.assets)) {
+                  console.warn('[VaultManager] Loading assets with fallback (no validation) to prevent data loss');
+                  this.vaultState.assets = data.assets;
+                }
             }
         } catch (e) {
             console.error('Failed to load assets:', e);
         }
       }
 
-      // Load Holdings
+      // Load Holdings (with sanitization)
       const holdingsPath = path.join(vaultPath, 'holdings.json');
       if (await fs.pathExists(holdingsPath)) {
         try {
             const data = await fs.readJson(holdingsPath);
+            
+            // Sanitize holdings before validation
+            if (data.holdings && Array.isArray(data.holdings)) {
+              data.holdings = data.holdings.map((holding: Record<string, unknown>) => ({
+                ...holding,
+                // Ensure price is integer (cents)
+                averageBuyPrice: typeof holding.averageBuyPrice === 'number' ? Math.round(holding.averageBuyPrice) : holding.averageBuyPrice,
+              }));
+            }
+            
             const parsed = HoldingsFileSchema.safeParse(data);
             if (parsed.success) {
                 this.vaultState.holdings = parsed.data.holdings;
             } else {
                 console.error('Invalid holdings.json:', parsed.error);
+                // Fallback for graceful degradation
+                if (data.holdings && Array.isArray(data.holdings)) {
+                  console.warn('[VaultManager] Loading holdings with fallback (no validation) to prevent data loss');
+                  this.vaultState.holdings = data.holdings;
+                }
             }
         } catch (e) {
             console.error('Failed to load holdings:', e);
@@ -451,16 +486,32 @@ export class VaultManager {
         }
       }
 
-      // Load Trades (Investment history)
+      // Load Trades (Investment history) - with sanitization
       const tradesPath = path.join(vaultPath, 'trades.json');
       if (await fs.pathExists(tradesPath)) {
         try {
             const data = await fs.readJson(tradesPath);
+            
+            // Sanitize trades before validation
+            if (data.trades && Array.isArray(data.trades)) {
+              data.trades = data.trades.map((trade: Record<string, unknown>) => ({
+                ...trade,
+                // Ensure prices/fees are integers (cents)
+                pricePerUnit: typeof trade.pricePerUnit === 'number' ? Math.round(trade.pricePerUnit) : trade.pricePerUnit,
+                fees: typeof trade.fees === 'number' ? Math.round(trade.fees) : trade.fees,
+              }));
+            }
+            
             const parsed = TradesFileSchema.safeParse(data);
             if (parsed.success) {
                 this.vaultState.trades = parsed.data.trades;
             } else {
                 console.error('Invalid trades.json:', parsed.error);
+                // Fallback for graceful degradation
+                if (data.trades && Array.isArray(data.trades)) {
+                  console.warn('[VaultManager] Loading trades with fallback (no validation) to prevent data loss');
+                  this.vaultState.trades = data.trades;
+                }
             }
         } catch (e) {
             console.error('Failed to load trades:', e);
@@ -2361,7 +2412,7 @@ export class VaultManager {
     absoluteGain: number;
     period: string;
   }> {
-    if (!this.performanceCalculator || !this.snapshotService) {
+    if (!this.performanceCalculator) {
       throw new Error('Analytics services not initialized');
     }
 
@@ -2393,11 +2444,44 @@ export class VaultManager {
         break;
     }
 
-    // Get snapshots from SnapshotService
-    const snapshots = this.snapshotService.getSnapshots(startDate, endDate);
+    // Use vault state snapshots (which are already loaded) instead of SnapshotService
+    // Filter and convert Snapshot (from schemas) to PortfolioSnapshot (for calculator)
+    const vaultSnapshots = this.vaultState.snapshots
+      .filter(s => {
+        const date = new Date(s.date);
+        return date >= startDate && date <= endDate;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Convert to PortfolioSnapshot format
+    // Note: We estimate cashFlow as difference in net worth between snapshots
+    // This is a simplification; for accurate cashFlow tracking, transactions would be needed
+    const portfolioSnapshots = vaultSnapshots.map((s, index, arr) => {
+      // Cash flow = difference not explained by investment returns
+      // For simplicity, we set cashFlow to 0 for first snapshot
+      // and estimate for subsequent ones based on investment breakdown changes
+      let cashFlow = 0;
+      if (index > 0) {
+        const prev = arr[index - 1];
+        // Estimate cash flow from cash/deposits changes (rough approximation)
+        const prevCash = prev.breakdown.cash + prev.breakdown.deposits;
+        const currCash = s.breakdown.cash + s.breakdown.deposits;
+        // If cash increased more than investments gained, assume deposit
+        // This is a simplification - ideally tracked per transaction
+        cashFlow = (currCash - prevCash);
+      }
+
+      return {
+        id: s.id,
+        timestamp: s.date,
+        totalValue: s.totalNetWorth,
+        cashFlow: cashFlow,
+        accounts: [], // Not needed for basic TWR/MWR calculation
+      };
+    });
     
     // Calculate metrics using PerformanceCalculator
-    const metrics = this.performanceCalculator.getMetrics(snapshots, period);
+    const metrics = this.performanceCalculator.getMetrics(portfolioSnapshots, period);
     
     return {
       ...metrics,

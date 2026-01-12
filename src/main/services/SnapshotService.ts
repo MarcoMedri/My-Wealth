@@ -51,8 +51,8 @@ export class SnapshotService {
   private snapshots: PortfolioSnapshot[] = [];
 
   constructor(vaultPath: string) {
-    const vaultDir = path.dirname(vaultPath);
-    this.snapshotsPath = path.join(vaultDir, 'snapshots.json');
+    // vaultPath IS the vault directory, no need for dirname
+    this.snapshotsPath = path.join(vaultPath, 'snapshots.json');
     this.loadSnapshots();
   }
 

@@ -1,25 +1,14 @@
-import yahooFinanceModule from 'yahoo-finance2';
+import { getYahooService } from './yahooService';
 import { app } from 'electron';
 import { join } from 'path';
 import fs from 'fs-extra';
 import { SUPPORTED_CURRENCIES } from '../shared/types';
-// Handle CommonJS/ESM interop
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const YahooFinanceModule = (yahooFinanceModule as any).default || yahooFinanceModule;
-const yahooFinance = new YahooFinanceModule();
-
-// usage: yahooFinance.quote(...)
 
 
 interface ExchangeRateCache {
   base: string;
   rates: Record<string, number>; // e.g. "USD": 1.05
   timestamp: number;
-}
-
-interface YahooQuote {
-  symbol: string;
-  regularMarketPrice?: number;
 }
 
 const CACHE_FILE = 'exchange_rates.json';
@@ -75,60 +64,46 @@ export class ExchangeRateManager {
     }
   }
 
-  private async fetchRates(base: string, retries = 3): Promise<Record<string, number>> {
+  private async fetchRates(base: string): Promise<Record<string, number>> {
     const rates: Record<string, number> = {};
+    const yahooService = getYahooService();
     
     // Yahoo Finance quotes for currencies usually look like "EURUSD=X" (EUR to USD)
     // We want 1 Base = ? Target
     // So if Base = EUR, we query EURUSD=X, EURGBP=X, etc.
     
-    const symbols = SUPPORTED_CURRENCIES
+    const targetCurrencies = SUPPORTED_CURRENCIES
       .filter(c => c.code !== base)
-      .map(c => `${base}${c.code}=X`);
+      .map(c => c.code);
     
-    if (symbols.length === 0) return { [base]: 1 };
+    if (targetCurrencies.length === 0) return { [base]: 1 };
+    
+    // Initialize with base = 1
+    rates[base] = 1;
 
-    // Retry logic with exponential backoff
-    for (let attempt = 0; attempt < retries; attempt++) {
+    // Check if rate limited
+    if (yahooService.isRateLimited()) {
+      console.warn('[ExchangeRateManager] Yahoo Finance rate limited, using fallback');
+      throw new Error('Yahoo Finance rate limited');
+    }
+
+    // Fetch rates one by one (YahooService handles rate limiting)
+    for (const target of targetCurrencies) {
+      const symbol = `${base}${target}=X`;
       try {
-        const results = await yahooFinance.quote(symbols);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const quote = await yahooService.quote(symbol) as any;
         
-        // Initialize with base = 1
-        rates[base] = 1;
-
-        // Ensure results is array
-        const quotes = (Array.isArray(results) ? results : [results]) as YahooQuote[];
-
-        quotes.forEach(quote => {
-          if (!quote.symbol || !quote.regularMarketPrice) return;
-          
-          // Extract target currency from symbol (e.g. "EURUSD=X" -> "USD")
-          const match = quote.symbol.match(/^[A-Z]{3}([A-Z]{3})=X$/);
-          if (match) {
-            const targetCurrency = match[1];
-            rates[targetCurrency] = quote.regularMarketPrice;
-          }
-        });
-
-        console.log(`[ExchangeRateManager] Fetched ${Object.keys(rates).length} rates for ${base}`);
-        return rates;
-        
-      } catch (error) {
-        const isLastAttempt = attempt === retries - 1;
-        
-        if (isLastAttempt) {
-          console.error('[ExchangeRateManager] All retry attempts failed:', error);
-          throw error;
+        if (quote && quote.regularMarketPrice) {
+          rates[target] = quote.regularMarketPrice;
         }
-        
-        // Exponential backoff: 1s, 2s, 4s
-        const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`[ExchangeRateManager] Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+      } catch (error) {
+        console.warn(`[ExchangeRateManager] Failed to fetch ${symbol}:`, error instanceof Error ? error.message : String(error));
+        // Continue with other currencies, don't fail entirely
       }
     }
 
-    // This should never be reached due to throw in loop, but TypeScript needs it
+    console.log(`[ExchangeRateManager] Fetched ${Object.keys(rates).length} rates for ${base}`);
     return rates;
   }
 
@@ -154,4 +129,17 @@ export class ExchangeRateManager {
   }
 }
 
-export const exchangeRateManager = new ExchangeRateManager();
+// Lazy-loaded singleton to avoid Electron app access at import time (breaks tests)
+let _exchangeRateManager: ExchangeRateManager | null = null;
+
+export function getExchangeRateManager(): ExchangeRateManager {
+  if (!_exchangeRateManager) {
+    _exchangeRateManager = new ExchangeRateManager();
+  }
+  return _exchangeRateManager;
+}
+
+// Keep for backwards compatibility but prefer getExchangeRateManager()
+export const exchangeRateManager = {
+  getExchangeRates: async (baseCurrency: string) => getExchangeRateManager().getExchangeRates(baseCurrency)
+};

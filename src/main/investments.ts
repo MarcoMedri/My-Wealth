@@ -1,29 +1,13 @@
-import yahooFinanceModule from 'yahoo-finance2';
-
-// Robust loader for Electron/Vite environment
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pkg = (yahooFinanceModule as any).default || yahooFinanceModule;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const yahooFinance = (typeof pkg === 'function') ? new pkg() : pkg;
-
-console.log('[InvestmentManager] Yahoo Finance initialized. Type:', typeof yahooFinance, 'Is search function?', typeof yahooFinance.search);
+import { getYahooService } from './yahooService';
 import { getVaultManager } from './vault';
 import { randomUUID } from 'crypto';
 import type { Asset, Holding, AssetType, InvestmentTrade, Account } from '../shared/schemas';
 import type { InvestmentSearchResult } from '../shared/types';
 import type { VaultManager } from './vault';
 import { logger } from './services/LoggerService';
+import { exchangeRateManager } from './exchangeRates';
 
-// Price cache interface
-interface PriceCache {
-  [symbol: string]: {
-    price: number;
-    timestamp: number;
-  }
-}
-
-// Cache TTL: 4 hours (increased from 15 minutes to reduce API calls)
-const CACHE_TTL_MS = 4 * 60 * 60 * 1000;
+// Note: Price caching is now handled by YahooService with disk persistence
 
 
 export interface SellResult {
@@ -34,31 +18,9 @@ export interface SellResult {
 
 export class InvestmentManager {
   private vaultManager: VaultManager;
-  private priceCache: PriceCache = {};
 
   constructor(vaultManager: VaultManager) {
     this.vaultManager = vaultManager;
-  }
-
-  // Cache helper methods
-  private isCacheValid(symbol: string): boolean {
-    const cached = this.priceCache[symbol];
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < CACHE_TTL_MS;
-  }
-
-  private getCachedPrice(symbol: string): number | null {
-    if (this.isCacheValid(symbol)) {
-      return this.priceCache[symbol].price;
-    }
-    return null;
-  }
-
-  private setCachedPrice(symbol: string, price: number): void {
-    this.priceCache[symbol] = {
-      price,
-      timestamp: Date.now()
-    };
   }
 
   /**
@@ -66,8 +28,9 @@ export class InvestmentManager {
    */
   async search(query: string): Promise<InvestmentSearchResult[]> {
     try {
+      const yahooService = getYahooService();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const results = await yahooFinance.search(query) as any;
+      const results = await yahooService.search(query) as any;
       
       if (!results.quotes) return [];
       
@@ -90,8 +53,9 @@ export class InvestmentManager {
    */
   async getQuote(symbol: string) {
     try {
+      const yahooService = getYahooService();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const quote = await yahooFinance.quote(symbol) as any;
+      const quote = await yahooService.quote(symbol) as any;
       return {
         symbol: quote.symbol,
         price: Math.round((quote.regularMarketPrice || 0) * 100), // to cents
@@ -142,8 +106,9 @@ export class InvestmentManager {
     
     if (!asset) {
       // Fetch details from Yahoo
+      const yahooService = getYahooService();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const quote = await yahooFinance.quote(params.symbol) as any;
+      const quote = await yahooService.quote(params.symbol) as any;
       const now = new Date().toISOString();
       
       // Map Yahoo types to our AssetType
@@ -163,6 +128,7 @@ export class InvestmentManager {
         currentPrice: Math.round((quote.regularMarketPrice || 0) * 100),
         previousClose: Math.round((quote.regularMarketPreviousClose || 0) * 100),
         lastUpdated: now,
+        autoRefresh: true,
         metadata: {
             exchange: quote.fullExchangeName,
             // Yahoo often requires 'quoteSummary' for sector/industry, simplistic quote has basics
@@ -174,8 +140,9 @@ export class InvestmentManager {
       await vaultManager.saveAsset(asset);
     } else {
       // Asset exists - update price and previousClose
+      const yahooService = getYahooService();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const quote = await yahooFinance.quote(params.symbol) as any;
+      const quote = await yahooService.quote(params.symbol) as any;
       const now = new Date().toISOString();
       asset = {
         ...asset,
@@ -313,6 +280,7 @@ export class InvestmentManager {
         currentPrice: params.price,
         previousClose: params.price, // No previous data for manual
         lastUpdated: now,
+        autoRefresh: false, // Manual assets don't auto-refresh by default
         createdAt: now,
         updatedAt: now
       };
@@ -556,11 +524,12 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
   }
 
   /**
-   * Refresh all asset prices (Batch Update with Rate Limiting)
-   * Fetches current price and previousClose from Yahoo Finance
+   * Refresh all asset prices (using centralized YahooService)
+   * YahooService handles caching, rate limiting, and request queuing
    * Returns statistics about the update operation
    */
   async refreshAllPrices(): Promise<{ updated: number; failed: number; total: number; cached: number }> {
+    const yahooService = getYahooService();
     const state = this.vaultManager.getState();
     const assets = state.assets || [];
     
@@ -570,90 +539,126 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
     const total = assets.length;
 
     logger.info('[InvestmentManager] Starting price refresh', { total });
+    
+    // Check if rate limited
+    if (yahooService.isRateLimited()) {
+      const remainingSeconds = yahooService.getRateLimitRemainingSeconds();
+      logger.warn('[InvestmentManager] Yahoo Finance rate limited', { remainingSeconds });
+      throw new Error(`Yahoo Finance rate limited. Try again in ${remainingSeconds} seconds.`);
+    }
 
-    // Filter assets that need refresh (not in cache or cache expired)
-    const assetsToRefresh = assets.filter(asset => {
-      const cachedPrice = this.getCachedPrice(asset.symbol);
-      if (cachedPrice !== null) {
-        cached++;
-        logger.info(`[InvestmentManager] Using cached price for ${asset.symbol}`, { 
-          price: cachedPrice,
-          age: Math.round((Date.now() - this.priceCache[asset.symbol].timestamp) / 1000) + 's'
-        });
-        return false; // Skip this asset
+    // Process assets one by one (YahooService handles rate limiting internally)
+    for (const asset of assets) {
+      // Skip assets with autoRefresh disabled
+      if (asset.autoRefresh === false) {
+        logger.info(`[InvestmentManager] Skipping ${asset.symbol} (autoRefresh disabled)`);
+        continue;
       }
-      return true; // Needs refresh
-    });
-
-    logger.info('[InvestmentManager] Assets to refresh', { 
-      total: assets.length,
-      cached,
-      toRefresh: assetsToRefresh.length
-    });
-
-    // Process in batches (conservative to avoid rate limiting)
-    const BATCH_SIZE = 2; // Reduced from 5 to avoid 429 errors
-    const DELAY_BETWEEN_BATCHES = 30000; // 30 seconds (increased from 6s)
-
-    for (let i = 0; i < assetsToRefresh.length; i += BATCH_SIZE) {
-      const batch = assetsToRefresh.slice(i, i + BATCH_SIZE);
       
-      const MAX_RETRIES = 2;
-      const RETRY_DELAY = 5000; // 5 seconds (increased from 2s)
-      
-      await Promise.all(
-        batch.map(async (asset) => {
-          let retries = 0;
-          while (retries <= MAX_RETRIES) {
+      try {
+        // Check if we have a valid cached price first
+        const cachedEntry = yahooService.getCachedPrice(asset.symbol);
+        
+        if (cachedEntry) {
+          // Use cached price, update asset
+          let cachedPrice = cachedEntry.price;
+          let cachedPreviousClose = cachedEntry.previousClose;
+          
+          // Currency conversion if needed (cached prices include their original currency)
+          const cachedCurrency = cachedEntry.currency || 'USD';
+          if (cachedCurrency !== asset.currency) {
             try {
-              const quote = await yahooFinance.quote(asset.symbol);
-              if (quote && quote.regularMarketPrice) {
-                const newPrice = Math.round(quote.regularMarketPrice * 100);
-                asset.currentPrice = newPrice;
-                
-                // Update cache
-                this.setCachedPrice(asset.symbol, newPrice);
-                
-                updated++;
-                logger.info(`[InvestmentManager] Updated ${asset.symbol}`, { 
-                  price: newPrice / 100,
-                  cached: true
-                });
-                break; // Success, exit retry loop
-              } else {
-                failed++;
-                logger.warn(`[InvestmentManager] No price data for ${asset.symbol}`);
-                break; // No data, don't retry
-              }
-            } catch (error) {
-              retries++;
-              // Extract error details for better logging
-              const errorDetails = error instanceof Error 
-                ? { message: error.message, stack: error.stack, name: error.name }
-                : { raw: String(error) };
+              const rates = await exchangeRateManager.getExchangeRates(cachedCurrency);
+              const conversionRate = rates[asset.currency] || 1;
               
-              if (retries > MAX_RETRIES) {
-                failed++;
-                logger.error(`[InvestmentManager] Failed to refresh ${asset.symbol} after ${MAX_RETRIES} retries`, errorDetails);
-                console.error(`[InvestmentManager] Full error for ${asset.symbol}:`, error);
-              } else {
-                logger.warn(`[InvestmentManager] Retry ${retries}/${MAX_RETRIES} for ${asset.symbol}`, errorDetails);
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * retries));
-              }
+              cachedPrice = Math.round(cachedPrice * conversionRate);
+              cachedPreviousClose = Math.round(cachedPreviousClose * conversionRate);
+              
+              logger.info(`[InvestmentManager] Converted cached ${asset.symbol} from ${cachedCurrency} to ${asset.currency}`, {
+                originalPrice: cachedEntry.price / 100,
+                convertedPrice: cachedPrice / 100,
+                rate: conversionRate
+              });
+            } catch (convError) {
+              logger.warn(`[InvestmentManager] Failed to convert cached currency for ${asset.symbol}`, {
+                from: cachedCurrency,
+                to: asset.currency
+              });
             }
           }
-        })
-      );
-
-      // Wait between batches (except for the last batch)
-      if (i + BATCH_SIZE < assetsToRefresh.length) {
-        logger.info(`[InvestmentManager] Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
-        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+          
+          asset.currentPrice = cachedPrice;
+          asset.previousClose = cachedPreviousClose;
+          asset.lastUpdated = new Date(cachedEntry.timestamp).toISOString();
+          cached++;
+          logger.info(`[InvestmentManager] Using cached price for ${asset.symbol}`, { 
+            price: cachedPrice / 100,
+            currency: asset.currency,
+            age: Math.round((Date.now() - cachedEntry.timestamp) / 1000 / 60) + ' min'
+          });
+        } else {
+          // Need to fetch from Yahoo
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const quote = await yahooService.quote(asset.symbol) as any;
+          
+          if (quote && quote.regularMarketPrice) {
+            let newPrice = Math.round(quote.regularMarketPrice * 100);
+            let previousClose = Math.round((quote.regularMarketPreviousClose || 0) * 100);
+            
+            // Currency conversion if needed
+            const quoteCurrency = quote.currency || 'USD';
+            if (quoteCurrency !== asset.currency) {
+              try {
+                // Get exchange rate from quote currency to asset currency
+                const rates = await exchangeRateManager.getExchangeRates(quoteCurrency);
+                const conversionRate = rates[asset.currency] || 1;
+                
+                newPrice = Math.round(newPrice * conversionRate);
+                previousClose = Math.round(previousClose * conversionRate);
+                
+                logger.info(`[InvestmentManager] Converted ${asset.symbol} from ${quoteCurrency} to ${asset.currency}`, {
+                  originalPrice: quote.regularMarketPrice,
+                  convertedPrice: newPrice / 100,
+                  rate: conversionRate
+                });
+              } catch (convError) {
+                logger.warn(`[InvestmentManager] Failed to convert currency for ${asset.symbol}, using original price`, {
+                  from: quoteCurrency,
+                  to: asset.currency
+                });
+              }
+            }
+            
+            asset.currentPrice = newPrice;
+            asset.previousClose = previousClose;
+            asset.lastUpdated = new Date().toISOString();
+            
+            updated++;
+            logger.info(`[InvestmentManager] Updated ${asset.symbol}`, { 
+              price: newPrice / 100,
+              currency: asset.currency,
+              fromCache: !!quote._fromCache
+            });
+          } else {
+            failed++;
+            logger.warn(`[InvestmentManager] No price data for ${asset.symbol}`);
+          }
+        }
+      } catch (error) {
+        failed++;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`[InvestmentManager] Failed to refresh ${asset.symbol}`, { error: errorMessage });
+        
+        // If rate limited, stop processing
+        if (errorMessage.includes('rate limit')) {
+          logger.warn('[InvestmentManager] Rate limit hit, stopping refresh');
+          break;
+        }
       }
     }
 
     // Save updated assets
-    if (updated > 0) {
+    if (updated > 0 || cached > 0) {
       for (const asset of assets) {
         await this.vaultManager.saveAsset(asset);
       }
