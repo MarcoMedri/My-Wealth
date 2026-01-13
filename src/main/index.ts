@@ -550,11 +550,17 @@ app.whenReady().then(async () => {
     
     // Use same path logic as logo registry
     const isDev = !app.isPackaged
+    
+    // In production, extraResources copies 'resources/' folder to 'Resources/resources/'
+    // So we need to go: process.resourcesPath/resources/asset-icons/...
+    // In dev, app.getAppPath()/resources/asset-icons/...
     const resourcesPath = isDev 
       ? path.join(app.getAppPath(), 'resources')
-      : (process.resourcesPath || path.join(__dirname, '../../resources'))
+      : path.join(process.resourcesPath, 'resources')
     
     const filePath = path.join(resourcesPath, 'asset-icons', url)
+    
+    console.log('[Asset Protocol] Serving:', filePath)
     
     return net.fetch(`file://${filePath}`)
   })

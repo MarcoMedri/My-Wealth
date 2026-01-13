@@ -32,7 +32,8 @@
     "saving": "Saving...",
     "error": "An error occurred",
     "confirmDelete": "Are you sure you want to delete this item?",
-    "close": "Close"
+    "close": "Close",
+    "confirmClear": "Are you sure you want to clear ALL data? This action cannot be undone."
   },
   "nav": {
     "dashboard": "Overview",
@@ -48,7 +49,8 @@
     "generateDemoData": "Generate Demo Data",
     "clearAllData": "Clear All Data",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "portfolioXRay": "Portfolio X-Ray"
   },
   "brokers": {
     "addBroker": "Add Broker",
@@ -303,7 +305,16 @@
     "confirmDelete": "Are you sure you want to delete this transaction",
     "expense": "Expense",
     "income": "Income",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "search": "Search transactions...",
+    "allCategories": "All Categories",
+    "results": "transactions",
+    "type": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Expense",
+      "transfer": "Transfer"
+    }
   },
   "import": {
     "title": "Import CSV",
@@ -402,7 +413,10 @@
     "moreItems": "+ {{count}} more",
     "refreshSuccess": "✅ {{count}} prices updated successfully",
     "refreshPartial": "⚠️ Updated {{updated}} prices ({{failed}} failed)",
-    "refreshError": "❌ Failed to refresh prices"
+    "refreshError": "❌ Failed to refresh prices",
+    "positions": "Positions",
+    "avgWithCost": "Avg Price",
+    "gainLoss": "Gain/Loss"
   },
   "modals": {
     "cancel": "Cancel",
@@ -700,5 +714,24 @@
   },
   "help": {
     "showTutorial": "Show Tutorial"
+  },
+  "analytics": {
+    "performanceTooltip": "Performance metrics calculated from your portfolio snapshots",
+    "performanceMetrics": "Performance Metrics",
+    "noData": "No data available",
+    "noDataHint": "Take snapshots to see performance over time",
+    "twr": "TWR",
+    "twrDescription": "Time-Weighted Return",
+    "mwr": "MWR",
+    "mwrDescription": "Money-Weighted Return",
+    "startValue": "Start Value",
+    "endValue": "End Value"
+  },
+  "exchangeRates": {
+    "staleRates": "Rates may be outdated, click to refresh",
+    "stale": "Stale rates",
+    "refreshing": "Refreshing rates...",
+    "updated": "Rates updated",
+    "error": "Failed to update rates"
   }
 }

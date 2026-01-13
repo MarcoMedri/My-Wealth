@@ -311,7 +311,16 @@
     "confirmDelete": "Sei sicuro di voler eliminare questa transazione",
     "expense": "Uscita",
     "income": "Entrata",
-    "transfer": "Trasferimento"
+    "transfer": "Trasferimento",
+    "search": "Cerca transazioni...",
+    "allCategories": "Tutte le Categorie",
+    "results": "transazioni",
+    "type": {
+      "all": "Tutte",
+      "income": "Entrate",
+      "expense": "Uscite",
+      "transfer": "Trasferimenti"
+    }
   },
   "import": {
     "title": "Importa CSV",
