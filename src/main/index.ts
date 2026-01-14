@@ -550,11 +550,27 @@ app.whenReady().then(async () => {
     
     // Use same path logic as logo registry
     const isDev = !app.isPackaged
+    
+    // In production, extraResources copies 'resources/' folder to 'Resources/resources/'
+    // So we need to go: process.resourcesPath/resources/asset-icons/...
+    // In dev, app.getAppPath()/resources/asset-icons/...
     const resourcesPath = isDev 
       ? path.join(app.getAppPath(), 'resources')
-      : (process.resourcesPath || path.join(__dirname, '../../resources'))
+      : path.join(process.resourcesPath, 'resources')
     
     const filePath = path.join(resourcesPath, 'asset-icons', url)
+    
+    // Check if file exists before attempting to fetch
+    if (!fs.existsSync(filePath)) {
+      console.error('[Asset Protocol] File not found:', filePath)
+      console.error('[Asset Protocol] isDev:', isDev)
+      console.error('[Asset Protocol] resourcesPath:', resourcesPath)
+      console.error('[Asset Protocol] requested url:', url)
+      // Return a transparent 1x1 PNG as fallback
+      return new Response(null, { status: 404, statusText: 'Asset not found' })
+    }
+    
+    console.log('[Asset Protocol] Serving:', filePath)
     
     return net.fetch(`file://${filePath}`)
   })

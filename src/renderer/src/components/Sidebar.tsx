@@ -297,15 +297,6 @@ export default function Sidebar() {
                     </div>
                 )}
 
-                {/* Version */}
-                {!isCollapsed && (
-                    <div className="mt-auto pt-4 border-t border-border text-center">
-                        <p className="text-xs text-foreground-subtle">
-                            v1.2.3
-                        </p>
-                    </div>
-                )}
-
                 {/* Collapse Toggle */}
                 <button
                     onClick={() => setSidebarCollapsed('left', !isCollapsed)}
@@ -315,9 +306,10 @@ export default function Sidebar() {
                     <PanelLeftClose className={cn("w-4 h-4 transition-transform", isCollapsed && "rotate-180")} />
                 </button>
 
+                {/* Version */}
                 {!isCollapsed && (
                     <p className="text-xs text-foreground-subtle text-center pt-2">
-                        MyWealth Desktop v1.2.2
+                        MyWealth Desktop v1.3.0
                     </p>
                 )}
             </div>

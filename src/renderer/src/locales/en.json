@@ -32,7 +32,14 @@
     "saving": "Saving...",
     "error": "An error occurred",
     "confirmDelete": "Are you sure you want to delete this item?",
-    "close": "Close"
+    "close": "Close",
+    "confirmClear": "Are you sure you want to clear ALL data? This action cannot be undone.",
+    "select": "Select",
+    "confirm": "Confirm",
+    "add": "Add",
+    "name": "Name",
+    "search": "Search",
+    "actions": "Actions"
   },
   "nav": {
     "dashboard": "Overview",
@@ -48,7 +55,8 @@
     "generateDemoData": "Generate Demo Data",
     "clearAllData": "Clear All Data",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "portfolioXRay": "Portfolio X-Ray"
   },
   "brokers": {
     "addBroker": "Add Broker",
@@ -126,7 +134,8 @@
         "crypto_exchange": "Crypto Exchange",
         "insurance": "Insurance",
         "other": "Other"
-    }
+    },
+    "cashAccounts": "Cash Accounts"
   },
   "dashboard": {
     "title": "Financial Overview",
@@ -184,7 +193,20 @@
     "dateTime": "Date & Time",
     "dateFormat": "Date Format",
     "timeFormat": "Time Format",
-    "loadDefaults": "Load Defaults"
+    "loadDefaults": "Load Defaults",
+    "switchVault": "Switch Vault",
+    "exportData": "Export Data",
+    "exportBackup": "Export Backup",
+    "keyboardShortcuts": "Keyboard Shortcuts",
+    "addCategory": "Add Category",
+    "color": "Color",
+    "icon": "Icon"
+  },
+  "shortcuts": {
+    "search": "Open Command Palette",
+    "settings": "Open Settings",
+    "navigate": "Navigate with keys",
+    "close": "Close dialogs"
   },
   "collectibles": {
     "title": "Collectibles",
@@ -303,7 +325,16 @@
     "confirmDelete": "Are you sure you want to delete this transaction",
     "expense": "Expense",
     "income": "Income",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "search": "Search transactions...",
+    "allCategories": "All Categories",
+    "results": "transactions",
+    "type": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Expense",
+      "transfer": "Transfer"
+    }
   },
   "import": {
     "title": "Import CSV",
@@ -402,7 +433,11 @@
     "moreItems": "+ {{count}} more",
     "refreshSuccess": "✅ {{count}} prices updated successfully",
     "refreshPartial": "⚠️ Updated {{updated}} prices ({{failed}} failed)",
-    "refreshError": "❌ Failed to refresh prices"
+    "refreshError": "❌ Failed to refresh prices",
+    "positions": "Positions",
+    "confirmDelete": "Delete {{symbol}}? This action cannot be undone.",
+    "avgWithCost": "Avg Price",
+    "gainLoss": "Gain/Loss"
   },
   "modals": {
     "cancel": "Cancel",
@@ -605,6 +640,8 @@
   },
   "deposits": {
     "title": "Deposit Accounts",
+    "deleteTitle": "Delete Deposit Account",
+    "addDepositDesc": "Add a deposit account",
     "subtitle": "Manage your locked and free savings.",
     "startTracking": "Start tracking your deposit accounts",
     "trackDescription": "Monitor returns on your deposit accounts, track maturity dates, and plan cash flows from interest payments.",
@@ -700,5 +737,49 @@
   },
   "help": {
     "showTutorial": "Show Tutorial"
+  },
+  "analytics": {
+    "performanceTooltip": "Performance metrics calculated from your portfolio snapshots",
+    "performanceMetrics": "Performance Metrics",
+    "noData": "No data available",
+    "noDataHint": "Take snapshots to see performance over time",
+    "twr": "TWR",
+    "twrDescription": "Time-Weighted Return",
+    "mwr": "MWR",
+    "mwrDescription": "Money-Weighted Return",
+    "startValue": "Start Value",
+    "endValue": "End Value",
+    "cashFlow": "Cash Flow",
+    "totalGain": "Total Gain",
+    "explanation": "TWR measures investment strategy performance (what the portfolio earned). MWR measures your personal return (what you earned, including timing).",
+    "portfolioXRay": "Portfolio X-Ray",
+    "portfolioXRayDescription": "In-depth analysis of portfolio composition",
+    "diversificationScore": "Diversification Score",
+    "concentrationRisks": "Concentration Risks Detected",
+    "sectorAllocation": "Sector Allocation",
+    "assetClassBreakdown": "Asset Class Breakdown",
+    "geographicExposure": "Geographic Exposure",
+    "topHoldings": "Top Holdings",
+    "dividendCalendar": "Dividend Calendar",
+    "upcomingPayments": "Upcoming Payments",
+    "avgMonthlyIncome": "Avg Monthly Income",
+    "monthlyIncomeTimeline": "Monthly Income Timeline",
+    "confidence": "Confidence",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "confidenceExplanation": "High confidence indicates 2+ years of regular payments.",
+    "noPaymentsExpected": "No dividend payments expected",
+    "addStocksForPredictions": "Add dividend-paying stocks to see predictions",
+    "aboutPredictions": "About Predictions",
+    "predictionsBasedOnHistory": "Predictions are based on historical payment patterns and frequencies.",
+    "actualAmountsMayVary": "Actual amounts may vary."
+  },
+  "exchangeRates": {
+    "staleRates": "Rates may be outdated, click to refresh",
+    "stale": "Stale rates",
+    "refreshing": "Refreshing rates...",
+    "updated": "Rates updated",
+    "error": "Failed to update rates"
   }
 }
