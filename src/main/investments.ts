@@ -107,8 +107,23 @@ export class InvestmentManager {
     if (!asset) {
       // Fetch details from Yahoo
       const yahooService = getYahooService();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const quote = await yahooService.quote(params.symbol) as any;
+      let quote: any;
+      let profile: any;
+
+      try {
+        const summary = await yahooService.getAssetProfile(params.symbol);
+        quote = summary.price || {};
+        profile = summary.assetProfile || {};
+
+        if (!quote.regularMarketPrice) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const q = await yahooService.quote(params.symbol) as any;
+            quote = { ...quote, ...q };
+        }
+      } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        quote = await yahooService.quote(params.symbol) as any;
+      }
       const now = new Date().toISOString();
       
       // Map Yahoo types to our AssetType
@@ -130,8 +145,10 @@ export class InvestmentManager {
         lastUpdated: now,
         autoRefresh: true,
         metadata: {
-            exchange: quote.fullExchangeName,
-            // Yahoo often requires 'quoteSummary' for sector/industry, simplistic quote has basics
+            exchange: quote.fullExchangeName || quote.exchangeName,
+            sector: profile?.sector,
+            industry: profile?.industry,
+            country: profile?.country,
         },
         createdAt: now,
         updatedAt: now
@@ -598,8 +615,25 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
           });
         } else {
           // Need to fetch from Yahoo
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const quote = await yahooService.quote(asset.symbol) as any;
+          let quote: any;
+          let profile: any;
+
+          const needsMetadata = !asset.metadata?.sector || asset.metadata?.sector === 'Unknown';
+
+          if (needsMetadata) {
+             try {
+                const summary = await yahooService.getAssetProfile(asset.symbol);
+                quote = summary.price;
+                profile = summary.assetProfile;
+                logger.info(`[InvestmentManager] Backfilled metadata for ${asset.symbol}`);
+             } catch (e) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                quote = await yahooService.quote(asset.symbol) as any;
+             }
+          } else {
+             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             quote = await yahooService.quote(asset.symbol) as any;
+          }
           
           if (quote && quote.regularMarketPrice) {
             let newPrice = Math.round(quote.regularMarketPrice * 100);
@@ -629,6 +663,14 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
               }
             }
             
+            if (profile) {
+                asset.metadata = {
+                    ...asset.metadata,
+                    sector: profile.sector,
+                    industry: profile.industry,
+                    country: profile.country,
+                };
+            }
             asset.currentPrice = newPrice;
             asset.previousClose = previousClose;
             asset.lastUpdated = new Date().toISOString();
