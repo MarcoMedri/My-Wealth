@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Loader2, AlertTriangle } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import { formatMoney } from '../../../../shared/schemas';
-import type { InvestmentSearchResult } from '../../../../shared/types';
+import type { InvestmentSearchResult, SupportedCurrency } from '../../../../shared/types';
 import { useTranslation } from 'react-i18next';
 
 
@@ -15,6 +16,7 @@ interface AddInvestmentModalProps {
 
 export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: AddInvestmentModalProps) {
     const { accounts, refreshInvestments, workspace } = useVaultStore();
+    const baseCurrency = useSettingsStore(state => state.currency);
     const { t } = useTranslation();
 
     // Search State
@@ -28,7 +30,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
     const [symbol, setSymbol] = useState('');
     const [name, setName] = useState('');
     const [type, setType] = useState<'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other'>('stock');
-    const [currency, setCurrency] = useState('USD');
+    const [currency, setCurrency] = useState<SupportedCurrency>(baseCurrency);
     const [quantity, setQuantity] = useState('');
     const [price, setPrice] = useState(''); // Display price
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -59,7 +61,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
             setSymbol('');
             setName('');
             setType('stock');
-            setCurrency('USD');
+            setCurrency(baseCurrency);
             setQuantity('');
             setPrice('');
             setDate(new Date().toISOString().split('T')[0]);
@@ -124,14 +126,14 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
         setSymbol(assetResult.symbol);
         setName(assetResult.name);
         setType((assetResult.type as 'stock' | 'etf' | 'crypto' | 'bond' | 'fund' | 'insurance' | 'other') || 'stock');
-        setCurrency(assetResult.currency);
+        setCurrency(assetResult.currency as SupportedCurrency);
 
         try {
             // Try to get live quote
             const quote = await window.api.getInvestmentQuote(assetResult.symbol);
             setPrice((quote.price / 100).toString());
             // Update details if quote has better ones
-            setCurrency(quote.currency);
+            setCurrency(quote.currency as SupportedCurrency);
             if (quote.name) setName(quote.name);
         } catch (e) {
             console.error("Failed to get quote", e);
@@ -412,7 +414,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                                 <select
                                     className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={currency}
-                                    onChange={e => setCurrency(e.target.value)}
+                                    onChange={e => setCurrency(e.target.value as SupportedCurrency)}
                                 >
                                     <option value="USD">USD</option>
                                     <option value="EUR">EUR</option>

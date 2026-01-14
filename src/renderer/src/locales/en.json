@@ -38,7 +38,8 @@
     "confirm": "Confirm",
     "add": "Add",
     "name": "Name",
-    "search": "Search"
+    "search": "Search",
+    "actions": "Actions"
   },
   "nav": {
     "dashboard": "Overview",
@@ -133,7 +134,8 @@
         "crypto_exchange": "Crypto Exchange",
         "insurance": "Insurance",
         "other": "Other"
-    }
+    },
+    "cashAccounts": "Cash Accounts"
   },
   "dashboard": {
     "title": "Financial Overview",
@@ -433,6 +435,7 @@
     "refreshPartial": "⚠️ Updated {{updated}} prices ({{failed}} failed)",
     "refreshError": "❌ Failed to refresh prices",
     "positions": "Positions",
+    "confirmDelete": "Delete {{symbol}}? This action cannot be undone.",
     "avgWithCost": "Avg Price",
     "gainLoss": "Gain/Loss"
   },
@@ -637,6 +640,8 @@
   },
   "deposits": {
     "title": "Deposit Accounts",
+    "deleteTitle": "Delete Deposit Account",
+    "addDepositDesc": "Add a deposit account",
     "subtitle": "Manage your locked and free savings.",
     "startTracking": "Start tracking your deposit accounts",
     "trackDescription": "Monitor returns on your deposit accounts, track maturity dates, and plan cash flows from interest payments.",

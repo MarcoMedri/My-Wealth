@@ -42,21 +42,70 @@ export class ExchangeRateManager {
       return rates;
     } catch (error) {
       console.warn('Failed to get exchange rates (using defaults):', error instanceof Error ? error.message : String(error));
-      // Fallback to cache if available even if stale
+      
       const cached = await this.readCache();
+      
+      // Fallback 1: Use cache if it matches base
       if (cached && cached.base === baseCurrency) {
         return cached.rates;
       }
-      // Fallback to defaults if API fails (e.g. 429 Too Many Requests) and no cache, or cache is for a different base
+      
+      // Fallback 2: Calculate from inverted cache (e.g. need USD, have EUR cache)
+      if (cached && cached.rates && cached.rates[baseCurrency] && cached.rates[baseCurrency] > 0) {
+        // We have rates for Base -> Target (e.g. EUR -> USD)
+        // We need rates for Target -> Base (e.g. USD -> EUR)
+        // Rate(Target->Base) = 1 / Rate(Base->Target)
+        // Rate(Target->Other) = Rate(Base->Other) / Rate(Base->Target)
+        
+        try {
+          const inverseRate = 1 / cached.rates[baseCurrency]; // e.g. 1 / 1.05 = 0.95 (USD->EUR)
+          const derivedRates: Record<string, number> = {};
+          
+          derivedRates[baseCurrency] = 1; // USD->USD = 1
+          derivedRates[cached.base] = inverseRate; // USD->EUR
+          
+          Object.entries(cached.rates).forEach(([currency, rate]) => {
+            if (currency !== baseCurrency) {
+              // Rate(USD->GBP) = Rate(EUR->GBP) / Rate(EUR->USD)
+              // Rate(USD->GBP) = rate * inverseRate
+              derivedRates[currency] = rate * inverseRate;
+            }
+          });
+          
+          console.log(`[ExchangeRateManager] Derived rates from inverted cache (${cached.base} -> ${baseCurrency})`);
+          return derivedRates;
+        } catch (e) {
+          console.warn('[ExchangeRateManager] Failed to derive inverse rates', e);
+        }
+      }
+
+      // Fallback 3: Hardcoded defaults for common currencies
       if (baseCurrency === 'EUR') {
         return {
           EUR: 1,
-          USD: 1.05, // Approximate fallback
+          USD: 1.05,
           GBP: 0.85,
           CHF: 0.95,
-          JPY: 160
+          JPY: 160,
+          CAD: 1.50,
+          AUD: 1.65,
+          CNY: 7.80
         };
       }
+      
+      if (baseCurrency === 'USD') {
+        return {
+          USD: 1,
+          EUR: 0.95, // ~1/1.05
+          GBP: 0.81,
+          CHF: 0.90,
+          JPY: 152,
+          CAD: 1.43,
+          AUD: 1.57,
+          CNY: 7.25
+        };
+      }
+
       // Ultimate fallback: 1:1 rates
       const fallback: Record<string, number> = {};
       SUPPORTED_CURRENCIES.forEach(c => fallback[c.code] = 1);
