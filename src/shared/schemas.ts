@@ -833,6 +833,13 @@ export const WorkspaceSettingsSchema = z.object({
   defaultViewMode: z.enum(['net', 'gross']).optional(),
   
   /**
+   * Holdings Table preferences
+   */
+  holdingsTable: z.object({
+    visibleColumns: z.array(z.string()).optional(),
+  }).optional(),
+  
+  /**
    * Investments Dashboard preferences
    */
   investmentsDashboard: z.object({

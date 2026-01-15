@@ -39,7 +39,8 @@
     "add": "Add",
     "name": "Name",
     "search": "Search",
-    "actions": "Actions"
+    "actions": "Actions",
+    "settings": "Settings"
   },
   "nav": {
     "dashboard": "Overview",
@@ -260,6 +261,9 @@
     "accountType": "Account Type",
     "linkedBroker": "Linked Broker (Optional)",
     "brokerLink": "Linked Broker",
+    "editAccount": "Edit Account",
+    "currentBalance": "Current Balance",
+    "useManualBalance": "Use Manual Balance",
     "noBroker": "-- None --",
     "editBalance": "Edit Balance",
     "manualBalance": "Manual Balance",
@@ -437,7 +441,14 @@
     "positions": "Positions",
     "confirmDelete": "Delete {{symbol}}? This action cannot be undone.",
     "avgWithCost": "Avg Price",
-    "gainLoss": "Gain/Loss"
+    "gainLoss": "Gain/Loss",
+    "metadata": "Metadata",
+    "sector": "Sector",
+    "country": "Country",
+    "region": "Region",
+    "selectSector": "Select Sector",
+    "selectRegion": "Select Region",
+    "countryPlaceholder": "e.g. USA, Italy, Germany"
   },
   "modals": {
     "cancel": "Cancel",
@@ -583,6 +594,7 @@
     "saveFailed": "Save failed"
   },
   "insurance": {
+    "linkedAccount": "Linked Account",
     "title": "Insurance",
     "subtitle": "Manage your insurance policies and savings plans.",
     "startTracking": "Start tracking your policies",
@@ -780,6 +792,14 @@
     "stale": "Stale rates",
     "refreshing": "Refreshing rates...",
     "updated": "Rates updated",
-    "error": "Failed to update rates"
+    "error": "Rate error",
+    "baseLabel": "Base",
+    "minsAgo": "{{mins}}m ago",
+    "hoursAgo": "{{hours}}h ago",
+    "justNow": "Just now",
+    "never": "Never",
+    "loading": "Loading rates...",
+    "refresh": "Refresh rates",
+    "clickToRetry": "Click to retry"
   }
 }

@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Building2,
     Trash2,
-    PieChart,
     TrendingUp,
     Wallet,
     Pencil,
@@ -18,7 +16,6 @@ import {
 import { toast } from 'sonner';
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
-import { HoldingsTable } from '../investments/HoldingsTable';
 import { AddBrokerModal } from './AddBrokerModal';
 import { EditBalanceModal } from '../accounts/EditBalanceModal';
 import { cn } from '../../lib/utils';
@@ -35,6 +32,8 @@ import { CloseDeleteAccountModal } from '../accounts/CloseDeleteAccountModal';
 import type { Account, DepositAccount, AccountType } from '../../../../shared/schemas';
 import AddTransactionModal from '../AddTransactionModal';
 import { EditHoldingModal } from '../investments/EditHoldingModal';
+import { HoldingsCard } from '../investments/HoldingsCard';
+import type { DateRange } from '../DateRangeFilter';
 import type { Holding, Asset } from '../../../../shared/schemas';
 
 interface BrokerDetailViewProps {
@@ -81,6 +80,10 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
     const [depositToDelete, setDepositToDelete] = useState<DepositAccount | null>(null);
     const [isDepositDeleteConfirmOpen, setIsDepositDeleteConfirmOpen] = useState(false);
     const [isArchiveDeleteConfirmOpen, setIsArchiveDeleteConfirmOpen] = useState(false);
+
+    // Holdings Card State
+    const [includeClosed, setIncludeClosed] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRange>('all');
 
     const deleteAccount = useVaultStore(state => state.deleteAccount);
     const deleteDeposit = useVaultStore(state => state.deleteDeposit);
@@ -439,20 +442,17 @@ export const BrokerDetailView = ({ brokerId }: BrokerDetailViewProps) => {
 
                 {/* Posizioni / Holdings */}
                 {brokerHoldings.length > 0 && (
-                    <div className="space-y-4">
-                        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                            <PieChart size={20} className="text-foreground-muted" />
-                            {t('investments.positions', 'Posizioni')}
-                        </h2>
-
-                        <HoldingsTable
-                            holdings={brokerHoldings}
-                            assets={assets}
-                            onEdit={(h, a) => setEditingItem({ holding: h, asset: a })}
-                            onSell={(h, a) => setSellItem({ holding: h, asset: a })}
-                            showActions={true}
-                        />
-                    </div>
+                    <HoldingsCard
+                        holdings={brokerHoldings}
+                        assets={assets}
+                        onEdit={(h, a) => setEditingItem({ holding: h, asset: a })}
+                        onSell={(h, a) => setSellItem({ holding: h, asset: a })}
+                        includeClosed={includeClosed}
+                        onIncludeClosedChange={setIncludeClosed}
+                        dateRange={dateRange}
+                        onDateRangeChange={setDateRange}
+                        className="mt-4"
+                    />
                 )}
 
 
@@ -720,5 +720,6 @@ function AddCard({ onClick, title, description, icon: Icon, className }: AddCard
         </button>
     );
 }
+
 
 

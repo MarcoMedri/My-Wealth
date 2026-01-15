@@ -37,7 +37,8 @@
     "close": "Chiudi",
     "actions": "Azioni",
     "confirmClear": "Sei sicuro di voler cancellare TUTTI i dati? Questa azione non può essere annullata.",
-    "select": "Seleziona"
+    "select": "Seleziona",
+    "settings": "Impostazioni"
   },
   "dashboard": {
     "title": "Panoramica Finanziaria",
@@ -742,7 +743,18 @@
   },
   "exchangeRates": {
     "stale": "Tassi obsoleti",
-    "staleRates": "I tassi potrebbero essere obsoleti, clicca per aggiornare"
+    "staleRates": "I tassi potrebbero essere obsoleti, clicca per aggiornare",
+    "refreshing": "Aggiornamento tassi...",
+    "updated": "Tassi aggiornati",
+    "error": "Errore tassi",
+    "baseLabel": "Valuta base",
+    "minsAgo": "{{mins}}m fa",
+    "hoursAgo": "{{hours}}h fa",
+    "justNow": "Proprio ora",
+    "never": "Mai",
+    "loading": "Caricamento tassi...",
+    "refresh": "Aggiorna tassi",
+    "clickToRetry": "Clicca per riprovare"
   },
   "analytics": {
     "performanceMetrics": "Metriche di Performance",

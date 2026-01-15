@@ -297,6 +297,25 @@ class YahooService {
   }
 
   /**
+   * Get asset profile (sector, industry, country, etc.)
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getAssetProfile(symbol: string): Promise<any> {
+    await this.init();
+
+    // Check rate limit
+    if (this.isRateLimited()) {
+       throw new Error(`Yahoo Finance rate limited.`);
+    }
+
+    return this.queueRequest(async () => {
+      logger.info('[YahooService] Fetching asset profile', { symbol });
+      const result = await this.yahooFinance.quoteSummary(symbol, { modules: ['assetProfile', 'price'] });
+      return result;
+    });
+  }
+
+  /**
    * Get quotes for multiple symbols (batched)
    */
   async quotes(symbols: string[]): Promise<unknown[]> {

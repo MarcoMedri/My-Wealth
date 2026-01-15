@@ -5,17 +5,25 @@ import { Holding, Asset } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { TrendingUp, TrendingDown, Minus, Pencil } from 'lucide-react';
 
+export type HoldingsColumn = 'quantity' | 'price' | 'avgPrice' | 'taxRate' | 'estTax' | 'dayChange' | 'value' | 'gainLoss';
+
 interface HoldingsTableProps {
     holdings: Holding[];
     assets: Asset[];
     onSell?: (holding: Holding, asset: Asset) => void;
     onEdit?: (holding: Holding, asset: Asset) => void;
-    showActions?: boolean; // Controls if actions column is shown
+    showActions?: boolean;
+    visibleColumns?: HoldingsColumn[];
 }
 
-export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = false }: HoldingsTableProps) {
+export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = false, visibleColumns }: HoldingsTableProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
+
+    const isVisible = (col: HoldingsColumn) => {
+        if (!visibleColumns) return true; // Default to all visible if not specified
+        return visibleColumns.includes(col);
+    };
 
     if (holdings.length === 0) {
         return (
@@ -32,14 +40,14 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = 
                     <thead className="bg-background-subtle text-xs uppercase text-foreground-muted font-medium">
                         <tr>
                             <th className="px-6 py-3 sticky left-0 bg-background-subtle z-10">{t('investments.symbol')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.quantity')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.price')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.avgWithCost', 'Avg Price')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.taxRate')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.estTax')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.dayChange')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.value')}</th>
-                            <th className="px-6 py-3 text-right">{t('investments.gainLoss')}</th>
+                            {isVisible('quantity') && <th className="px-6 py-3 text-right">{t('investments.quantity')}</th>}
+                            {isVisible('price') && <th className="px-6 py-3 text-right">{t('investments.price')}</th>}
+                            {isVisible('avgPrice') && <th className="px-6 py-3 text-right">{t('investments.avgWithCost', 'Avg Price')}</th>}
+                            {isVisible('taxRate') && <th className="px-6 py-3 text-right">{t('investments.taxRate')}</th>}
+                            {isVisible('estTax') && <th className="px-6 py-3 text-right">{t('investments.estTax')}</th>}
+                            {isVisible('dayChange') && <th className="px-6 py-3 text-right">{t('investments.dayChange')}</th>}
+                            {isVisible('value') && <th className="px-6 py-3 text-right">{t('investments.value')}</th>}
+                            {isVisible('gainLoss') && <th className="px-6 py-3 text-right">{t('investments.gainLoss')}</th>}
                             {showActions && (
                                 <th className="px-6 py-3 text-right w-24">{t('common.actions')}</th>
                             )}
@@ -68,38 +76,57 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = 
                                 >
                                     <td className="px-6 py-4 sticky left-0 bg-background-card group-hover:bg-background-muted/50 transition-colors z-10">
                                         <div className="font-semibold text-foreground">{asset.symbol}</div>
-                                        <div className="text-xs text-foreground-subtle max-w-[150px] truncate" title={asset.name}>{asset.name}</div>
+                                        <div className="text-xs text-foreground-subtle max-w-[150px] truncate mb-1" title={asset.name}>{asset.name}</div>
+                                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${getTypeColor(asset.type)}`}>
+                                            {t(`investments.types.${asset.type}`, asset.type)}
+                                        </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-foreground-muted font-mono">
-                                        {holding.quantity}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-foreground-muted">
-                                        {formatMoney(asset.currentPrice, asset.currency)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-foreground-muted">
-                                        {formatMoney(holding.averageBuyPrice, asset.currency)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-foreground-muted">
-                                        {taxRate}%
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-red-500 text-xs">
-                                        {taxLiability > 0 ? `-${formatMoney(taxLiability, asset.currency)}` : '-'}
-                                    </td>
-                                    <td className={`px-6 py-4 text-right font-mono text-sm ${dayChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                        <div className="flex items-center justify-end gap-1">
-                                            {dayChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                            {dayChangePercent >= 0 ? '+' : ''}{dayChangePercent.toFixed(2)}%
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono font-medium text-foreground">
-                                        {formatMoney(value, asset.currency)}
-                                    </td>
-                                    <td className={`px-6 py-4 text-right font-mono text-sm ${gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                        <div className="flex flex-col items-end">
-                                            <span>{gain >= 0 ? '+' : ''}{formatMoney(gain, asset.currency)}</span>
-                                            <span className="text-xs opacity-80">{gainPercent.toFixed(2)}%</span>
-                                        </div>
-                                    </td>
+                                    {isVisible('quantity') && (
+                                        <td className="px-6 py-4 text-right text-foreground-muted font-mono">
+                                            {holding.quantity}
+                                        </td>
+                                    )}
+                                    {isVisible('price') && (
+                                        <td className="px-6 py-4 text-right font-mono text-foreground-muted">
+                                            {formatMoney(asset.currentPrice, asset.currency)}
+                                        </td>
+                                    )}
+                                    {isVisible('avgPrice') && (
+                                        <td className="px-6 py-4 text-right font-mono text-foreground-muted">
+                                            {formatMoney(holding.averageBuyPrice, asset.currency)}
+                                        </td>
+                                    )}
+                                    {isVisible('taxRate') && (
+                                        <td className="px-6 py-4 text-right font-mono text-foreground-muted">
+                                            {taxRate}%
+                                        </td>
+                                    )}
+                                    {isVisible('estTax') && (
+                                        <td className="px-6 py-4 text-right font-mono text-red-500 text-xs">
+                                            {taxLiability > 0 ? `-${formatMoney(taxLiability, asset.currency)}` : '-'}
+                                        </td>
+                                    )}
+                                    {isVisible('dayChange') && (
+                                        <td className={`px-6 py-4 text-right font-mono text-sm ${dayChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            <div className="flex items-center justify-end gap-1">
+                                                {dayChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                                {dayChangePercent >= 0 ? '+' : ''}{dayChangePercent.toFixed(2)}%
+                                            </div>
+                                        </td>
+                                    )}
+                                    {isVisible('value') && (
+                                        <td className="px-6 py-4 text-right font-mono font-medium text-foreground">
+                                            {formatMoney(value, asset.currency)}
+                                        </td>
+                                    )}
+                                    {isVisible('gainLoss') && (
+                                        <td className={`px-6 py-4 text-right font-mono text-sm ${gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            <div className="flex flex-col items-end">
+                                                <span>{gain >= 0 ? '+' : ''}{formatMoney(gain, asset.currency)}</span>
+                                                <span className="text-xs opacity-80">{gainPercent.toFixed(2)}%</span>
+                                            </div>
+                                        </td>
+                                    )}
                                     {showActions && (
                                         <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-1">
@@ -138,4 +165,15 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = 
             </div>
         </div>
     );
+}
+
+function getTypeColor(type: Asset['type']) {
+    switch (type) {
+        case 'stock': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+        case 'etf': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+        case 'crypto': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+        case 'bond': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+        case 'fund': return 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20';
+        default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+    }
 }
