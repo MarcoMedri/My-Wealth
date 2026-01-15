@@ -107,7 +107,9 @@ export class InvestmentManager {
     if (!asset) {
       // Fetch details from Yahoo
       const yahooService = getYahooService();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let quote: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let profile: any;
 
       try {
@@ -615,7 +617,9 @@ Tax Paid: ${taxAmount/100} (${params.taxRate ?? 0}%).`,
           });
         } else {
           // Need to fetch from Yahoo
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let quote: any;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let profile: any;
 
           const needsMetadata = !asset.metadata?.sector || asset.metadata?.sector === 'Unknown';

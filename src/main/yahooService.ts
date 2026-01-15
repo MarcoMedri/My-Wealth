@@ -299,6 +299,7 @@ class YahooService {
   /**
    * Get asset profile (sector, industry, country, etc.)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getAssetProfile(symbol: string): Promise<any> {
     await this.init();
 
