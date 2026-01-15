@@ -21,6 +21,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
     const [taxRate, setTaxRate] = useState((holding.taxRate ?? 26).toString());
     const [assetName, setAssetName] = useState(asset.name);
     const [assetSymbol, setAssetSymbol] = useState(asset.symbol);
+    const [assetType, setAssetType] = useState<Asset['type']>(asset.type);
     const [autoRefresh, setAutoRefresh] = useState(asset.autoRefresh !== false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,6 +32,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
             setTaxRate((holding.taxRate ?? 26).toString());
             setAssetName(asset.name);
             setAssetSymbol(asset.symbol);
+            setAssetType(asset.type);
             setAutoRefresh(asset.autoRefresh !== false);
         }
     }, [isOpen, holding, asset]);
@@ -52,11 +54,12 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
             };
 
             // Update asset if anything changed
-            if (assetName !== asset.name || assetSymbol !== asset.symbol || autoRefresh !== (asset.autoRefresh !== false)) {
+            if (assetName !== asset.name || assetSymbol !== asset.symbol || assetType !== asset.type || autoRefresh !== (asset.autoRefresh !== false)) {
                 const updatedAsset = {
                     ...asset,
                     name: assetName,
                     symbol: assetSymbol.toUpperCase(),
+                    type: assetType,
                     autoRefresh: autoRefresh,
                     updatedAt: new Date().toISOString()
                 };
@@ -73,12 +76,14 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
         }
     };
 
+    const ASSET_TYPES: Asset['type'][] = ['stock', 'etf', 'crypto', 'bond', 'fund', 'insurance', 'other'];
+
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-background-card rounded-2xl w-full max-w-md shadow-xl border border-border flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-background-card rounded-2xl w-full max-w-md shadow-xl border border-border flex flex-col max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
 
                 {/* Header */}
-                <div className="p-4 border-b border-border flex justify-between items-center bg-background-main rounded-t-2xl">
+                <div className="p-4 border-b border-border flex justify-between items-center bg-background-main rounded-t-2xl sticky top-0 z-10">
                     <div>
                         <h2 className="text-lg font-semibold text-foreground">
                             {t('common.edit')} {asset.symbol}
@@ -91,22 +96,41 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-foreground-subtle">
-                            {t('investments.symbol', 'Simbolo')}
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none uppercase"
-                            value={assetSymbol}
-                            onChange={e => setAssetSymbol(e.target.value)}
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-foreground-subtle">
+                                {t('investments.symbol')}
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none uppercase"
+                                value={assetSymbol}
+                                onChange={e => setAssetSymbol(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-foreground-subtle">
+                                {t('common.type')}
+                            </label>
+                            <select
+                                value={assetType}
+                                onChange={e => setAssetType(e.target.value as Asset['type'])}
+                                className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none appearance-none"
+                            >
+                                {ASSET_TYPES.map(type => (
+                                    <option key={type} value={type}>
+                                        {t(`investments.types.${type}`)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-foreground-subtle">
-                            {t('investments.name', 'Nome')}
+                            {t('investments.name')}
                         </label>
                         <input
                             type="text"
@@ -166,7 +190,7 @@ export function EditHoldingModal({ isOpen, onClose, holding, asset }: EditHoldin
                     <div className="flex items-center justify-between py-2 px-3 bg-background-subtle rounded-lg border border-border">
                         <div>
                             <label className="text-sm font-medium text-foreground cursor-pointer" htmlFor="auto-refresh-toggle">
-                                {t('investments.autoRefresh', 'Aggiornamento automatico')}
+                                {t('investments.autoRefresh')}
                             </label>
                             <p className="text-xs text-foreground-muted">
                                 {t('investments.autoRefreshDesc', 'Aggiorna prezzi da Yahoo Finance')}

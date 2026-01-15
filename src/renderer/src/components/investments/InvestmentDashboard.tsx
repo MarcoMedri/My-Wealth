@@ -9,10 +9,9 @@ import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
-import { cn } from '../../lib/utils';
 import { ReturnMetricsCard } from './ReturnMetricsCard';
 import { PerformanceChart } from './PerformanceChart';
-import { HoldingsTable } from './HoldingsTable';
+import { HoldingsCard } from './HoldingsCard';
 
 import {
     Chart as ChartJS,
@@ -70,17 +69,7 @@ export function InvestmentDashboard() {
     // Standard practice for 'Investments' dashboard is to show current holdings.
     // The DateRangeFilter is likely for the analytics/charts above.
 
-    // Filter holdings based on closed status
-    const filteredHoldings = useMemo(() => {
-        return holdings.filter(h => {
-            if (includeClosed) return true;
-            // Exclude insurance from this view
-            const asset = assets.find(a => a.id === h.assetId);
-            if (asset?.type === 'insurance') return false;
 
-            return h.quantity > 0; // Only show open positions by default
-        });
-    }, [holdings, includeClosed, assets]);
 
     // --- Metrics ---
     const metrics = useMemo(() => {
@@ -341,54 +330,19 @@ export function InvestmentDashboard() {
             </div>
 
             {/* Row 4: Holdings Table - Full Width */}
-            <div className="bg-background-card rounded-xl shadow-sm border border-border overflow-hidden min-h-[650px] flex flex-col">
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                    <span className="font-semibold text-foreground">{t('investments.positions', 'Posizioni')}</span>
-
-                    {/* Include Closed Positions Toggle */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 bg-background-subtle rounded-lg px-2 py-1 border border-border">
-                            <label className="text-sm text-foreground-muted cursor-pointer select-none" htmlFor="show-closed-toggle">
-                                {t('investments.showClosedPositions')}
-                            </label>
-                            <button
-                                id="show-closed-toggle"
-                                aria-checked={includeClosed}
-                                role="switch"
-                                onClick={() => handleIncludeClosedChange(!includeClosed)}
-                                className={cn(
-                                    "w-10 h-6 rounded-full transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary border-2",
-                                    includeClosed
-                                        ? "bg-primary border-primary"
-                                        : "bg-gray-300 dark:bg-gray-600 border-gray-300 dark:border-gray-600"
-                                )}
-                            >
-                                <span
-                                    className={cn(
-                                        "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-transform",
-                                        includeClosed ? "translate-x-4" : "translate-x-0"
-                                    )}
-                                />
-                            </button>
-                        </div>
-                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
-                        <button
-                            onClick={() => refreshAllPrices()}
-                            className="btn btn-ghost flex items-center gap-1"
-                            disabled={isLoading}
-                            title={t('investments.refreshPrices')}
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                            <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
-                        </button>
-                    </div>
-                </div>
-                <HoldingsTable
-                    holdings={filteredHoldings}
-                    assets={assets}
-                    onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
-                />
-            </div>
+            <HoldingsCard
+                holdings={holdings.filter(h => {
+                    const asset = assets.find(a => a.id === h.assetId);
+                    return asset?.type !== 'insurance';
+                })}
+                assets={assets}
+                onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
+                includeClosed={includeClosed}
+                onIncludeClosedChange={handleIncludeClosedChange}
+                dateRange={dateRange}
+                onDateRangeChange={handleDateRangeChange}
+                className="min-h-[650px]"
+            />
 
             {/* Modals */}
             {isAddModalOpen && <AddInvestmentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
