@@ -4,7 +4,7 @@ import { RefreshCw, PieChart } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useVaultStore } from '../../store/useVaultStore';
 import { HoldingsTable, type HoldingsColumn } from './HoldingsTable';
-import { ColumnSettings } from './ColumnSettings';
+import { ViewSettings } from './ViewSettings';
 import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import type { Holding, Asset } from '../../../../shared/schemas';
 
@@ -63,14 +63,14 @@ export function HoldingsCard({
     }, [holdings, includeClosed]);
 
     return (
-        <div className={cn("bg-background-card rounded-xl shadow-sm border border-border overflow-hidden flex flex-col", className)}>
-            <div className="px-6 py-4 border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className={cn("bg-background-card rounded-xl shadow-sm border border-border flex flex-col", className)}>
+            <div className="p-card-p border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-card-gap">
                 <div className="flex items-center gap-4">
                     <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                         {!title && <PieChart size={20} className="text-foreground-muted" />}
                         {title || t('investments.positions', 'Posizioni')}
                     </h2>
-                    <ColumnSettings
+                    <ViewSettings
                         visibleColumns={workspace?.holdingsTable?.visibleColumns}
                         onChange={(cols) => setWorkspaceSettings({
                             holdingsTable: { visibleColumns: cols }
@@ -127,6 +127,7 @@ export function HoldingsCard({
                 onSell={onSell}
                 showActions={true}
                 visibleColumns={workspace?.holdingsTable?.visibleColumns as HoldingsColumn[]}
+                isLoading={isLoading}
             />
         </div>
     );

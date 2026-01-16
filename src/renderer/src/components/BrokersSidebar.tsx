@@ -60,18 +60,76 @@ export default function BrokersSidebar() {
     }, []);
 
     // Default to false if undefined
+    const width = workspace.layout?.rightSidebarWidth ?? 256;
     const isCollapsed = workspace.layout?.rightSidebarCollapsed ?? false;
+
+    // Local state for smooth resizing
+    const [localWidth, setLocalWidth] = useState(width);
+    const [isResizing, setIsResizing] = useState(false);
+
+    // Sync local width when store width changes (unless resizing)
+    useEffect(() => {
+        if (!isResizing) {
+            setLocalWidth(width);
+        }
+    }, [width, isResizing]);
+
+    // Handle Resize (Right sidebar: dragging left increases width)
+    useEffect(() => {
+        if (!isResizing) return;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const windowWidth = window.innerWidth;
+            // Calculate new width relative to right edge
+            const newWidth = Math.max(200, Math.min(600, windowWidth - e.clientX));
+            setLocalWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            useVaultStore.getState().setWorkspaceSettings({
+                layout: {
+                    leftSidebarCollapsed: false,
+                    rightSidebarCollapsed: false,
+                    ...workspace.layout,
+                    rightSidebarWidth: localWidth
+                }
+            });
+            document.body.style.cursor = 'default';
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = 'col-resize';
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'default';
+        };
+    }, [isResizing, localWidth, workspace.layout]);
 
     // Sort brokers by custom sortOrder or name
     const sortedBrokers = [...brokers].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name));
 
     return (
-        <aside className={cn(
-            "bg-background-subtle border-l border-border flex flex-col transition-all duration-300 ease-in-out",
-            isCollapsed ? "w-16" : "w-64"
-        )}>
+        <aside
+            className="group/sidebar relative bg-background-subtle border-l border-border flex flex-col transition-all duration-75 ease-out"
+            style={{ width: isCollapsed ? 64 : localWidth }}
+        >
+            {/* Resize Handle (Left side) */}
+            {!isCollapsed && (
+                <div
+                    className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors z-50 group-hover/sidebar:bg-border -ml-0.5"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsResizing(true);
+                    }}
+                />
+            )}
             {/* Drag region for macOS */}
-            <div className="h-8 app-drag-region" />
+            <div className="h-8 w-full app-drag-region" />
+
 
             <BrokerPresetSelectorModal
                 isOpen={isPresetSelectorOpen}

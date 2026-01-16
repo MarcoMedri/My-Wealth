@@ -100,7 +100,7 @@ export function PropertiesDashboard() {
     }
 
     return (
-        <div className="p-6 space-y-6 overflow-y-auto h-full">
+        <div className="p-card-p space-y-card-gap overflow-y-auto h-full">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -119,15 +119,15 @@ export function PropertiesDashboard() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
+                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
                     <div className="text-sm text-foreground-muted mb-1">{t('properties.totalValue')}</div>
                     <div className="text-2xl font-bold text-foreground">
                         {formatMoney(metrics.totalValue, baseCurrency)}
                     </div>
                     <div className="text-xs text-foreground-muted mt-1">{metrics.count} {t('properties.properties')}</div>
                 </div>
-                <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
+                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
                     <div className="text-sm text-foreground-muted mb-1">{t('properties.appreciation')}</div>
                     <div className={`text-2xl font-bold ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {metrics.appreciation >= 0 ? '+' : ''}{formatMoney(metrics.appreciation, baseCurrency)}
@@ -136,7 +136,7 @@ export function PropertiesDashboard() {
                         {metrics.appreciationPercent >= 0 ? '+' : ''}{metrics.appreciationPercent.toFixed(2)}%
                     </div>
                 </div>
-                <div className="bg-background-card p-4 rounded-xl shadow-sm border border-border">
+                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
                     <div className="text-sm text-foreground-muted mb-1">{t('properties.purchaseCost')}</div>
                     <div className="text-2xl font-bold text-foreground">
                         {formatMoney(metrics.totalPurchasePrice, baseCurrency)}
@@ -145,7 +145,7 @@ export function PropertiesDashboard() {
             </div>
 
             {/* Properties Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
                 {properties.map(property => {
                     const Icon = PROPERTY_ICONS[property.type] || Building2;
                     const appreciation = property.purchasePrice
@@ -156,7 +156,7 @@ export function PropertiesDashboard() {
                         <div
                             key={property.id}
                             onClick={() => handleEdit(property)} // Click to edit
-                            className="bg-background-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow group relative cursor-pointer"
+                            className="bg-background-card rounded-xl shadow-sm border border-border p-card-p hover:shadow-md transition-shadow group relative cursor-pointer"
                         >
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                 <button
