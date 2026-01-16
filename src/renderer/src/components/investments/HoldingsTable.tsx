@@ -5,6 +5,8 @@ import { Holding, Asset } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { TrendingUp, TrendingDown, Minus, Pencil } from 'lucide-react';
 
+import { TableSkeleton } from '../skeletons/TableSkeleton';
+
 export type HoldingsColumn = 'quantity' | 'price' | 'avgPrice' | 'taxRate' | 'estTax' | 'dayChange' | 'value' | 'gainLoss';
 
 interface HoldingsTableProps {
@@ -14,11 +16,16 @@ interface HoldingsTableProps {
     onEdit?: (holding: Holding, asset: Asset) => void;
     showActions?: boolean;
     visibleColumns?: HoldingsColumn[];
+    isLoading?: boolean;
 }
 
-export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = false, visibleColumns }: HoldingsTableProps) {
+export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = false, visibleColumns, isLoading }: HoldingsTableProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
+
+    if (isLoading) {
+        return <TableSkeleton rows={Math.max(3, holdings.length)} />;
+    }
 
     const isVisible = (col: HoldingsColumn) => {
         if (!visibleColumns) return true; // Default to all visible if not specified
@@ -39,17 +46,17 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = 
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-background-subtle text-xs uppercase text-foreground-muted font-medium">
                         <tr>
-                            <th className="px-6 py-3 sticky left-0 bg-background-subtle z-10">{t('investments.symbol')}</th>
-                            {isVisible('quantity') && <th className="px-6 py-3 text-right">{t('investments.quantity')}</th>}
-                            {isVisible('price') && <th className="px-6 py-3 text-right">{t('investments.price')}</th>}
-                            {isVisible('avgPrice') && <th className="px-6 py-3 text-right">{t('investments.avgWithCost', 'Avg Price')}</th>}
-                            {isVisible('taxRate') && <th className="px-6 py-3 text-right">{t('investments.taxRate')}</th>}
-                            {isVisible('estTax') && <th className="px-6 py-3 text-right">{t('investments.estTax')}</th>}
-                            {isVisible('dayChange') && <th className="px-6 py-3 text-right">{t('investments.dayChange')}</th>}
-                            {isVisible('value') && <th className="px-6 py-3 text-right">{t('investments.value')}</th>}
-                            {isVisible('gainLoss') && <th className="px-6 py-3 text-right">{t('investments.gainLoss')}</th>}
+                            <th className="px-card-p py-table-y sticky left-0 bg-background-subtle z-10">{t('investments.symbol')}</th>
+                            {isVisible('quantity') && <th className="px-card-p py-table-y text-right">{t('investments.quantity')}</th>}
+                            {isVisible('price') && <th className="px-card-p py-table-y text-right">{t('investments.price')}</th>}
+                            {isVisible('avgPrice') && <th className="px-card-p py-table-y text-right">{t('investments.avgWithCost', 'Avg Price')}</th>}
+                            {isVisible('taxRate') && <th className="px-card-p py-table-y text-right">{t('investments.taxRate')}</th>}
+                            {isVisible('estTax') && <th className="px-card-p py-table-y text-right">{t('investments.estTax')}</th>}
+                            {isVisible('dayChange') && <th className="px-card-p py-table-y text-right">{t('investments.dayChange')}</th>}
+                            {isVisible('value') && <th className="px-card-p py-table-y text-right">{t('investments.value')}</th>}
+                            {isVisible('gainLoss') && <th className="px-card-p py-table-y text-right">{t('investments.gainLoss')}</th>}
                             {showActions && (
-                                <th className="px-6 py-3 text-right w-24">{t('common.actions')}</th>
+                                <th className="px-card-p py-table-y text-right w-24">{t('common.actions')}</th>
                             )}
                         </tr>
                     </thead>
@@ -74,7 +81,7 @@ export function HoldingsTable({ holdings, assets, onSell, onEdit, showActions = 
                                     className="hover:bg-background-muted/50 group cursor-pointer transition-colors"
                                     onClick={() => onEdit && onEdit(holding, asset)}
                                 >
-                                    <td className="px-6 py-4 sticky left-0 bg-background-card group-hover:bg-background-muted/50 transition-colors z-10">
+                                    <td className="px-card-p py-table-y sticky left-0 bg-background-card group-hover:bg-background-muted/50 transition-colors z-10">
                                         <div className="font-semibold text-foreground">{asset.symbol}</div>
                                         <div className="text-xs text-foreground-subtle max-w-[150px] truncate mb-1" title={asset.name}>{asset.name}</div>
                                         <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${getTypeColor(asset.type)}`}>

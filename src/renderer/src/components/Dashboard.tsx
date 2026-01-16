@@ -20,6 +20,7 @@ import DashboardCharts, { DashboardPeriod } from './DashboardCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { SnapshotConfirmationModal } from './modals/SnapshotConfirmationModal';
 import { PerformanceMetrics } from './analytics/PerformanceMetrics';
+import { DashboardSkeleton } from './skeletons/DashboardSkeleton';
 
 // Force HMR update
 export default function Dashboard() {
@@ -37,7 +38,9 @@ export default function Dashboard() {
         snapshots,
         setActiveView,
         workspace,
-        setWorkspaceSettings
+        setWorkspaceSettings,
+        isLoading,
+        isLoaded
     } = useVaultStore();
 
     const { netWorth, convert, baseCurrency } = useNetWorth();
@@ -171,6 +174,18 @@ export default function Dashboard() {
         }
     };
 
+    const handleModalConfirm = async (shouldRefresh: boolean, rememberChoice: boolean) => {
+        setShowSnapshotModal(false);
+
+        if (rememberChoice) {
+            await setWorkspaceSettings({
+                autoRefreshOnSnapshot: shouldRefresh
+            });
+        }
+
+        await handleSnapshotAction(shouldRefresh);
+    };
+
     const handleSnapshotClick = async () => {
         const autoRefresh = workspace.autoRefreshOnSnapshot; // This is a boolean | null | undefined
 
@@ -185,17 +200,11 @@ export default function Dashboard() {
         }
     };
 
-    const handleModalConfirm = async (shouldRefresh: boolean, rememberChoice: boolean) => {
-        setShowSnapshotModal(false);
+    // Skeleton Loading Check
+    if (isLoading && !isLoaded) {
+        return <DashboardSkeleton />;
+    }
 
-        if (rememberChoice) {
-            await setWorkspaceSettings({
-                autoRefreshOnSnapshot: shouldRefresh
-            });
-        }
-
-        await handleSnapshotAction(shouldRefresh);
-    };
 
 
     return (

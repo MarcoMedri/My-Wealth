@@ -64,6 +64,11 @@ module.exports = {
         // Card (alias for background-card for convenience)
         card: 'rgb(var(--background-card) / <alpha-value>)',
       },
+      spacing: {
+        'card-p': 'var(--card-padding)',
+        'card-gap': 'var(--card-gap)',
+        'table-y': 'var(--table-cell-y)',
+      },
     },
   },
   plugins: [],

@@ -100,6 +100,14 @@ function App(): React.ReactElement {
         i18n.changeLanguage(language);
     }, [language, i18n]);
 
+    // Density Effect
+    const workspace = useVaultStore(state => state.workspace);
+    const density = workspace?.uiDensity || 'normal';
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-density', density);
+    }, [density]);
+
     useEffect(() => {
         const checkVaultStatus = async () => {
             try {

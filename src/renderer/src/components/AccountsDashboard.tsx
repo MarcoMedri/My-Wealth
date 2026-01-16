@@ -149,8 +149,8 @@ export default function AccountsDashboard() {
             </header>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap p-card-p">
+                <div className="p-card-p rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-emerald-500/10">
                             <Wallet className="w-5 h-5 text-emerald-500" />
@@ -162,7 +162,7 @@ export default function AccountsDashboard() {
                     </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
+                <div className="p-card-p rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-blue-500/10">
                             <TrendingUp className="w-5 h-5 text-blue-500" />
@@ -174,7 +174,7 @@ export default function AccountsDashboard() {
                     </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
+                <div className="p-card-p rounded-xl bg-background-card border border-border shadow-sm overflow-hidden">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-red-500/10">
                             <TrendingDown className="w-5 h-5 text-red-500" />

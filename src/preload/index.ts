@@ -189,6 +189,9 @@ const api = {
   refreshInvestmentPrices: (): Promise<{ updated: number; failed: number; total: number; cached: number }> => {
     return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENT_REFRESH_PRICES)
   },
+  refreshAssetMetadata: (): Promise<{ updated: number; failed: number }> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.INVESTMENTS_REFRESH_METADATA)
+  },
 
   // ========== ANALYTICS ==========
   
@@ -206,16 +209,8 @@ const api = {
   },
 
   /** Get portfolio composition (X-Ray analysis) */
-  getPortfolioComposition: (): Promise<{
-    totalValue: number;
-    sectors: Array<{ name: string; value: number; percentage: number; count: number }>;
-    geographies: Array<{ name: string; value: number; percentage: number; count: number }>;
-    assetClasses: Array<{ name: string; value: number; percentage: number; count: number }>;
-    topHoldings: Array<{ assetId: string; symbol: string; name: string; value: number; percentage: number }>;
-    diversificationScore: number;
-    warnings: string[];
-  }> => {
-    return ipcRenderer.invoke(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION)
+  getPortfolioComposition: (baseCurrency: string): Promise<import('../shared/types').PortfolioComposition> => {
+    return ipcRenderer.invoke(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION, baseCurrency)
   },
 
   /** Get dividend predictions for next N months */

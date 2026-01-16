@@ -97,6 +97,7 @@ export const IPC_CHANNELS = {
   INVESTMENT_BUY_MANUAL: 'investment:buyManual', // Manual asset entry without Yahoo lookup
   INVESTMENT_SELL: 'investment:sell', // Sell holding, create income transaction, track gain/loss
   INVESTMENT_REFRESH_PRICES: 'investment:refreshPrices', // Batch update all asset prices
+  INVESTMENTS_REFRESH_METADATA: 'investments:refreshMetadata', // Refresh static asset data (Sector, Country)
   
   // Analytics operations
   ANALYTICS_GET_PERFORMANCE: 'analytics:getPerformance', // Get TWR/MWR metrics
@@ -165,6 +166,29 @@ export interface InvestmentQuote {
   price: number; // in cents
   currency: string;
   name?: string;
+}
+
+export interface AllocationItem {
+    name: string;
+    value: number; // in cents (converted to base currency)
+    percentage: number;
+    count: number;
+}
+
+export interface PortfolioComposition {
+    totalValue: number; // in cents (converted to base currency)
+    sectors: AllocationItem[];
+    geographies: AllocationItem[];
+    assetClasses: AllocationItem[];
+    topHoldings: {
+        assetId: string;
+        symbol: string;
+        name: string;
+        value: number; // in cents (converted to base currency)
+        percentage: number;
+    }[];
+    diversificationScore: number;
+    concentrationWarnings?: string[];
 }
 
 // ... CSV TYPES ...

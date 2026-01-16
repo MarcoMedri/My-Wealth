@@ -201,7 +201,12 @@
     "keyboardShortcuts": "Keyboard Shortcuts",
     "addCategory": "Add Category",
     "color": "Color",
-    "icon": "Icon"
+    "icon": "Icon",
+    "refreshMetadata": "Refresh Asset Metadata",
+    "refreshMetadataDesc": "Re-download static information (Sector, Country, Description) for all your assets from Yahoo Finance. Useful if data is missing.",
+    "refreshMetadataAction": "Refresh Now",
+    "refreshMetadataResult": "Updated: {{updated}}, Failed: {{failed}}",
+    "maintenance": "Maintenance"
   },
   "shortcuts": {
     "search": "Open Command Palette",
@@ -785,7 +790,13 @@
     "addStocksForPredictions": "Add dividend-paying stocks to see predictions",
     "aboutPredictions": "About Predictions",
     "predictionsBasedOnHistory": "Predictions are based on historical payment patterns and frequencies.",
-    "actualAmountsMayVary": "Actual amounts may vary."
+    "actualAmountsMayVary": "Actual amounts may vary.",
+    "warnings": {
+        "lowPositions": "Low number of positions (< 5)",
+        "highCrypto": "High exposure to Crypto (> 20%)",
+        "singleAsset": "High concentration in a single asset (> 20%)",
+        "singleSector": "High concentration in a single sector (> 30%)"
+    }
   },
   "exchangeRates": {
     "staleRates": "Rates may be outdated, click to refresh",

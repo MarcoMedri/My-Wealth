@@ -13,44 +13,44 @@
   --background-card: 255 255 255;
   --background-popover: 255 255 255;
   --background-sidebar: 248 250 252;
-  
+
   /* Foregrounds */
   --foreground: 15 23 42;
   --foreground-muted: 100 116 139;
   --foreground-subtle: 148 163 184;
-  
+
   /* Borders */
   --border: 226 232 240;
   --border-muted: 241 245 249;
-  
+
   /* Primary Accent (Indigo) */
   --primary: 99 102 241;
   --primary-hover: 79 70 229;
   --primary-foreground: 255 255 255;
-  
+
   /* Success (Emerald) */
   --success: 16 185 129;
   --success-foreground: 255 255 255;
   --success-muted: 209 250 229;
-  
+
   /* Warning (Amber) */
   --warning: 245 158 11;
   --warning-foreground: 255 255 255;
   --warning-muted: 254 243 199;
-  
+
   /* Error (Rose) */
   --error: 239 68 68;
   --error-foreground: 255 255 255;
   --error-muted: 254 226 226;
-  
+
   /* Info (Blue) */
   --info: 59 130 246;
   --info-foreground: 255 255 255;
-  
+
   /* Input */
   --input: 255 255 255;
   --input-border: 203 213 225;
-  
+
   /* Ring (focus) */
   --ring: 99 102 241;
 }
@@ -66,47 +66,81 @@
   --background-card: 30 41 59;
   --background-popover: 30 41 59;
   --background-sidebar: 15 23 42;
-  
+
   /* Foregrounds */
   --foreground: 248 250 252;
   --foreground-muted: 148 163 184;
   --foreground-subtle: 100 116 139;
-  
+
   /* Borders */
   --border: 51 65 85;
   --border-muted: 71 85 105;
-  
+
   /* Primary Accent (Indigo) - slightly brighter for dark */
   --primary: 129 140 248;
   --primary-hover: 165 180 252;
   --primary-foreground: 15 23 42;
-  
+
   /* Success (Emerald) */
   --success: 52 211 153;
   --success-foreground: 15 23 42;
   --success-muted: 6 78 59;
-  
+
   /* Warning (Amber) */
   --warning: 251 191 36;
   --warning-foreground: 15 23 42;
   --warning-muted: 120 53 15;
-  
+
   /* Error (Rose) */
   --error: 251 113 133;
   --error-foreground: 15 23 42;
   --error-muted: 136 19 55;
-  
+
   /* Info (Blue) */
   --info: 96 165 250;
   --info-foreground: 15 23 42;
-  
+
   /* Input */
   --input: 30 41 59;
   --input-border: 71 85 105;
-  
+
   /* Ring (focus) */
   --ring: 129 140 248;
 }
+
+/* ============================================
+   DENSITY TOKENS
+   ============================================ */
+:root {
+  /* Default (Normal) */
+  --card-padding: 1.5rem;
+  /* p-6 */
+  --card-gap: 1rem;
+  /* gap-4 */
+  --table-cell-y: 1rem;
+  /* py-4 */
+}
+
+[data-density="compact"] {
+  --card-padding: 0.75rem;
+  /* p-3 */
+  --card-gap: 0.25rem;
+  /* gap-1 */
+  --table-cell-y: 0.25rem;
+  /* py-1 */
+  font-size: 0.9rem;
+  /* Slightly smaller text for compact */
+}
+
+[data-density="expanded"] {
+  --card-padding: 2.5rem;
+  /* p-10 */
+  --card-gap: 1.5rem;
+  /* gap-6 */
+  --table-cell-y: 1.5rem;
+  /* py-6 */
+}
+
 
 /* ============================================
    BASE STYLES
@@ -172,133 +206,134 @@ body {
    COMPONENT CLASSES
    ============================================ */
 @layer components {
+
   /* Button styles */
   .btn {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
-  
+
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary-hover;
   }
-  
+
   .btn-secondary {
     @apply bg-background-subtle text-foreground border border-border hover:bg-background-muted;
   }
-  
+
   .btn-ghost {
     @apply bg-transparent text-foreground-muted hover:bg-background-muted hover:text-foreground;
   }
-  
+
   .btn-danger {
     @apply bg-error text-error-foreground hover:bg-error/90;
   }
-  
+
   .btn-sm {
     @apply px-3 py-1.5 text-xs;
   }
-  
+
   .btn-lg {
     @apply px-6 py-3 text-base;
   }
-  
+
   /* Card styles */
   .card {
     @apply bg-card rounded-xl border border-border shadow-sm;
   }
-  
+
   .card-hover {
     @apply hover:shadow-md hover:border-primary/30 transition-all cursor-pointer;
   }
-  
+
   /* Input styles */
   .input {
     @apply w-full p-2 bg-input border border-input-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-colors;
   }
-  
+
   .form-input {
     @apply w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground placeholder:text-foreground-muted/50 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-colors;
   }
-  
+
   .form-input-error {
     @apply border-error focus:ring-error;
   }
-  
+
   .form-label {
     @apply block text-sm font-medium text-foreground-muted mb-1;
   }
-  
+
   .form-section {
     @apply space-y-4;
   }
-  
+
   .form-section-title {
     @apply text-sm font-semibold text-foreground-muted flex items-center gap-2;
   }
-  
+
   .form-divider {
     @apply h-px bg-border/50;
   }
-  
+
   .form-error {
     @apply text-xs text-error;
   }
-  
+
   .form-hint {
     @apply text-xs text-foreground-muted;
   }
-  
+
   /* Grid utilities for forms */
   .form-grid-2 {
     @apply grid grid-cols-1 md:grid-cols-2 gap-4;
   }
-  
+
   .form-grid-3 {
     @apply grid grid-cols-1 md:grid-cols-3 gap-4;
   }
-  
+
   /* Alert/Message styles */
   .alert {
     @apply p-3 rounded-lg flex items-center gap-2 text-sm;
   }
-  
+
   .alert-error {
     @apply bg-error/10 border border-error/20 text-error;
   }
-  
+
   .alert-warning {
     @apply bg-warning/10 border border-warning/20 text-warning;
   }
-  
+
   .alert-success {
     @apply bg-success/10 border border-success/20 text-success;
   }
-  
+
   .alert-info {
     @apply bg-info/10 border border-info/20 text-info;
   }
-  
+
   /* KPI Card styles */
   .kpi-card {
     @apply bg-background-card p-4 rounded-xl border border-border;
   }
-  
+
   .kpi-value {
     @apply text-2xl font-bold text-foreground;
   }
-  
+
   .kpi-label {
     @apply text-sm font-medium text-foreground-muted;
   }
-  
+
   /* Icon container */
   .icon-container {
     @apply w-10 h-10 rounded-lg flex items-center justify-center;
   }
-  
+
   .icon-container-sm {
     @apply w-8 h-8 rounded-lg flex items-center justify-center;
   }
-  
+
   .icon-container-lg {
     @apply w-12 h-12 rounded-xl flex items-center justify-center;
   }
