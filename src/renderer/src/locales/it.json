@@ -78,9 +78,14 @@
     "generateDemoData": "Genera Dati Demo",
     "clearAllData": "Cancella Tutto",
     "expand": "Espandi",
-    "collapse": "Comprimi"
+    "collapse": "Comprimi",
+    "refreshMetadata": "Aggiorna Metadati Asset",
+    "refreshMetadataDesc": "Scarica nuovamente le informazioni statiche (Settore, Paese, Descrizione) per tutti i tuoi asset da Yahoo Finance. Utile se mancano dei dati.",
+    "refreshMetadataAction": "Aggiorna Ora",
+    "refreshMetadataResult": "Aggiornati: {{updated}}, Falliti: {{failed}}",
+    "maintenance": "Manutenzione"
   },
-  "settings": {
+  "shortcuts": {
     "title": "Impostazioni",
     "general": "Generale",
     "appearance": "Aspetto",
@@ -791,6 +796,12 @@
     "addStocksForPredictions": "Aggiungi azioni che pagano dividendi per vedere le previsioni",
     "aboutPredictions": "Informazioni sulle Previsioni",
     "predictionsBasedOnHistory": "Le previsioni si basano su modelli e frequenze di pagamento storici.",
-    "actualAmountsMayVary": "Gli importi effettivi possono variare."
+    "actualAmountsMayVary": "Gli importi effettivi possono variare.",
+    "warnings": {
+        "lowPositions": "Numero ridotto di posizioni (< 5)",
+        "highCrypto": "Alta esposizione alle Criptovalute (> 20%)",
+        "singleAsset": "Alta concentrazione in un singolo asset (> 20%)",
+        "singleSector": "Alta concentrazione in un singolo settore (> 30%)"
+    }
   }
 }

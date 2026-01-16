@@ -3,7 +3,7 @@
  * Shows main navigation and app status
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Wallet,
     TrendingUp,
@@ -11,17 +11,13 @@ import {
     LayoutDashboard,
     Home,
     Settings,
-    Database,
-    Trash2,
-    Loader2,
     Shield,
-    PiggyBank,
-    Watch,
     PanelLeftClose,
+    Watch,
+    PiggyBank,
     HelpCircle,
     PieChart
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
 import { cn } from '../lib/utils';
 import { useNetWorth } from '../hooks/useNetWorth';
@@ -29,7 +25,6 @@ import { useTranslation } from 'react-i18next';
 import { useTutorial } from '../hooks/useTutorial';
 import { SettingsModal } from './settings/SettingsModal';
 import { ExchangeRateIndicator } from './ExchangeRateIndicator';
-import { ConfirmationModal } from './ui/ConfirmationModal';
 import { useFormatMoney } from '../hooks/useFormatMoney'; // Assuming this hook exists
 
 export default function Sidebar() {
@@ -39,40 +34,79 @@ export default function Sidebar() {
     const { netWorth, baseCurrency } = useNetWorth();
     const formatMoney = useFormatMoney();
     const { startTutorial } = useTutorial();
-    const refreshData = useVaultStore(state => state.refreshData);
     const workspace = useVaultStore(state => state.workspace);
     const setSidebarCollapsed = useVaultStore(state => state.setSidebarCollapsed);
-
-    // Default to false if undefined
+    const width = workspace.layout?.leftSidebarWidth ?? 256;
     const isCollapsed = workspace.layout?.leftSidebarCollapsed ?? false;
 
-    const [showDevMenu, setShowDevMenu] = useState(false);
-    const [isSeeding, setIsSeeding] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isClearDataOpen, setIsClearDataOpen] = useState(false);
+    // Local state for smooth resizing
+    const [localWidth, setLocalWidth] = useState(width);
+    const [isResizing, setIsResizing] = useState(false);
 
-    const handleGenerateDemoData = async () => {
-        setIsSeeding(true);
-        try {
-            await window.api.generateDemoData();
-            await refreshData();
-        } catch (error) {
-            console.error('Failed to generate demo data:', error);
-        } finally {
-            setIsSeeding(false);
-            setShowDevMenu(false);
+    // Sync local width when store width changes (unless resizing)
+    useEffect(() => {
+        if (!isResizing) {
+            setLocalWidth(width);
         }
-    };
+    }, [width, isResizing]);
+
+    // Handle Resize
+    useEffect(() => {
+        if (!isResizing) return;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const newWidth = Math.max(200, Math.min(600, e.clientX));
+            setLocalWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            useVaultStore.getState().setWorkspaceSettings({
+                layout: {
+                    leftSidebarCollapsed: workspace.layout?.leftSidebarCollapsed ?? false,
+                    rightSidebarCollapsed: workspace.layout?.rightSidebarCollapsed ?? false,
+                    ...workspace.layout,
+                    leftSidebarWidth: localWidth
+                }
+            });
+            document.body.style.cursor = 'default';
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = 'col-resize';
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'default';
+        };
+        // Add workspace.layout to dependency array if you want to react to other layout changes, 
+        // but for resizing logic 'isResizing' and 'localWidth' are primary.
+        // However, the lint warning suggested 'workspace.layout'. 
+        // We use 'workspace.layout' in setWorkspaceSettings closure.
+    }, [isResizing, localWidth, workspace.layout]);
+
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     return (
-        <aside className={cn(
-            "bg-background-subtle border-r border-border flex flex-col transition-all duration-300 ease-in-out",
-            isCollapsed ? "w-16" : "w-64"
-        )}
+        <aside
+            className="group/sidebar relative bg-background-subtle border-r border-border flex flex-col transition-all duration-75 ease-out"
+            style={{ width: isCollapsed ? 64 : localWidth }}
             data-tour="sidebar"
         >
+            {/* Resize Handle */}
+            {!isCollapsed && (
+                <div
+                    className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors z-50 group-hover/sidebar:bg-border"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        setIsResizing(true);
+                    }}
+                />
+            )}
             {/* Drag region for macOS */}
-            <div className="h-12 app-drag-region" />
+            <div className="h-12 w-full app-drag-region" />
 
             <SettingsModal
                 isOpen={isSettingsOpen}
@@ -253,49 +287,7 @@ export default function Sidebar() {
                     {!isCollapsed && <span className="text-sm">{t('nav.settings')}</span>}
                 </button>
 
-                {/* Dev Menu Toggle */}
-                <button
-                    onClick={() => setShowDevMenu(!showDevMenu)}
-                    className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-background-muted text-foreground-muted hover:text-foreground transition-colors",
-                        showDevMenu && "bg-background-muted text-foreground"
-                    )}
-                    title={isCollapsed ? t('nav.developer') : undefined}
-                >
-                    <Database className="w-4 h-4 shrink-0" />
-                    {!isCollapsed && <span className="text-sm">{t('nav.developer')}</span>}
-                </button>
 
-                {/* Dev Menu */}
-                {showDevMenu && !isCollapsed && (
-                    <div className="space-y-1 px-2 pt-1 border-t border-border/50 mt-2">
-                        <button
-                            onClick={handleGenerateDemoData}
-                            disabled={isSeeding}
-                            className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left",
-                                "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
-                                "transition-colors text-sm",
-                                isSeeding && "opacity-50 cursor-not-allowed"
-                            )}
-                        >
-                            {isSeeding ? (
-                                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                            ) : (
-                                <Database className="w-4 h-4 shrink-0" />
-                            )}
-                            <span className="truncate">{t('nav.generateDemoData')}</span>
-                        </button>
-
-                        <button
-                            onClick={() => setIsClearDataOpen(true)}
-                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 dark:text-red-400 text-sm font-medium transition-colors"
-                        >
-                            <Trash2 className="w-4 h-4 shrink-0" />
-                            <span className="truncate">{t('nav.clearAllData')}</span>
-                        </button>
-                    </div>
-                )}
 
                 {/* Collapse Toggle */}
                 <button
@@ -314,20 +306,6 @@ export default function Sidebar() {
                 )}
             </div>
 
-            <ConfirmationModal
-                isOpen={isClearDataOpen}
-                onClose={() => setIsClearDataOpen(false)}
-                onConfirm={async () => {
-                    await window.api.clearVaultData();
-                    toast.success(t('common.dataCleared', 'Data cleared successfully'));
-                    setIsClearDataOpen(false);
-                    setTimeout(() => window.location.reload(), 1000);
-                }}
-                title={t('nav.clearAllData')}
-                description={t('common.confirmClear', 'Are you sure you want to clear ALL data? This action cannot be undone.')}
-                confirmText={t('common.delete')}
-                variant="danger"
-            />
         </aside>
     );
 }

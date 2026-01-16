@@ -100,6 +100,7 @@ export const AssetSchema = z.object({
     region: z.string().optional(),
     country: z.string().optional(),
     exchange: z.string().optional(),
+    description: z.string().optional(),
   }).optional(),
   createdAt: ISODate,
   updatedAt: ISODate,
@@ -819,8 +820,14 @@ export const WorkspaceSettingsSchema = z.object({
       /** Is the left sidebar collapsed? */
       leftSidebarCollapsed: z.boolean().default(false),
       
+      /** Width of the left sidebar in pixels */
+      leftSidebarWidth: z.number().min(200).max(600).default(256).optional(),
+      
       /** Is the right sidebar collapsed? */
       rightSidebarCollapsed: z.boolean().default(false),
+
+      /** Width of the right sidebar in pixels */
+      rightSidebarWidth: z.number().min(200).max(600).default(256).optional(),
   }).optional(),
   
   /**
@@ -839,6 +846,11 @@ export const WorkspaceSettingsSchema = z.object({
     visibleColumns: z.array(z.string()).optional(),
   }).optional(),
   
+  /**
+   * UI Density Preference
+   */
+  uiDensity: z.enum(['compact', 'normal', 'expanded']).default('normal').optional(),
+
   /**
    * Investments Dashboard preferences
    */

@@ -401,6 +401,10 @@ function registerIpcHandlers(): void {
     return vaultManager.refreshInvestmentPrices();
   });
 
+  ipcMain.handle(IPC_CHANNELS.INVESTMENTS_REFRESH_METADATA, async () => {
+    return getInvestmentManager().refreshAssetMetadata();
+  });
+
   // ========== ANALYTICS ==========
 
   ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_PERFORMANCE, async (_event, period: 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL') => {
@@ -408,9 +412,8 @@ function registerIpcHandlers(): void {
     return vaultManager.getPerformanceMetrics(period);
   });
 
-  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION, async () => {
-    const vaultManager = getVaultManager();
-    return vaultManager.getPortfolioComposition();
+  ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_COMPOSITION, async (_event, baseCurrency: string) => {
+    return getInvestmentManager().getPortfolioComposition(baseCurrency);
   });
 
   ipcMain.handle(IPC_CHANNELS.ANALYTICS_GET_DIVIDENDS, async () => {

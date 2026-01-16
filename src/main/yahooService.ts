@@ -141,8 +141,8 @@ class YahooService {
       currency
     };
     
-    // Save async, don't wait
-    this.savePriceCache().catch(() => {});
+    // Use debounced save
+    this.savePriceCacheDebounced();
   }
 
   /**
@@ -317,15 +317,20 @@ class YahooService {
 
   /**
    * Get quotes for multiple symbols (batched)
+   * Uses yahoo-finance2 batch support for efficiency
    */
   async quotes(symbols: string[]): Promise<unknown[]> {
+    if (symbols.length === 0) return [];
+    
     await this.init();
     
+    // De-duplicate symbols
+    const uniqueSymbols = [...new Set(symbols)];
     const results: unknown[] = [];
     const symbolsToFetch: string[] = [];
     
-    // Check cache for each symbol
-    for (const symbol of symbols) {
+    // Check cache first
+    for (const symbol of uniqueSymbols) {
       const cached = this.getCachedPrice(symbol);
       if (cached) {
         results.push({
@@ -340,19 +345,64 @@ class YahooService {
       }
     }
     
-    // Fetch uncached symbols one by one (to respect rate limits)
-    for (const symbol of symbolsToFetch) {
-      try {
-        const quote = await this.quote(symbol);
-        results.push(quote);
-      } catch (error) {
-        logger.error('[YahooService] Failed to fetch quote', { symbol, error });
-        // Don't fail entirely, just skip this symbol
+    if (symbolsToFetch.length === 0) {
+      return results;
+    }
+
+    // Rate limit check
+    if (this.isRateLimited()) {
+       logger.warn('[YahooService] Rate limited, skipping fetch', { count: symbolsToFetch.length });
+       return results; // Return only cached
+    }
+
+    // Fetch in batches of 50 (Yahoo limitation safety)
+    const BATCH_SIZE = 50;
+    
+    return this.queueRequest(async () => {
+      logger.info(`[YahooService] Fetching ${symbolsToFetch.length} symbols in batches`);
+      
+      for (let i = 0; i < symbolsToFetch.length; i += BATCH_SIZE) {
+        const batch = symbolsToFetch.slice(i, i + BATCH_SIZE);
+        try {
+          const quotes = await this.yahooFinance.quote(batch);
+          // Check if result is array (it should be)
+          if (Array.isArray(quotes)) {
+             results.push(...quotes);
+          } else {
+             results.push(quotes); // Single result fallback
+          }
+        } catch (error) {
+           logger.error('[YahooService] Batch fetch failed', { batch, error });
+           // Fallback to single fetch for this batch ?? No, too slow. Just skip.
+        }
+        
+        // Small delay between batches to be nice
+        if (i + BATCH_SIZE < symbolsToFetch.length) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
+      return results;
+    });
+  }
+
+  // Timer for debounced save
+  private saveDebounceTimer: NodeJS.Timeout | null = null;
+
+  /**
+   * Debounced save of price cache
+   */
+  private savePriceCacheDebounced(): void {
+    if (this.saveDebounceTimer) {
+      clearTimeout(this.saveDebounceTimer);
     }
     
-    return results;
+    this.saveDebounceTimer = setTimeout(() => {
+      this.savePriceCache();
+      this.saveDebounceTimer = null;
+    }, 5000); // 5 seconds debounce
   }
+
+
 
   /**
    * Clear all cached prices (for testing)

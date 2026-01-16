@@ -64,7 +64,7 @@ export function DepositDashboard() {
     }
 
     return (
-        <div className="p-8 space-y-8 overflow-y-auto h-full animate-in fade-in duration-500">
+        <div className="p-card-p space-y-card-gap overflow-y-auto h-full animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex justify-between items-end">
                 <div>
@@ -85,8 +85,8 @@ export function DepositDashboard() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
+                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
                     <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
                         <PiggyBank className="w-4 h-4" />
                         {t('deposits.totalValue')}
@@ -95,7 +95,7 @@ export function DepositDashboard() {
                         {formatMoney(totalPrincipal, 'EUR')}
                     </div>
                 </div>
-                <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
+                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
                     <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
                         <ArrowRight className="w-4 h-4" />
                         {t('deposits.netRate')} ({t('deposits.weightedAvg')})
@@ -104,7 +104,7 @@ export function DepositDashboard() {
                         {averageNetRate.toFixed(2)}%
                     </div>
                 </div>
-                <div className="bg-background-card p-6 rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
+                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
                     <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4" />
                         {t('deposits.depositsCount')}
@@ -121,12 +121,12 @@ export function DepositDashboard() {
                     {t('deposits.yourDeposits')}
                 </h3>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-card-gap">
                     {deposits.map(deposit => (
                         <div
                             key={deposit.id}
                             onClick={() => handleEdit(deposit)}
-                            className="group bg-background-card p-5 rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
+                            className="group bg-background-card p-card-p rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
