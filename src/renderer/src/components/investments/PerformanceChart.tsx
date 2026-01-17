@@ -9,10 +9,13 @@ import {
     Tooltip,
     ResponsiveContainer
 } from 'recharts';
+import { TrendingUp, FileText } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useFormatDate } from '../../hooks/useFormatDate';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { Card, CardHeader, EmptyState } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 interface PerformanceChartProps {
     startDate?: Date;
@@ -47,14 +50,13 @@ export function PerformanceChart({ startDate, endDate }: PerformanceChartProps) 
 
     if (chartData.length < 2) {
         return (
-            <div className="bg-background-card rounded-xl border border-border p-6 flex flex-col items-center justify-center min-h-[300px]">
-                <p className="text-foreground-muted text-sm">
-                    {t('common.notEnoughData', 'Not enough data to display chart')}
-                </p>
-                <p className="text-foreground-subtle text-xs mt-1">
-                    {t('investments.performance.needMoreSnapshots', 'Take more snapshots to see your performance over time')}
-                </p>
-            </div>
+            <Card>
+                <EmptyState
+                    icon={FileText}
+                    title={t('common.notEnoughData', 'Not enough data to display chart')}
+                    description={t('investments.performance.needMoreSnapshots', 'Take more snapshots to see your performance over time')}
+                />
+            </Card>
         );
     }
 
@@ -65,28 +67,30 @@ export function PerformanceChart({ startDate, endDate }: PerformanceChartProps) 
     const padding = (maxValue - minValue) * 0.1;
 
     return (
-        <div className="bg-background-card rounded-xl border border-border p-6 shadow-sm">
-            <h3 className="font-semibold text-foreground mb-4">
-                {t('investments.performance.chartTitle', 'Portfolio Value Over Time')}
-            </h3>
+        <Card>
+            <CardHeader
+                icon={TrendingUp}
+                iconColor={DESIGN_TOKENS.colors.icon.performance}
+                title={t('investments.performance.chartTitle', 'Portfolio Value Over Time')}
+            />
             <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                <stop offset="5%" stopColor={DESIGN_TOKENS.colors.chart.primary} stopOpacity={0.3} />
+                                <stop offset="95%" stopColor={DESIGN_TOKENS.colors.chart.primary} stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={DESIGN_TOKENS.colors.chart.grid} vertical={false} />
                         <XAxis
                             dataKey="date"
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
-                            axisLine={{ stroke: '#334155' }}
+                            tick={{ fontSize: 11, fill: DESIGN_TOKENS.colors.chart.text }}
+                            axisLine={{ stroke: DESIGN_TOKENS.colors.chart.grid }}
                             tickLine={false}
                         />
                         <YAxis
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
+                            tick={{ fontSize: 11, fill: DESIGN_TOKENS.colors.chart.text }}
                             axisLine={false}
                             tickLine={false}
                             domain={[minValue - padding, maxValue + padding]}
@@ -111,15 +115,15 @@ export function PerformanceChart({ startDate, endDate }: PerformanceChartProps) 
                         <Area
                             type="monotone"
                             dataKey="investments"
-                            stroke="#3b82f6"
+                            stroke={DESIGN_TOKENS.colors.chart.primary}
                             strokeWidth={2}
                             fill="url(#investmentGradient)"
                             dot={false}
-                            activeDot={{ r: 4, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
+                            activeDot={{ r: 4, fill: DESIGN_TOKENS.colors.chart.primary, stroke: '#fff', strokeWidth: 2 }}
                         />
                     </AreaChart>
                 </ResponsiveContainer>
             </div>
-        </div>
+        </Card>
     );
 }

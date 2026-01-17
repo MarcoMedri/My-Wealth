@@ -12,6 +12,7 @@ import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import { ReturnMetricsCard } from './ReturnMetricsCard';
 import { PerformanceChart } from './PerformanceChart';
 import { HoldingsCard } from './HoldingsCard';
+import { PageHeader } from '../ui/PageHeader';
 
 import {
     Chart as ChartJS,
@@ -267,33 +268,34 @@ export function InvestmentDashboard() {
     }
 
     return (
-        <div className="p-6 space-y-8 overflow-y-auto h-full">
+        <div className="p-card-p space-y-card-gap overflow-y-auto h-full">
             {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Activity className="w-6 h-6 text-indigo-500" />
-                    {t('investments.title')}
-                </h1>
-                <div className="flex gap-2">
-                    <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
-                    <button
-                        onClick={refreshAllPrices}
-                        className="btn btn-ghost flex items-center gap-1"
-                        disabled={isLoading}
-                        title={t('investments.refreshPrices')}
-                    >
-                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
-                    </button>
-                    <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
-                        <Plus className="w-4 h-4 mr-2" />
-                        {t('investments.addInvestment')}
-                    </button>
-                </div>
-            </div>
+            <PageHeader
+                title={t('investments.title')}
+                icon={Activity}
+                iconClassName="text-indigo-500"
+                actions={
+                    <>
+                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
+                        <button
+                            onClick={refreshAllPrices}
+                            className="btn btn-ghost flex items-center gap-1"
+                            disabled={isLoading}
+                            title={t('investments.refreshPrices')}
+                        >
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
+                        </button>
+                        <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
+                            <Plus className="w-4 h-4 mr-2" />
+                            {t('investments.addInvestment')}
+                        </button>
+                    </>
+                }
+            />
 
             {/* Row 1: KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-card-gap">
                 <KpiCard title={t('investments.totalValue')} value={metrics.totalValue} currency={baseCurrency} />
                 <KpiCard
                     title={t('investments.dayChange')}
@@ -313,19 +315,19 @@ export function InvestmentDashboard() {
             </div>
 
             {/* Row 2: Charts (Asset Type, Broker, Geography) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-card-gap">
                 <ChartCard title={t('investments.allocationByType')} data={getChartData(typeDistribution)} options={chartOptions} />
                 <ChartCard title={t('investments.allocationByBroker')} data={getChartData(brokerDistribution)} options={chartOptions} />
                 <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
             </div>
 
             {/* Row 3: Performance Metrics */}
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-card-gap">
                 <ReturnMetricsCard />
             </div>
 
             {/* Row 4: Portfolio Value Over Time */}
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-card-gap">
                 <PerformanceChart />
             </div>
 

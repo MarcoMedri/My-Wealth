@@ -14,6 +14,7 @@ import IncomeExpenseCharts from './charts/IncomeExpenseCharts';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { DateRangeFilter, type DateRange } from './DateRangeFilter';
 import { AccountFilter } from './AccountFilter';
+import { PageHeader } from './ui/PageHeader';
 
 export default function AccountsDashboard() {
     const {
@@ -119,34 +120,35 @@ export default function AccountsDashboard() {
     const categories = useVaultStore(state => state.categories);
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
             {/* Header */}
-            <header className="px-6 py-4 border-b border-border flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Wallet className="w-6 h-6 text-indigo-500" />
-                    {t('accounts.title')}
-                </h1>
-                <div className="flex items-center gap-3">
-                    <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
+            <PageHeader
+                title={t('accounts.title')}
+                icon={Wallet}
+                iconClassName="text-indigo-500"
+                actions={
+                    <>
+                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
 
-                    <AccountFilter
-                        selectedAccountIds={selectedAccountIds}
-                        onChange={handleAccountFilterChange}
-                    />
+                        <AccountFilter
+                            selectedAccountIds={selectedAccountIds}
+                            onChange={handleAccountFilterChange}
+                        />
 
-                    <button
-                        onClick={refreshData}
-                        disabled={isLoading}
-                        className={cn(
-                            "p-2 rounded-lg bg-background-muted text-foreground-muted hover:text-foreground hover:bg-background-subtle transition-colors border border-border",
-                            isLoading && "opacity-50 cursor-not-allowed"
-                        )}
-                        title={t('accounts.refreshData')}
-                    >
-                        <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                    </button>
-                </div>
-            </header>
+                        <button
+                            onClick={refreshData}
+                            disabled={isLoading}
+                            className={cn(
+                                "p-2 rounded-lg bg-background-muted text-foreground-muted hover:text-foreground hover:bg-background-subtle transition-colors border border-border",
+                                isLoading && "opacity-50 cursor-not-allowed"
+                            )}
+                            title={t('accounts.refreshData')}
+                        >
+                            <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                        </button>
+                    </>
+                }
+            />
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap p-card-p">
@@ -188,7 +190,7 @@ export default function AccountsDashboard() {
             </div>
 
             {/* Charts Row */}
-            <div className="px-6 pb-6">
+            <div className="px-card-p pb-card-p">
                 <IncomeExpenseCharts
                     transactions={transactions}
                     categories={categories}
@@ -197,7 +199,7 @@ export default function AccountsDashboard() {
                 />
             </div>
 
-            <div className="flex-1 min-h-[650px] flex gap-6 px-6 pb-6">
+            <div className="flex-1 min-h-[650px] flex gap-6 px-card-p pb-card-p">
                 {/* Main Feed - Full Width */}
                 <div className="flex-1 flex flex-col bg-background-card rounded-xl border border-border overflow-hidden shadow-sm">
                     <TransactionTable dateRange={dateRange} selectedAccountIds={selectedAccountIds} />

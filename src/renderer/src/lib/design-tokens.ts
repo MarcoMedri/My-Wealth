@@ -35,6 +35,16 @@ export const DESIGN_TOKENS = {
       secondary: 'text-gray-500 dark:text-gray-400',
       muted: 'text-gray-400 dark:text-gray-500',
     },
+    chart: {
+      primary: '#3b82f6', // blue-500
+      grid: '#334155',    // slate-700
+      text: '#94a3b8',    // slate-400
+      tooltip: {
+        background: 'var(--background-card)',
+        border: 'var(--border)',
+        text: 'var(--foreground)',
+      }
+    },
   },
 
   /**

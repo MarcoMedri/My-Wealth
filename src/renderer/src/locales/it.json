@@ -85,7 +85,7 @@
     "refreshMetadataResult": "Aggiornati: {{updated}}, Falliti: {{failed}}",
     "maintenance": "Manutenzione"
   },
-  "shortcuts": {
+  "settings": {
     "title": "Impostazioni",
     "general": "Generale",
     "appearance": "Aspetto",
@@ -118,7 +118,30 @@
     "dateTime": "Data & Ora",
     "dateFormat": "Formato Data",
     "timeFormat": "Formato Ora",
-    "loadDefaults": "Carica Default"
+    "loadDefaults": "Carica Default",
+    "dataBackup": "Dati & Backup",
+    "shortcuts": "Scorciatoie",
+    "exportData": "Esporta Dati",
+    "exportBackup": "Esporta Backup",
+    "densityCompactDesc": "Più dati sullo schermo, meno scorrimento.",
+    "densityNormalDesc": "Spaziatura bilanciata per uso generale.",
+    "densityExpandedDesc": "Navigazione comoda, ideale per touch.",
+    "taxConfiguration": "Configurazione Fiscale",
+    "taxConfigurationDesc": "Imposta le aliquote fiscali predefinite per diverse classi di attività. Questi valori predefiniti vengono applicati quando si aggiungono nuovi asset ma possono essere sovrascritti individualmente.",
+    "assetTaxRates": "Aliquote Fiscali Asset",
+    "currentPath": "Percorso Attuale",
+    "exportDataDesc": "Scarica un backup JSON completo del tuo vault. Questo file contiene tutti i tuoi dati e configurazioni.",
+    "manageCategoriesDesc": "Gestisci etichette personalizzate per le tue proprietà e asset.",
+    "developerWarningDesc": "Questi strumenti sono destinati a scopi di sviluppo e test. Usa con cautela.",
+    "dataManagement": "Gestione Dati",
+    "demoDataDesc": "Popola il vault con dati di esempio",
+    "clearDataDesc": "Cancella tutti i dati dal vault corrente"
+  },
+  "shortcuts": {
+    "search": "Apri Palette Comandi",
+    "settings": "Apri Impostazioni",
+    "navigate": "Naviga con tasti",
+    "close": "Chiudi dialoghi"
   },
   "collectibles": {
     "title": "Collezionabili",
@@ -726,6 +749,13 @@
     "back": "Indietro",
     "skip": "Salta Tour",
     "finish": "Inizia"
+  },
+  "onboarding": {
+    "welcome": "Benvenuto in MyWealth",
+    "description": "Il tuo compagno di finanza personale locale.\nTutti i tuoi dati rimangono sul tuo dispositivo.",
+    "createVault": "Crea Nuovo Vault",
+    "openVault": "Apri Vault Esistente",
+    "vaultHint": "Il tuo vault è una cartella contenente file JSON.\nSalvalo dove vuoi — disco locale, Dropbox, iCloud, ecc."
   },
   "backups": {
     "title": "Backup",

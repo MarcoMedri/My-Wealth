@@ -88,13 +88,13 @@ function App(): React.ReactElement {
         const isStale = Date.now() - lastUpdated > SEVEN_DAYS;
 
         if (isStale || lastUpdated === 0) {
-            console.log('[App] Exchange rates cache is stale, fetching...');
+
             fetchRates();
         }
     }, [fetchRates, currency, lastUpdated]);
 
     // Language Effect
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const language = useSettingsStore(state => state.language);
 
     useEffect(() => {
@@ -165,7 +165,7 @@ function App(): React.ReactElement {
             <div className="flex h-screen items-center justify-center bg-background">
                 <div className="text-center">
                     <Wallet className="mx-auto h-16 w-16 animate-pulse text-emerald-500" />
-                    <p className="mt-4 text-lg text-foreground-muted">Loading...</p>
+                    <p className="mt-4 text-lg text-foreground-muted">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -186,12 +186,11 @@ function App(): React.ReactElement {
                         </div>
 
                         <h1 className="mb-3 text-3xl font-bold tracking-tight text-foreground">
-                            Welcome to MyWealth
+                            {t('onboarding.welcome')}
                         </h1>
 
-                        <p className="mb-8 text-foreground-muted">
-                            Your local-first personal finance companion.
-                            All your data stays on your device.
+                        <p className="mb-8 text-foreground-muted whitespace-pre-line">
+                            {t('onboarding.description')}
                         </p>
 
                         <div className="space-y-4">
@@ -207,7 +206,7 @@ function App(): React.ReactElement {
                                 )}
                             >
                                 <Plus className="w-5 h-5" />
-                                <span>Create New Vault</span>
+                                <span>{t('onboarding.createVault')}</span>
                             </button>
 
                             <button
@@ -221,13 +220,12 @@ function App(): React.ReactElement {
                                 )}
                             >
                                 <FolderOpen className="w-5 h-5" />
-                                <span>Open Existing Vault</span>
+                                <span>{t('onboarding.openVault')}</span>
                             </button>
                         </div>
 
-                        <p className="mt-8 text-xs text-foreground-subtle">
-                            Your vault is a folder containing JSON files.
-                            Store it anywhere — local drive, Dropbox, iCloud, etc.
+                        <p className="mt-8 text-xs text-foreground-subtle whitespace-pre-line">
+                            {t('onboarding.vaultHint')}
                         </p>
                     </div>
                 </main>

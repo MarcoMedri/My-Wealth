@@ -1,11 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { Plus, RefreshCw, Watch, Palette, Wine, Coins, Car, Box, Trash2, Tag } from 'lucide-react';
+import { Plus, RefreshCw, Watch, Palette, Wine, Coins, Car, Box, Trash2, Tag, TrendingUp } from 'lucide-react';
 import { type Collectible } from '../../../../shared/schemas';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { CollectibleModal } from './CollectibleModal';
 import { useNetWorth } from '../../hooks/useNetWorth';
 import { useTranslation } from 'react-i18next';
+import { Card, EmptyState } from '../ui';
+import { PageHeader } from '../ui/PageHeader';
+import { cn } from '../../lib/utils';
 
 const COLLECTIBLE_ICONS: Record<string, typeof Watch> = {
     watch: Watch,
@@ -80,123 +83,157 @@ export function CollectiblesDashboard() {
 
     if (!collectibles.length) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center text-foreground-subtle">
-                <div className="bg-background-muted p-4 rounded-full mb-4 dark:bg-background-subtle">
-                    <Watch className="w-8 h-8 text-indigo-500" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground mb-2">{t('collectibles.yourCollectibles')}</h2>
-                <p className="max-w-md mb-6">{t('collectibles.trackDescription')}</p>
-                <button
-                    onClick={handleAdd}
-                    className="btn btn-primary"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('collectibles.addFirst')}
-                </button>
+            <Card className="h-full flex items-center justify-center min-h-[400px]">
+                <EmptyState
+                    icon={Watch}
+                    title={t('collectibles.yourCollectibles')}
+                    description={t('collectibles.trackDescription')}
+                    action={{
+                        label: t('collectibles.addFirst'),
+                        onClick: handleAdd
+                    }}
+                />
                 {isModalOpen && (
                     <CollectibleModal isOpen={isModalOpen} onClose={handleCloseModal} collectible={editingItem} />
                 )}
-            </div>
+            </Card>
         );
     }
 
     return (
-        <div className="p-card-p space-y-card-gap overflow-y-auto h-full">
+        <div className="space-y-card-gap">
             {/* Header */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                    <Watch className="w-6 h-6 text-indigo-500" />
-                    {t('collectibles.title')}
-                </h1>
-                <div className="flex gap-2">
-                    <button onClick={() => refreshData()} className="btn btn-ghost" disabled={isLoading}>
-                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    </button>
-                    <button onClick={handleAdd} className="btn btn-primary">
-                        <Plus className="w-4 h-4 mr-2" />
-                        {t('collectibles.addItem')}
-                    </button>
-                </div>
-            </div>
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
-                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
-                    <div className="text-sm text-foreground-muted mb-1">{t('collectibles.totalValue')}</div>
-                    <div className="text-2xl font-bold text-foreground">
-                        {formatMoney(metrics.totalValue, baseCurrency)}
-                    </div>
-                    <div className="text-xs text-foreground-muted mt-1">{metrics.count} {t('collectibles.items')}</div>
-                </div>
-                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
-                    <div className="text-sm text-foreground-muted mb-1">{t('collectibles.appreciation')}</div>
-                    <div className={`text-2xl font-bold ${metrics.appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {metrics.appreciation >= 0 ? '+' : ''}{formatMoney(metrics.appreciation, baseCurrency)}
-                    </div>
-                    <div className={`text-sm mt-1 ${metrics.appreciation >= 0 ? 'text-emerald-500/80' : 'text-rose-500/80'}`}>
-                        {metrics.appreciationPercent >= 0 ? '+' : ''}{metrics.appreciationPercent.toFixed(2)}%
-                    </div>
-                </div>
-                <div className="bg-background-card p-card-p rounded-xl shadow-sm border border-border">
-                    <div className="text-sm text-foreground-muted mb-1">{t('collectibles.purchaseCost')}</div>
-                    <div className="text-2xl font-bold text-foreground">
-                        {formatMoney(metrics.totalPurchasePrice, baseCurrency)}
-                    </div>
-                </div>
-            </div>
-
-            {/* Collectibles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
-                {collectibles.map(item => {
-                    const Icon = COLLECTIBLE_ICONS[item.type] || Tag;
-                    const appreciation = item.purchasePrice
-                        ? item.currentValue - item.purchasePrice
-                        : 0;
-
-                    return (
-                        <div
-                            key={item.id}
-                            onClick={() => handleEdit(item)}
-                            className="bg-background-card rounded-xl shadow-sm border border-border p-card-p hover:shadow-md transition-shadow group relative cursor-pointer"
+            <PageHeader
+                title={t('collectibles.title')}
+                icon={Watch}
+                iconClassName="text-indigo-500"
+                actions={
+                    <>
+                        <button
+                            onClick={() => refreshData()}
+                            className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-subtle rounded-lg transition-colors"
+                            disabled={isLoading}
                         >
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                                    className="p-1.5 hover:bg-background-muted dark:hover:bg-background-muted rounded text-foreground-subtle hover:text-rose-500"
-                                    title={t('collectibles.delete')}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
+                            <RefreshCw className={cn("w-5 h-5", isLoading && "animate-spin")} />
+                        </button>
+                        <button
+                            onClick={handleAdd}
+                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            {t('collectibles.addItem')}
+                        </button>
+                    </>
+                }
+            />
 
-                            <div className="flex items-start gap-3">
-                                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                    <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-card-p">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
+                    <Card className="p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-blue-500/10">
+                                <Watch className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('collectibles.totalValue')}</p>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground tracking-tight truncate" title={formatMoney(metrics.totalValue, baseCurrency)}>
+                            {formatMoney(metrics.totalValue, baseCurrency)}
+                        </p>
+                    </Card>
+
+                    <Card className="p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-emerald-500/10">
+                                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('collectibles.totalGain')}</p>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <p className={cn("text-2xl font-bold tracking-tight truncate", metrics.appreciation >= 0 ? "text-emerald-500" : "text-rose-500")}>
+                                {metrics.appreciation >= 0 ? '+' : ''}{formatMoney(metrics.appreciation, baseCurrency)}
+                            </p>
+                            <p className={cn("text-sm font-medium", metrics.appreciation >= 0 ? "text-emerald-500/80" : "text-rose-500/80")}>
+                                ({metrics.appreciationPercent.toFixed(2)}%)
+                            </p>
+                        </div>
+                    </Card>
+
+                    <Card className="p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-amber-500/10">
+                                <Coins className="w-5 h-5 text-amber-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('collectibles.items')}</p>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground tracking-tight truncate">
+                            {collectibles.length}
+                        </p>
+                    </Card>
+                </div>
+
+                {/* Items Grid */}
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
+                    {collectibles.map(item => {
+                        const Icon = COLLECTIBLE_ICONS[item.type] || Tag;
+                        const appreciation = item.purchasePrice
+                            ? item.currentValue - item.purchasePrice
+                            : 0;
+
+                        return (
+                            <Card
+                                key={item.id}
+                                onClick={() => handleEdit(item)}
+                                className="p-card-p cursor-pointer hover:shadow-md transition-all group relative"
+                            >
+                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                                        className="p-1.5 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded text-foreground-subtle hover:text-rose-600 transition-colors"
+                                        title={t('collectibles.delete')}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <div className="flex-1 min-w-0 pr-16">
-                                    <h3 className="font-semibold text-foreground truncate">
-                                        {item.name}
-                                    </h3>
-                                    {item.description && (
-                                        <p className="text-sm text-foreground-subtle truncate">{item.description}</p>
+
+                                <div className="flex items-start gap-4 mb-4">
+                                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                                        <Icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0 pr-8">
+                                        <h3 className="font-semibold text-lg text-foreground truncate">
+                                            {item.name}
+                                        </h3>
+                                        {item.description && (
+                                            <p className="text-sm text-foreground-subtle truncate">{item.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-border space-y-1">
+                                    <div className="flex justify-between items-baseline mb-2">
+                                        <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">{t('collectibles.currentValue')}</span>
+                                        <span className="text-xl font-bold text-foreground">
+                                            {formatMoney(item.currentValue, item.currency)}
+                                        </span>
+                                    </div>
+
+                                    {item.purchasePrice && (
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-foreground-subtle">{t('collectibles.appreciation')}</span>
+                                            <span className={cn(
+                                                "font-medium",
+                                                appreciation >= 0 ? "text-emerald-500" : "text-rose-500"
+                                            )}>
+                                                {appreciation >= 0 ? '+' : ''}{formatMoney(appreciation, item.currency)}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="mt-4 pt-3 border-t border-border">
-                                <div className="text-xs text-foreground-muted">{t('collectibles.currentValue')}</div>
-                                <div className="text-lg font-bold text-foreground">
-                                    {formatMoney(item.currentValue, item.currency)}
-                                </div>
-                                {item.purchasePrice && (
-                                    <div className={`text-sm font-medium mt-1 ${appreciation >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                        {appreciation >= 0 ? '+' : ''}{formatMoney(appreciation, item.currency)}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
+                            </Card>
+                        );
+                    })}
+                </div>
             </div>
 
             {isModalOpen && (

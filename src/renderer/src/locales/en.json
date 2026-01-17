@@ -175,6 +175,8 @@
       "system": "System"
     },
     "taxation": "Taxation (Capital Gains)",
+    "dataBackup": "Data & Backup",
+    "shortcuts": "Shortcuts",
     "taxDefaults": "Default Tax Rates",
     "taxDefaultsDesc": "Default tax rates used when creating new investments. You can override these for individual holdings.",
     "defaultViewMode": "Default Dashboard View",
@@ -206,7 +208,20 @@
     "refreshMetadataDesc": "Re-download static information (Sector, Country, Description) for all your assets from Yahoo Finance. Useful if data is missing.",
     "refreshMetadataAction": "Refresh Now",
     "refreshMetadataResult": "Updated: {{updated}}, Failed: {{failed}}",
-    "maintenance": "Maintenance"
+    "maintenance": "Maintenance",
+    "densityCompactDesc": "More data on screen, less scrolling.",
+    "densityNormalDesc": "Balanced spacing for general use.",
+    "densityExpandedDesc": "Comfortable navigation, touch friendly.",
+    "taxConfiguration": "Tax Configuration",
+    "taxConfigurationDesc": "Set default tax rates for different asset classes. These defaults are applied when adding new assets but can be overridden individually.",
+    "assetTaxRates": "Asset Tax Rates",
+    "currentPath": "Current Path",
+    "exportDataDesc": "Download a complete JSON backup of your vault. This file contains all your data and configurations.",
+    "manageCategoriesDesc": "Manage custom labels for your properties and assets.",
+    "developerWarningDesc": "These tools are intended for development and testing purposes. Use with caution.",
+    "dataManagement": "Data Management",
+    "demoDataDesc": "Populate vault with sample data",
+    "clearDataDesc": "Wipe all data from current vault"
   },
   "shortcuts": {
     "search": "Open Command Palette",
@@ -735,6 +750,13 @@
     "back": "Back",
     "skip": "Skip Tour",
     "finish": "Get Started"
+  },
+  "onboarding": {
+    "welcome": "Welcome to MyWealth",
+    "description": "Your local-first personal finance companion.\nAll your data stays on your device.",
+    "createVault": "Create New Vault",
+    "openVault": "Open Existing Vault",
+    "vaultHint": "Your vault is a folder containing JSON files.\nStore it anywhere — local drive, Dropbox, iCloud, etc."
   },
   "backups": {
     "title": "Backups",
