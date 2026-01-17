@@ -87,13 +87,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={cn(
-                                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left",
                                         activeTab === tab.id
                                             ? "bg-primary/10 text-primary shadow-sm"
                                             : "text-foreground-muted hover:bg-background-muted hover:text-foreground"
                                     )}
                                 >
-                                    <Icon className={cn("w-5 h-5", activeTab === tab.id ? "text-primary" : "text-foreground-muted")} />
+                                    <Icon className={cn("w-5 h-5 shrink-0", activeTab === tab.id ? "text-primary" : "text-foreground-muted")} />
                                     {tab.label}
                                 </button>
                             );
@@ -225,7 +225,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         </label>
                                         <div className="bg-background-subtle p-4 rounded-xl border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-xs text-foreground-muted uppercase font-bold tracking-wider mb-1">Current Path</div>
+                                                <div className="text-xs text-foreground-muted uppercase font-bold tracking-wider mb-1">{t('settings.currentPath')}</div>
                                                 <div className="text-sm font-mono text-foreground break-all">
                                                     {vaultPath || t('settings.noVaultSelected', 'No vault selected')}
                                                 </div>
@@ -303,9 +303,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 <div>
                                                     <span className="block font-medium capitalize text-base">{t(`settings.densities.${d}`, d)}</span>
                                                     <span className="text-xs opacity-70">
-                                                        {d === 'compact' && "More data on screen, less scrolling."}
-                                                        {d === 'normal' && "Balanced spacing for general use."}
-                                                        {d === 'expanded' && "Comfortable navigation, touch friendly."}
+                                                        {d === 'compact' && t('settings.densityCompactDesc')}
+                                                        {d === 'normal' && t('settings.densityNormalDesc')}
+                                                        {d === 'expanded' && t('settings.densityExpandedDesc')}
                                                     </span>
                                                 </div>
                                             </button>
@@ -323,8 +323,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 flex gap-4">
                                     <Shield className="w-6 h-6 text-primary shrink-0" />
                                     <div>
-                                        <h4 className="font-medium text-primary mb-1">Tax Configuration</h4>
-                                        <p className="text-sm text-foreground-muted">Set default tax rates for different asset classes. These defaults are applied when adding new assets but can be overridden individually.</p>
+                                        <h4 className="font-medium text-primary mb-1">{t('settings.taxConfiguration')}</h4>
+                                        <p className="text-sm text-foreground-muted">{t('settings.taxConfigurationDesc')}</p>
                                     </div>
                                 </div>
 
@@ -360,7 +360,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-sm font-semibold text-foreground-muted uppercase tracking-wider">Asset Tax Rates</h4>
+                                    <h4 className="text-sm font-semibold text-foreground-muted uppercase tracking-wider">{t('settings.assetTaxRates')}</h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {['stock', 'etf', 'crypto', 'bond', 'fund', 'residence', 'rental', 'collectible'].map(type => (
                                             <div key={type} className="space-y-2">
@@ -416,7 +416,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 {t('settings.exportData', 'Export Data')}
                                             </h4>
                                             <p className="text-sm text-foreground-muted mt-2 max-w-md">
-                                                Download a complete JSON backup of your vault. This file contains all your data and configurations.
+                                                {t('settings.exportDataDesc')}
                                             </p>
                                         </div>
                                         <button
@@ -490,7 +490,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             <div className="space-y-8 animate-in slide-in-from-right-4 duration-300 h-full flex flex-col">
                                 <div>
                                     <h3 className="text-lg font-semibold text-foreground mb-1">{t('settings.categories')}</h3>
-                                    <p className="text-sm text-foreground-muted mb-4">Manage custom labels for your properties and assets.</p>
+                                    <p className="text-sm text-foreground-muted mb-4">{t('settings.manageCategoriesDesc')}</p>
                                 </div>
                                 <div className="flex-1 min-h-0">
                                     <CategoryManager />
@@ -582,11 +582,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         <Shield className="w-6 h-6 text-amber-500 shrink-0" />
                                         <div>
                                             <h4 className="font-medium text-amber-500 mb-1">{t('common.warning', 'Warning')}</h4>
-                                            <p className="text-sm text-foreground-muted">These tools are intended for development and testing purposes. Use with caution.</p>
+                                            <p className="text-sm text-foreground-muted">{t('settings.developerWarningDesc')}</p>
                                         </div>
                                     </div>
 
-                                    <h4 className="text-sm font-semibold text-foreground-muted uppercase tracking-wider mt-6">Data Management</h4>
+                                    <h4 className="text-sm font-semibold text-foreground-muted uppercase tracking-wider mt-6">{t('settings.dataManagement')}</h4>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <button
@@ -602,7 +602,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                             </div>
                                             <div>
                                                 <div className="font-medium text-foreground">{t('nav.generateDemoData')}</div>
-                                                <div className="text-xs text-foreground-muted mt-0.5">Populate vault with sample data</div>
+                                                <div className="text-xs text-foreground-muted mt-0.5">{t('settings.demoDataDesc')}</div>
                                             </div>
                                         </button>
 
@@ -615,7 +615,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                             </div>
                                             <div>
                                                 <div className="font-medium text-red-500">{t('nav.clearAllData')}</div>
-                                                <div className="text-xs text-foreground-muted mt-0.5">Wipe all data from current vault</div>
+                                                <div className="text-xs text-foreground-muted mt-0.5">{t('settings.clearDataDesc')}</div>
                                             </div>
                                         </button>
                                     </div>

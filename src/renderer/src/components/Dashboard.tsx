@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from './ui/PageHeader';
 import {
     Wallet,
     TrendingUp,
@@ -8,7 +9,8 @@ import {
     Camera,
     Shield,
     PiggyBank,
-    RefreshCw
+    RefreshCw,
+    LayoutDashboard
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useVaultStore } from '../store/useVaultStore';
@@ -208,7 +210,7 @@ export default function Dashboard() {
 
 
     return (
-        <div className="p-6 space-y-6 overflow-y-auto h-full" data-tour="dashboard">
+        <div className="p-card-p space-y-card-gap overflow-y-auto h-full" data-tour="dashboard">
             <SnapshotConfirmationModal
                 isOpen={showSnapshotModal}
                 onClose={() => setShowSnapshotModal(false)}
@@ -216,31 +218,33 @@ export default function Dashboard() {
             />
 
             {/* Header */}
-            <header className="px-8 py-6 pb-2 flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.title')}</h1>
-                    <p className="text-foreground-muted mt-1">{t('dashboard.subtitle')}</p>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => useVaultStore.getState().refreshAllPrices()}
-                        className="flex items-center gap-2 bg-background-subtle hover:bg-background-element border border-border px-4 py-2 rounded-lg transition-colors text-sm font-medium"
-                        title={t('investments.refreshPrices')}
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                        <span className="hidden sm:inline">{t('investments.refresh')}</span>
-                    </button>
-                    <button
-                        onClick={handleSnapshotClick}
-                        className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-md hover:bg-primary/90 transition-colors text-sm font-medium"
-                    >
-                        <Camera className="w-4 h-4" />
-                        <span>{t('dashboard.takeSnapshot')}</span>
-                    </button>
-                </div>
-            </header >
+            <PageHeader
+                title={t('dashboard.title')}
+                description={t('dashboard.subtitle')}
+                icon={LayoutDashboard}
+                iconClassName="text-blue-500"
+                actions={
+                    <>
+                        <button
+                            onClick={() => useVaultStore.getState().refreshAllPrices()}
+                            className="flex items-center gap-2 btn btn-ghost text-sm font-medium"
+                            title={t('investments.refreshPrices')}
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            <span className="hidden sm:inline">{t('investments.refresh')}</span>
+                        </button>
+                        <button
+                            onClick={handleSnapshotClick}
+                            className="flex items-center gap-2 btn btn-primary text-sm font-medium"
+                        >
+                            <Camera className="w-4 h-4" />
+                            <span>{t('dashboard.takeSnapshot')}</span>
+                        </button>
+                    </>
+                }
+            />
 
-            <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
+            <div className="p-card-p space-y-card-gap max-w-7xl mx-auto w-full">
 
                 {/* Net Worth Hero - Enhanced with Gradient */}
                 <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-2xl p-8 shadow-2xl overflow-hidden group">
@@ -321,7 +325,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Summary Cards Grid (6 cols) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
                     <SummaryCard
                         title={t('dashboard.cashAccounts')}
                         value={cashTotal}
@@ -428,7 +432,7 @@ function SummaryCard({ title, value, icon: Icon, color, bg, borderColor, classNa
                 borderColor,
                 className
             )}>
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-card-gap mb-3">
                 <div className={cn("p-2 rounded-lg", bg, color)}>
                     <Icon className="w-5 h-5" />
                 </div>

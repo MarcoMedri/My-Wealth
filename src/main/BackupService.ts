@@ -114,9 +114,19 @@ export class BackupService {
         // Extract timestamp from filename
         // Format: vault-backup-2026-01-05T12-00-00-000Z.json.gz
         const timestampMatch = filename.match(/vault-backup-(.+)\.json\.gz/);
-        const timestamp = timestampMatch 
-          ? timestampMatch[1].replace(/-/g, ':').replace(/T(\d{2}):(\d{2}):(\d{2}):(\d{3})Z/, 'T$1:$2:$3.$4Z')
-          : new Date(stats.mtime).toISOString();
+        let timestamp = new Date(stats.mtime).toISOString();
+
+        if (timestampMatch) {
+            const raw = timestampMatch[1];
+            // Fix: Only replace hyphens in the TIME part (after T)
+            const parts = raw.split('T');
+            if (parts.length === 2) {
+                const datePart = parts[0];
+                // Replace hyphens with colons in time, and last colon with dot for ms
+                const timePart = parts[1].replace(/-/g, ':').replace(/:(\d{3}Z)$/, '.$1');
+                timestamp = `${datePart}T${timePart}`;
+            }
+        }
 
         backups.push({
           id: filename,

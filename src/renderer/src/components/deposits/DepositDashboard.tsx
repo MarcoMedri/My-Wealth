@@ -1,31 +1,38 @@
 import React, { useState, useMemo } from 'react';
 import { useVaultStore } from '../../store/useVaultStore';
-import { PiggyBank, Plus, Building, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { PiggyBank, Plus, Building, Calendar, RefreshCw, TrendingUp, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useFormatDate } from '../../hooks/useFormatDate';
+import { useNetWorth } from '../../hooks/useNetWorth';
 import { AddDepositModal } from './AddDepositModal';
 import { DepositAccount } from '../../../../shared/schemas';
+import { Card, EmptyState } from '../ui';
+import { PageHeader } from '../ui/PageHeader';
+import { cn } from '../../lib/utils';
 
 export function DepositDashboard() {
-    const { deposits, brokers } = useVaultStore();
+    const { deposits, brokers, refreshData, isLoading } = useVaultStore();
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
     const { formatDate } = useFormatDate();
+    const { baseCurrency } = useNetWorth();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingDeposit, setEditingDeposit] = useState<DepositAccount | null>(null);
 
     // Calculations
-    const totalPrincipal = useMemo(() => {
-        return deposits.reduce((sum, d) => sum + d.principal, 0);
+    const metrics = useMemo(() => {
+        const totalPrincipal = deposits.reduce((sum, d) => sum + d.principal, 0);
+        // Simple interest estimation for total interest (just summing up hypothetical interest for dashboard)
+        // This is decorative if we don't have exact accrued interest tracked
+        const totalInterest = deposits.reduce((sum, d) => sum + (d.principal * (d.netRate / 100)), 0);
+        return {
+            totalPrincipal,
+            totalInterest,
+            count: deposits.length
+        };
     }, [deposits]);
-
-    const averageNetRate = useMemo(() => {
-        if (deposits.length === 0) return 0;
-        const weightedSum = deposits.reduce((sum, d) => sum + (d.netRate * d.principal), 0);
-        return weightedSum / totalPrincipal;
-    }, [deposits, totalPrincipal]);
 
     const getBrokerName = (brokerId?: string) => {
         if (!brokerId) return t('deposits.noBroker');
@@ -33,10 +40,15 @@ export function DepositDashboard() {
         return broker ? broker.name : t('deposits.noBroker');
     };
 
-    const handleEdit = (deposit: DepositAccount) => {
-        setEditingDeposit(deposit);
-        setIsAddModalOpen(true);
+    // Polyfill or import getDaysRemaining if it's missing
+    const getDaysRemaining = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffTime = date.getTime() - now.getTime();
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
+
+
 
     const handleCloseModal = () => {
         setIsAddModalOpen(false);
@@ -45,90 +57,111 @@ export function DepositDashboard() {
 
     if (!deposits.length) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center text-foreground-subtle animate-in fade-in zoom-in duration-300">
-                <div className="bg-primary/10 p-6 rounded-full mb-6">
-                    <PiggyBank className="w-12 h-12 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">{t('deposits.startTracking')}</h2>
-                <p className="max-w-md text-foreground-muted mb-8 leading-relaxed">{t('deposits.trackDescription')}</p>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95"
-                >
-                    <Plus className="w-5 h-5" />
-                    {t('deposits.addDeposit')}
-                </button>
+            <Card className="h-full flex items-center justify-center min-h-[400px]">
+                <EmptyState
+                    icon={PiggyBank}
+                    title={t('deposits.startTracking')}
+                    description={t('deposits.trackDescription')}
+                    action={{
+                        label: t('deposits.addDeposit'),
+                        onClick: () => setIsAddModalOpen(true)
+                    }}
+                />
                 <AddDepositModal isOpen={isAddModalOpen} onClose={handleCloseModal} />
-            </div>
+            </Card>
         );
     }
 
     return (
-        <div className="p-card-p space-y-card-gap overflow-y-auto h-full animate-in fade-in duration-500">
+        <div className="space-y-card-gap">
             {/* Header */}
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                        <PiggyBank className="w-8 h-8 text-primary" />
-                        {t('deposits.title')}
-                    </h1>
-                    <p className="text-foreground-muted mt-2 text-lg">{t('deposits.subtitle')}</p>
-                </div>
-
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="bg-primary hover:bg-primary-hover text-primary-foreground px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all hover:shadow-lg hover:shadow-primary/20 active:scale-95"
-                >
-                    <Plus className="w-4 h-4" />
-                    {t('deposits.addDeposit')}
-                </button>
-            </div>
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
-                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
-                    <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
-                        <PiggyBank className="w-4 h-4" />
-                        {t('deposits.totalValue')}
-                    </div>
-                    <div className="text-3xl font-bold text-foreground tracking-tight">
-                        {formatMoney(totalPrincipal, 'EUR')}
-                    </div>
-                </div>
-                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
-                    <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
-                        <ArrowRight className="w-4 h-4" />
-                        {t('deposits.netRate')} ({t('deposits.weightedAvg')})
-                    </div>
-                    <div className="text-3xl font-bold text-foreground tracking-tight">
-                        {averageNetRate.toFixed(2)}%
-                    </div>
-                </div>
-                <div className="bg-background-card p-card-p rounded-2xl shadow-sm border border-border/50 backdrop-blur-sm">
-                    <div className="text-sm font-medium text-foreground-muted mb-2 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        {t('deposits.depositsCount')}
-                    </div>
-                    <div className="text-3xl font-bold text-foreground tracking-tight">
-                        {deposits.length}
-                    </div>
-                </div>
-            </div>
-
-            {/* List */}
-            <div className="space-y-4">
-                <h3 className="font-semibold text-foreground-muted uppercase text-xs tracking-wider ml-1">
-                    {t('deposits.yourDeposits')}
-                </h3>
-
-                <div className="grid grid-cols-1 gap-card-gap">
-                    {deposits.map(deposit => (
-                        <div
-                            key={deposit.id}
-                            onClick={() => handleEdit(deposit)}
-                            className="group bg-background-card p-card-p rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
+            <PageHeader
+                title={t('deposits.title')}
+                icon={PiggyBank}
+                iconClassName="text-indigo-500"
+                actions={
+                    <>
+                        <button
+                            onClick={() => refreshData()}
+                            className="btn btn-ghost flex items-center gap-1"
+                            disabled={isLoading}
                         >
-                            <div className="flex items-center justify-between">
+                            <RefreshCw className={`w - 4 h - 4 ${isLoading ? 'animate-spin' : ''} `} />
+                        </button>
+                        <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
+                            <Plus className="w-4 h-4 mr-2" />
+                            {t('deposits.addDeposit')}
+                        </button>
+                    </>
+                }
+            />
+
+            <div className="p-card-p">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
+                    <div className="card p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-emerald-500/10">
+                                <PiggyBank className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('deposits.totalPrincipal')}</p>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground tracking-tight truncate" title={formatMoney(metrics.totalPrincipal, baseCurrency)}>
+                            {formatMoney(metrics.totalPrincipal, baseCurrency)}
+                        </p>
+                    </div>
+
+                    <div className="card p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-blue-500/10">
+                                <TrendingUp className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('deposits.totalInterest')}</p>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground tracking-tight truncate" title={formatMoney(metrics.totalInterest, baseCurrency)}>
+                            {formatMoney(metrics.totalInterest, baseCurrency)}
+                        </p>
+                    </div>
+
+                    <div className="card p-card-p">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 rounded-lg bg-indigo-500/10">
+                                <Building className="w-5 h-5 text-indigo-500" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground-muted truncate">{t('deposits.activeDeposits')}</p>
+                        </div>
+                        <p className="text-2xl font-bold text-foreground tracking-tight truncate">
+                            {deposits.length}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Info Alert */}
+                <div className="mt-8 bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex gap-4">
+                    <Info className="w-6 h-6 text-blue-500 shrink-0" />
+                    <div>
+                        <h4 className="font-medium text-blue-500 text-sm mb-1">{t('deposits.disclaimerTitle')}</h4>
+                        <p className="text-sm text-foreground-muted leading-relaxed">
+                            {t('deposits.disclaimerText')}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Deposits Grid */}
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
+                    {deposits.map(deposit => {
+                        const daysRemaining = getDaysRemaining(deposit.maturityDate);
+                        const isMatured = daysRemaining <= 0;
+
+                        return (
+                            <div
+                                key={deposit.id}
+                                onClick={() => setEditingDeposit(deposit)}
+                                className={cn(
+                                    "card p-card-p cursor-pointer hover:shadow-md transition-all border-l-4",
+                                    isMatured ? "border-l-emerald-500" : "border-l-blue-500"
+                                )}
+                            >
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform">
                                         <PiggyBank className="w-6 h-6" />
@@ -144,54 +177,58 @@ export function DepositDashboard() {
                                                 <Calendar className="w-3 h-3" />
                                                 {formatDate(deposit.maturityDate)}
                                             </span>
-                                            <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider ${deposit.constraintType === 'free' ? 'bg-success/10 text-success' :
-                                                deposit.constraintType === 'locked' ? 'bg-error/10 text-error' :
-                                                    'bg-amber-500/10 text-amber-500'
-                                                }`}>
-                                                {t(`deposits.constraintTypes.${deposit.constraintType}`)}
+                                            <span className={cn(
+                                                "px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider",
+                                                deposit.constraintType === 'free' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                    deposit.constraintType === 'locked' ? 'bg-rose-500/10 text-rose-500' :
+                                                        'bg-amber-500/10 text-amber-500'
+                                            )}>
+                                                {t(`deposits.constraintTypes.${deposit.constraintType} `)}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="font-bold text-xl text-foreground">
-                                        {formatMoney(deposit.principal, deposit.currency)}
-                                    </div>
-                                    <div className="text-sm font-semibold text-success">
-                                        {deposit.netRate.toFixed(2)}% {t('deposits.net')}
+                                <div className="mt-4 flex justify-between items-center text-right border-t border-border pt-4">
+                                    <div>
+                                        <div className="font-bold text-xl text-foreground">
+                                            {formatMoney(deposit.principal, deposit.currency)}
+                                        </div>
+                                        <div className="text-sm font-semibold text-emerald-500">
+                                            {deposit.netRate.toFixed(2)}% {t('deposits.net')}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Detailed Info Row */}
-                            <div className="mt-4 pt-4 border-t border-border/30 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div>
-                                    <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.grossRate')}</span>
-                                    <span className="font-medium text-foreground">{deposit.grossRate.toFixed(2)}%</span>
-                                </div>
-                                <div>
-                                    <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.interestPeriodicity')}</span>
-                                    <span className="font-medium text-foreground">{t(`deposits.interestPeriodicityTypes.${deposit.interestPeriodicity}`)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.activationDate')}</span>
-                                    <span className="font-medium text-foreground">{formatDate(deposit.activationDate)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.duration')}</span>
-                                    <span className="font-medium text-foreground">{deposit.durationMonths} {t('common.months')}</span>
+                                {/* Detailed Info Row */}
+                                <div className="mt-4 pt-4 border-t border-border/30 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.grossRate')}</span>
+                                        <span className="font-medium text-foreground">{deposit.grossRate.toFixed(2)}%</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.interestPeriodicity')}</span>
+                                        <span className="font-medium text-foreground">{t(`deposits.interestPeriodicityTypes.${deposit.interestPeriodicity} `)}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.activationDate')}</span>
+                                        <span className="font-medium text-foreground">{formatDate(deposit.activationDate)}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.duration')}</span>
+                                        <span className="font-medium text-foreground">{deposit.durationMonths} {t('common.months')}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
-            </div>
+            </div >
 
             <AddDepositModal
                 isOpen={isAddModalOpen}
                 onClose={handleCloseModal}
                 initialData={editingDeposit}
             />
-        </div>
+        </div >
     );
 }

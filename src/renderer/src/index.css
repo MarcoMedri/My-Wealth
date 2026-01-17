@@ -115,8 +115,8 @@
   /* Default (Normal) */
   --card-padding: 1.5rem;
   /* p-6 */
-  --card-gap: 1rem;
-  /* gap-4 */
+  --card-gap: 1.5rem;
+  /* gap-6 (increased from gap-4) */
   --table-cell-y: 1rem;
   /* py-4 */
 }
@@ -124,8 +124,8 @@
 [data-density="compact"] {
   --card-padding: 0.75rem;
   /* p-3 */
-  --card-gap: 0.25rem;
-  /* gap-1 */
+  --card-gap: 0.75rem;
+  /* gap-3 (increased from gap-1) */
   --table-cell-y: 0.25rem;
   /* py-1 */
   font-size: 0.9rem;
@@ -135,8 +135,8 @@
 [data-density="expanded"] {
   --card-padding: 2.5rem;
   /* p-10 */
-  --card-gap: 1.5rem;
-  /* gap-6 */
+  --card-gap: 2.5rem;
+  /* gap-10 (increased from gap-6) */
   --table-cell-y: 1.5rem;
   /* py-6 */
 }
