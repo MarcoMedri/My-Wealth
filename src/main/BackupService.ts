@@ -55,19 +55,22 @@ export class BackupService {
    * Intelligent backup: Only creates backup if 30+ minutes have passed since last backup
    * This prevents excessive backups while ensuring regular protection
    */
-  async createBackup(vaultPath: string): Promise<boolean> {
+  async createBackup(vaultPath: string, force: boolean = false): Promise<boolean> {
     try {
       // Check if we should skip this backup (intelligent backup)
-      const backups = await this.listBackups();
+      // If force is true, we skip the intelligent check
+      if (!force) {
+        const backups = await this.listBackups();
       
-      if (backups.length > 0) {
-        const lastBackup = new Date(backups[0].timestamp);
-        const now = new Date();
-        const minutesSinceLastBackup = (now.getTime() - lastBackup.getTime()) / 1000 / 60;
-        
-        if (minutesSinceLastBackup < 30) {
-          console.log(`[BackupService] Skipping backup (last backup was ${Math.round(minutesSinceLastBackup)} minutes ago)`);
-          return false; // Skip backup
+        if (backups.length > 0) {
+          const lastBackup = new Date(backups[0].timestamp);
+          const now = new Date();
+          const minutesSinceLastBackup = (now.getTime() - lastBackup.getTime()) / 1000 / 60;
+          
+          if (minutesSinceLastBackup < 30) {
+            console.log(`[BackupService] Skipping backup (last backup was ${Math.round(minutesSinceLastBackup)} minutes ago)`);
+            return false; // Skip backup
+          }
         }
       }
 
@@ -167,7 +170,7 @@ export class BackupService {
       JSON.parse(decompressed.toString('utf-8'));
 
       // Create backup of current vault before restoring
-      await this.createBackup(vaultPath);
+      await this.createBackup(vaultPath, true);
 
       // Write restored data to vault
       await writeFile(vaultPath, decompressed);
