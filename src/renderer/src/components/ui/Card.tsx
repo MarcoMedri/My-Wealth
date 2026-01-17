@@ -20,26 +20,27 @@ export interface CardProps {
     children: React.ReactNode;
     className?: string;
     onClick?: () => void;
-    hoverable?: boolean;
+    hover?: boolean;
     padding?: 'sm' | 'md' | 'lg';
 }
 
-export const Card: React.FC<CardProps> = ({
+export function Card({ // Changed to function component
     title,
     subtitle,
     icon,
     actions,
     children,
-    className,
+    className = '', // Added default for className
     onClick,
-    hoverable = false,
+    hover = false, // Changed from hoverable and added default
     padding = 'md',
-}) => {
+}: CardProps) {
     const isClickable = !!onClick;
     const paddingClass = getCardPadding(padding);
 
     return (
         <div
+            onClick={onClick}
             className={cn(
                 // Base styles from design tokens
                 DESIGN_TOKENS.colors.background.card,
@@ -49,10 +50,14 @@ export const Card: React.FC<CardProps> = ({
                 'border',
                 paddingClass,
 
-                // Hover effect if enabled or clickable
-                (hoverable || isClickable) && [
-                    DESIGN_TOKENS.shadow.cardHover,
-                    DESIGN_TOKENS.transition.default,
+                // Enhanced hover effects
+                (hover || isClickable) && [
+                    'transition-all duration-300 ease-out',
+                    'hover:scale-[1.02]',
+                    'hover:shadow-2xl',
+                    'hover:-translate-y-1',
+                    'active:scale-[0.98]',
+                    'active:translate-y-0',
                 ],
 
                 // Clickable styling
@@ -61,7 +66,6 @@ export const Card: React.FC<CardProps> = ({
                 // Custom classes
                 className
             )}
-            onClick={onClick}
         >
             {(title || icon || actions) && (
                 <div className={cn("flex items-center justify-between", DESIGN_TOKENS.spacing.header.marginBottom)}>
@@ -90,4 +94,4 @@ export const Card: React.FC<CardProps> = ({
             {children}
         </div>
     );
-};
+}

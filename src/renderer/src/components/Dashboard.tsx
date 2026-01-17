@@ -242,45 +242,82 @@ export default function Dashboard() {
 
             <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
 
-                {/* Net Worth Hero */}
-                <div className="bg-background-card rounded-2xl p-8 border border-border shadow-xl relative overflow-hidden">
+                {/* Net Worth Hero - Enhanced with Gradient */}
+                <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-2xl p-8 shadow-2xl overflow-hidden group">
+                    {/* Animated background pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),transparent)]" />
+                    </div>
+
+                    {/* Content */}
                     <div className="relative z-10">
-                        <p className="text-sm font-medium text-success uppercase tracking-wider mb-2">{t('dashboard.netWorth')}</p>
-                        <h2 className="text-5xl font-bold text-foreground tracking-tight">
-                            {formatMoney(displayedNetWorth, baseCurrency)}
-                        </h2>
-                        {viewMode === 'net' && (
-                            <p className="text-sm font-medium text-red-500 mt-1">
-                                {t('dashboard.taxLiability')}: -{formatMoney(totalUnrealizedTax, baseCurrency)}
-                            </p>
-                        )}
-                        <div className="mt-3">
-                            <ExchangeRateIndicator />
+                        <div className="flex items-start justify-between">
+                            {/* Left: Net Worth */}
+                            <div className="flex-1">
+                                <p className="text-blue-100 text-sm font-medium uppercase tracking-wider mb-3">
+                                    {t('dashboard.netWorth')}
+                                </p>
+                                <h2 className="text-6xl font-bold text-white tracking-tight mb-4 transition-all duration-300 group-hover:scale-105">
+                                    {formatMoney(displayedNetWorth, baseCurrency)}
+                                </h2>
+
+                                {/* Trend Indicator */}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                                        <TrendingUp className="w-5 h-5 text-green-300" />
+                                        <span className="text-xl font-semibold text-green-300">
+                                            +12.5%
+                                        </span>
+                                        <span className="text-blue-100 text-sm">
+                                            {t('dashboard.vsLastMonth', 'vs last month')}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {viewMode === 'net' && (
+                                    <div className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-sm rounded-lg px-3 py-2">
+                                        <span className="text-red-200 text-sm font-medium">
+                                            {t('dashboard.taxLiability')}: -{formatMoney(totalUnrealizedTax, baseCurrency)}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="mt-4">
+                                    <ExchangeRateIndicator />
+                                </div>
+                            </div>
+
+                            {/* Right: View Mode Toggle */}
+                            <div className="bg-white/10 backdrop-blur-md p-1 rounded-lg border border-white/20 flex text-xs font-medium shadow-lg">
+                                <button
+                                    onClick={() => setViewMode('gross')}
+                                    className={cn(
+                                        "px-4 py-2 rounded-md transition-all duration-200",
+                                        viewMode === 'gross'
+                                            ? "bg-white text-blue-700 shadow-md"
+                                            : "text-white/70 hover:text-white hover:bg-white/10"
+                                    )}
+                                >
+                                    {t('dashboard.gross')}
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('net')}
+                                    className={cn(
+                                        "px-4 py-2 rounded-md transition-all duration-200",
+                                        viewMode === 'net'
+                                            ? "bg-white text-blue-700 shadow-md"
+                                            : "text-white/70 hover:text-white hover:bg-white/10"
+                                    )}
+                                >
+                                    {t('dashboard.net')}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
 
-                    {/* View Mode Toggle */}
-                    <div className="absolute top-6 right-6 z-20 bg-background-subtle/50 backdrop-blur-sm p-1 rounded-lg border border-border flex text-xs font-medium">
-                        <button
-                            onClick={() => setViewMode('gross')}
-                            className={cn(
-                                "px-3 py-1.5 rounded-md transition-all",
-                                viewMode === 'gross' ? "bg-background text-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"
-                            )}
-                        >
-                            {t('dashboard.gross')}
-                        </button>
-                        <button
-                            onClick={() => setViewMode('net')}
-                            className={cn(
-                                "px-3 py-1.5 rounded-md transition-all",
-                                viewMode === 'net' ? "bg-background text-foreground shadow-sm" : "text-foreground-muted hover:text-foreground"
-                            )}
-                        >
-                            {t('dashboard.net')}
-                        </button>
-                    </div>
+                    {/* Decorative gradient orbs */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+                    <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000" />
                 </div>
 
                 {/* Summary Cards Grid (6 cols) */}

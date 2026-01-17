@@ -106,6 +106,10 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate, view
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+            mode: 'index' as const,
+            intersect: false,
+        },
         plugins: {
             legend: {
                 position: 'top' as const,
@@ -113,13 +117,25 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate, view
                 labels: {
                     usePointStyle: true,
                     boxWidth: 8,
-                    font: { size: 11 },
-                    color: '#94a3b8' // foreground-muted
+                    font: { size: 12 },
+                    color: '#64748b', // improved contrast
+                    padding: 12,
                 }
             },
             tooltip: {
                 mode: 'index' as const,
                 intersect: false,
+                backgroundColor: 'rgba(15, 23, 42, 0.95)', // dark with transparency
+                titleColor: '#f8fafc',
+                bodyColor: '#e2e8f0',
+                borderColor: '#334155',
+                borderWidth: 1,
+                padding: 12,
+                displayColors: true,
+                titleFont: { size: 14 },
+                bodyFont: { size: 13 },
+                footerFont: { size: 13 },
+                footerColor: '#10b981', // green for total
                 callbacks: {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     label: function (context: any) {
@@ -143,15 +159,25 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate, view
         scales: {
             x: {
                 stacked: true,
-                grid: { display: false },
-                ticks: { font: { size: 10 }, color: '#94a3b8' }
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: { size: 11 },
+                    color: '#64748b',
+                    maxRotation: 45,
+                    minRotation: 0,
+                }
             },
             y: {
                 stacked: true,
-                grid: { color: '#334155' },
+                grid: {
+                    color: 'rgba(51, 65, 85, 0.3)', // more subtle
+                    lineWidth: 1,
+                },
                 ticks: {
-                    font: { size: 10 },
-                    color: '#94a3b8',
+                    font: { size: 11 },
+                    color: '#64748b',
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     callback: (val: any) => formatMoney(val * 100, currency)
                 }
