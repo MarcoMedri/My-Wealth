@@ -882,6 +882,11 @@ export const WorkspaceSettingsSchema = z.object({
     rental: 0,
     collectible: 0
   }),
+
+  /**
+   * Performance Metrics preferred period
+   */
+  performanceMetricsPeriod: z.enum(['YTD', '1M', '3M', '6M', '1Y', '3Y', 'ALL']).default('YTD').optional(),
 });
 
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;

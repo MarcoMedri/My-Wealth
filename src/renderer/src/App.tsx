@@ -23,6 +23,7 @@ const BrokerDetailView = lazy(() => import('./components/brokers/BrokerDetailVie
 const PortfolioXRay = lazy(() => import('./pages/PortfolioXRay').then(m => ({ default: m.PortfolioXRay })));
 
 import { CommandPalette, createNavigationCommands, Toaster } from './components';
+import { QuickActionFAB } from './components/QuickActionFAB';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { cn } from './lib/utils';
 import { useSettingsStore } from './store/useSettingsStore';
@@ -239,6 +240,7 @@ function App(): React.ReactElement {
         <ErrorBoundary>
             <Toaster />
             <CommandPalette commands={navigationCommands} />
+            <QuickActionFAB />
             <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                     {activeView === 'dashboard' && <Dashboard />}

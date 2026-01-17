@@ -8,6 +8,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Calendar, Info } from 'lucide-react';
+import { useVaultStore } from '../../store/useVaultStore';
+import { Card, CardHeader } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 type Period = 'YTD' | '1M' | '3M' | '6M' | '1Y' | '3Y' | 'ALL';
 
@@ -27,7 +30,13 @@ interface MetricsData {
 
 export function PerformanceMetrics({ className = '' }: PerformanceMetricsProps) {
     const { t } = useTranslation();
-    const [selectedPeriod, setSelectedPeriod] = useState<Period>('YTD');
+    const workspace = useVaultStore((state) => state.workspace);
+    const setWorkspaceSettings = useVaultStore((state) => state.setWorkspaceSettings);
+
+    // Initialize with saved preference or default to 'YTD'
+    const [selectedPeriod, setSelectedPeriod] = useState<Period>(
+        workspace.performanceMetricsPeriod || 'YTD'
+    );
     const [metrics, setMetrics] = useState<MetricsData | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -44,6 +53,14 @@ export function PerformanceMetrics({ className = '' }: PerformanceMetricsProps) 
             setLoading(false);
         }
     };
+
+    // Sync with workspace preference changes
+    useEffect(() => {
+        if (workspace.performanceMetricsPeriod && workspace.performanceMetricsPeriod !== selectedPeriod) {
+            setSelectedPeriod(workspace.performanceMetricsPeriod);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [workspace.performanceMetricsPeriod]);
 
     // Load metrics on mount and period change
     useEffect(() => {
@@ -64,33 +81,30 @@ export function PerformanceMetrics({ className = '' }: PerformanceMetricsProps) 
     const periods: Period[] = ['YTD', '1M', '3M', '6M', '1Y', '3Y', 'ALL'];
 
     return (
-        <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t('analytics.performanceMetrics')}
-                    </h2>
-                </div>
-
-                {/* Info tooltip */}
-                <button
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    title={t('analytics.performanceTooltip')}
-                >
-                    <Info className="w-4 h-4" />
-                </button>
-            </div>
+        <Card className={className}>
+            <CardHeader
+                icon={TrendingUp}
+                iconColor={DESIGN_TOKENS.colors.icon.performance}
+                title={t('analytics.performanceMetrics')}
+                action={
+                    <button
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        title={t('analytics.performanceTooltip')}
+                    >
+                        <Info className="w-4 h-4" />
+                    </button>
+                }
+            />
 
             {/* Period Selector */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                 {periods.map((period) => (
                     <button
                         key={period}
-                        onClick={() => {
+                        onClick={async () => {
                             setSelectedPeriod(period);
-                            loadMetrics(period);
+                            // Save preference
+                            await setWorkspaceSettings({ performanceMetricsPeriod: period });
                         }}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${selectedPeriod === period
                             ? 'bg-blue-600 text-white'
@@ -201,6 +215,6 @@ export function PerformanceMetrics({ className = '' }: PerformanceMetricsProps) 
                     <p className="text-sm mt-2">{t('analytics.noDataHint')}</p>
                 </div>
             )}
-        </div>
+        </Card>
     );
 }
