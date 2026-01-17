@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { PieChart as PieChartIcon } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { formatMoney } from '../../../../shared/schemas';
 import { CHART_COLORS } from '../../lib/constants';
+import { Card, CardHeader } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 interface ChartDataItem {
     name: string;
@@ -22,10 +25,10 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
-            <div className="bg-background-card px-3 py-2 rounded-lg shadow-lg border border-border">
-                <p className="font-semibold text-foreground">{data.symbol}</p>
-                <p className="text-sm text-foreground-muted">{data.name}</p>
-                <p className="text-sm font-medium text-foreground mt-1">
+            <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                <p className={DESIGN_TOKENS.typography.cardTitle}>{data.symbol}</p>
+                <p className={DESIGN_TOKENS.typography.cardSubtitle}>{data.name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
                     {formatMoney(data.value, 'USD')} ({data.percentage.toFixed(1)}%)
                 </p>
             </div>
@@ -74,8 +77,12 @@ export function PortfolioPieChart() {
     }
 
     return (
-        <div className="bg-background-card rounded-xl shadow-sm border border-border p-4">
-            <h3 className="font-semibold text-foreground mb-4">{t('investments.portfolioDistribution')}</h3>
+        <Card padding="sm">
+            <CardHeader
+                icon={PieChartIcon}
+                iconColor={DESIGN_TOKENS.colors.icon.portfolio}
+                title={t('investments.portfolioDistribution')}
+            />
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -100,7 +107,7 @@ export function PortfolioPieChart() {
                         <Tooltip content={<CustomTooltip />} />
                         <Legend
                             formatter={(value) => (
-                                <span className="text-sm text-foreground-muted">{value}</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">{value}</span>
                             )}
                         />
                     </PieChart>
@@ -116,17 +123,17 @@ export function PortfolioPieChart() {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: item.color }}
                             />
-                            <span className="font-medium text-foreground">{item.symbol}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{item.symbol}</span>
                         </div>
-                        <span className="text-foreground-subtle">{item.percentage.toFixed(1)}%</span>
+                        <span className="text-gray-500 dark:text-gray-400">{item.percentage.toFixed(1)}%</span>
                     </div>
                 ))}
                 {chartData.length > 5 && (
-                    <div className="text-xs text-foreground-muted text-center pt-1">
+                    <div className="text-xs text-gray-400 dark:text-gray-500 text-center pt-1">
                         {t('investments.moreItems', { count: chartData.length - 5 })}
                     </div>
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { PieChart as PieChartIcon } from 'lucide-react';
 import { useVaultStore } from '../../store/useVaultStore';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useNetWorth } from '../../hooks/useNetWorth';
 import { CHART_COLORS } from '../../lib/constants';
 import { cn } from '../../lib/utils';
+import { Card, CardHeader, EmptyState } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 type GroupByOption = 'type' | 'broker' | 'currency';
 
@@ -82,9 +85,9 @@ export function AllocationPieChart() {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="bg-background-card px-3 py-2 rounded-lg shadow-lg border border-border">
-                    <p className="font-semibold text-foreground">{data.name}</p>
-                    <p className="text-sm font-medium text-foreground mt-1">
+                <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                    <p className={DESIGN_TOKENS.typography.cardTitle}>{data.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
                         {formatMoney(data.value, currency)} ({data.percentage.toFixed(1)}%)
                     </p>
                 </div>
@@ -95,36 +98,41 @@ export function AllocationPieChart() {
 
     if (chartData.length === 0) {
         return (
-            <div className="bg-background-card rounded-xl border border-border p-6 flex items-center justify-center min-h-[300px]">
-                <p className="text-foreground-muted text-sm">{t('common.noData', 'No data available')}</p>
-            </div>
+            <Card>
+                <EmptyState
+                    icon={PieChartIcon}
+                    title={t('common.noData', 'No data available')}
+                    description={t('investments.allocation.noDataDescription', 'Add some investments to see your allocation')}
+                />
+            </Card>
         );
     }
 
     return (
-        <div className="bg-background-card rounded-xl border border-border p-6 shadow-sm">
-            {/* Header with Tab Switcher */}
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">
-                    {t('investments.allocation.title', 'Portfolio Allocation')}
-                </h3>
-                <div className="flex gap-1 bg-background-subtle rounded-lg p-1">
-                    {groupByOptions.map(option => (
-                        <button
-                            key={option.value}
-                            onClick={() => setGroupBy(option.value)}
-                            className={cn(
-                                'px-3 py-1 text-xs font-medium rounded-md transition-colors',
-                                groupBy === option.value
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'text-foreground-muted hover:text-foreground'
-                            )}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+        <Card>
+            <CardHeader
+                icon={PieChartIcon}
+                iconColor={DESIGN_TOKENS.colors.icon.allocation}
+                title={t('investments.allocation.title', 'Portfolio Allocation')}
+                action={
+                    <div className="flex gap-1 bg-gray-50 dark:bg-gray-900 rounded-lg p-1">
+                        {groupByOptions.map(option => (
+                            <button
+                                key={option.value}
+                                onClick={() => setGroupBy(option.value)}
+                                className={cn(
+                                    'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+                                    groupBy === option.value
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                )}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                }
+            />
 
             {/* Chart */}
             <div className="h-64">
@@ -171,17 +179,17 @@ export function AllocationPieChart() {
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: item.color }}
                             />
-                            <span className="font-medium text-foreground">{item.name}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{item.name}</span>
                         </div>
-                        <span className="text-foreground-subtle">{item.percentage.toFixed(1)}%</span>
+                        <span className="text-gray-500 dark:text-gray-400">{item.percentage.toFixed(1)}%</span>
                     </div>
                 ))}
                 {chartData.length > 5 && (
-                    <div className="text-xs text-foreground-muted text-center pt-1">
+                    <div className="text-xs text-gray-400 dark:text-gray-500 text-center pt-1">
                         {t('investments.moreItems', { count: chartData.length - 5 })}
                     </div>
                 )}
             </div>
-        </div>
+        </Card>
     );
 }

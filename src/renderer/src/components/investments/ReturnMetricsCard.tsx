@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, TrendingDown, Activity, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { useFormatMoney } from '../../hooks/useFormatMoney';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { cn } from '../../lib/utils';
+import { Card, CardHeader, CardSkeleton, EmptyState } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 interface PerformanceMetrics {
     twr: number;
@@ -39,18 +41,17 @@ export function ReturnMetricsCard() {
     }, []);
 
     if (loading) {
-        return (
-            <div className="bg-background-card rounded-xl border border-border p-6 flex items-center justify-center min-h-[140px]">
-                <Loader2 className="w-6 h-6 animate-spin text-foreground-muted" />
-            </div>
-        );
+        return <CardSkeleton lines={3} />;
     }
 
     if (!metrics) {
         return (
-            <div className="bg-background-card rounded-xl border border-border p-6 flex items-center justify-center min-h-[140px]">
-                <p className="text-sm text-foreground-muted">{t('common.noData')}</p>
-            </div>
+            <Card>
+                <EmptyState
+                    title={t('common.noData')}
+                    description={t('analytics.noDataHint')}
+                />
+            </Card>
         );
     }
 
@@ -60,13 +61,12 @@ export function ReturnMetricsCard() {
     };
 
     return (
-        <div className="bg-background-card rounded-xl border border-border p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-                <Activity className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                    {t('investments.performance.title', 'Performance Metrics')}
-                </h3>
-            </div>
+        <Card>
+            <CardHeader
+                icon={Activity}
+                iconColor={DESIGN_TOKENS.colors.icon.performance}
+                title={t('investments.performance.title', 'Performance Metrics')}
+            />
 
             <div className="grid grid-cols-3 gap-4">
                 {/* TWR */}
@@ -93,7 +93,7 @@ export function ReturnMetricsCard() {
                     isPositive={metrics.absoluteGain >= 0}
                 />
             </div>
-        </div>
+        </Card>
     );
 }
 

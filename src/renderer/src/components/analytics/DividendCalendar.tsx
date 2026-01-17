@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, DollarSign, Info } from 'lucide-react';
+import { Card, CardHeader, CardSkeleton, EmptyState } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 interface DividendPrediction {
     assetId: string;
@@ -150,37 +152,26 @@ export function DividendCalendar() {
     const avgMonthlyIncome = monthlyIncome.length > 0 ? totalAnnualIncome / monthlyIncome.length : 0;
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-        );
+        return <CardSkeleton lines={5} />;
     }
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <Calendar className="w-6 h-6 text-blue-600" />
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                {t('analytics.dividendCalendar')}
-                            </h2>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            {t('analytics.upcomingPayments', 'Pagamenti previsti e previsione reddito passivo')}
-                        </p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('analytics.avgMonthlyIncome')}</p>
-                        <p className="text-2xl font-bold text-green-600">
-                            {formatCurrency(avgMonthlyIncome)}
-                        </p>
-                    </div>
+            <Card>
+                <CardHeader
+                    icon={Calendar}
+                    iconColor={DESIGN_TOKENS.colors.icon.dividend}
+                    title={t('analytics.dividendCalendar')}
+                    subtitle={t('analytics.upcomingPayments', 'Pagamenti previsti e previsione reddito passivo')}
+                />
+                <div className="text-right mt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('analytics.avgMonthlyIncome')}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                        {formatCurrency(avgMonthlyIncome)}
+                    </p>
                 </div>
-            </div>
+            </Card>
 
             {/* Monthly Income Timeline */}
             {monthlyIncome.length > 0 ? (
@@ -243,15 +234,13 @@ export function DividendCalendar() {
                     ))}
                 </div>
             ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 mb-2">
-                        {t('analytics.noPaymentsExpected')}
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500">
-                        {t('analytics.addStocksForPredictions')}
-                    </p>
-                </div>
+                <Card>
+                    <EmptyState
+                        icon={Calendar}
+                        title={t('analytics.noPaymentsExpected')}
+                        description={t('analytics.addStocksForPredictions')}
+                    />
+                </Card>
             )}
 
             {/* Info Box */}

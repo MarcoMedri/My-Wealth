@@ -7,6 +7,8 @@ import { HoldingsTable, type HoldingsColumn } from './HoldingsTable';
 import { ViewSettings } from './ViewSettings';
 import { DateRangeFilter, type DateRange } from '../DateRangeFilter';
 import type { Holding, Asset } from '../../../../shared/schemas';
+import { Card, CardHeader } from '../ui';
+import { DESIGN_TOKENS } from '../../lib/design-tokens';
 
 interface HoldingsCardProps {
     holdings: Holding[];
@@ -63,13 +65,15 @@ export function HoldingsCard({
     }, [holdings, includeClosed]);
 
     return (
-        <div className={cn("bg-background-card rounded-xl shadow-sm border border-border flex flex-col", className)}>
-            <div className="p-card-p border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-card-gap">
+        <Card className={cn("flex flex-col", className)} padding="sm">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                        {!title && <PieChart size={20} className="text-foreground-muted" />}
-                        {title || t('investments.positions', 'Posizioni')}
-                    </h2>
+                    <CardHeader
+                        icon={title ? undefined : PieChart}
+                        iconColor={DESIGN_TOKENS.colors.icon.portfolio}
+                        title={title || t('investments.positions', 'Posizioni')}
+                        className="mb-0"
+                    />
                     <ViewSettings
                         visibleColumns={workspace?.holdingsTable?.visibleColumns}
                         onChange={(cols) => setWorkspaceSettings({
@@ -81,8 +85,8 @@ export function HoldingsCard({
                 {/* Filters & Actions */}
                 <div className="flex flex-wrap items-center gap-3">
                     {/* Include Closed Toggle */}
-                    <div className="flex items-center gap-2 bg-background-subtle rounded-lg px-2 py-1 border border-border">
-                        <label className="text-sm text-foreground-muted cursor-pointer select-none" htmlFor="show-closed-toggle-card">
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 rounded-lg px-2 py-1 border border-gray-200 dark:border-gray-700">
+                        <label className="text-sm text-gray-500 dark:text-gray-400 cursor-pointer select-none" htmlFor="show-closed-toggle-card">
                             {t('investments.showClosedPositions')}
                         </label>
                         <button
@@ -129,6 +133,6 @@ export function HoldingsCard({
                 visibleColumns={workspace?.holdingsTable?.visibleColumns as HoldingsColumn[]}
                 isLoading={isLoading}
             />
-        </div>
+        </Card>
     );
 }

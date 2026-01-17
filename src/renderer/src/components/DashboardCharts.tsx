@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { Transaction, Snapshot } from '../../../shared/schemas';
 import NetWorthTrendChart from './charts/NetWorthTrendChart';
+import { TrendingUp } from 'lucide-react';
+import { Card, CardHeader } from './ui';
+import { DESIGN_TOKENS } from '../lib/design-tokens';
+import { useTranslation } from 'react-i18next';
 
 
 export type DashboardPeriod = 'current_month' | 'last_month' | '3m' | '6m' | '1y' | 'all';
@@ -11,8 +15,6 @@ interface DashboardChartsProps {
     snapshots: Snapshot[];
     viewMode?: 'gross' | 'net';
 }
-
-import { useTranslation } from 'react-i18next';
 
 export default function DashboardCharts({ period, snapshots, viewMode }: DashboardChartsProps) {
     const { t } = useTranslation();
@@ -64,14 +66,18 @@ export default function DashboardCharts({ period, snapshots, viewMode }: Dashboa
     // BUT the user wants Trend + Net Worth Value side by side.
 
     return (
-        <div className="bg-card rounded-xl p-6 shadow-sm border border-border flex flex-col items-center justify-center min-h-[300px]">
-            <h3 className="text-sm font-semibold text-foreground-muted mb-4 self-start">{t('dashboard.netWorthTrend')}</h3>
+        <Card>
+            <CardHeader
+                icon={TrendingUp}
+                iconColor={DESIGN_TOKENS.colors.icon.performance}
+                title={t('dashboard.netWorthTrend')}
+            />
             <NetWorthTrendChart
                 snapshots={snapshots}
                 startDate={startDate}
                 endDate={endDate}
                 viewMode={viewMode}
             />
-        </div>
+        </Card>
     );
 }

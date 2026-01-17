@@ -40,6 +40,21 @@ mac:
     teamId: UDZC3RG9P6
 dmg:
   artifactName: ${name}-${version}.${ext}
+  title: "Installa ${productName}"
+  icon: build/icon.icns
+  background: build/dmg-background.png
+  contents:
+    - x: 140
+      y: 180
+      type: file
+    - x: 520
+      y: 180
+      type: link
+      path: /Applications
+  window:
+    width: 660
+    height: 400
+  iconSize: 100
 linux:
   target:
     - AppImage
