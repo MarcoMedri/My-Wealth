@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { Transaction, Snapshot } from '../../../shared/schemas';
 import NetWorthTrendChart from './charts/NetWorthTrendChart';
 import { TrendingUp } from 'lucide-react';
@@ -16,7 +16,8 @@ interface DashboardChartsProps {
     viewMode?: 'gross' | 'net';
 }
 
-export default function DashboardCharts({ period, snapshots, viewMode }: DashboardChartsProps) {
+// Memoized component - prevents re-render if props unchanged
+function DashboardChartsComponent({ period, snapshots, viewMode }: DashboardChartsProps) {
     const { t } = useTranslation();
 
     // Filter Logic (Centralized here or passed down?)
@@ -81,3 +82,6 @@ export default function DashboardCharts({ period, snapshots, viewMode }: Dashboa
         </Card>
     );
 }
+
+// Export memoized version as default
+export default memo(DashboardChartsComponent);

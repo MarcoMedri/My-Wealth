@@ -121,34 +121,37 @@ export default function AccountsDashboard() {
 
     return (
         <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
-            {/* Header */}
-            <PageHeader
-                title={t('accounts.title')}
-                icon={Wallet}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('accounts.title')}
+                    description={t('accounts.subtitle')}
+                    icon={Wallet}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
 
-                        <AccountFilter
-                            selectedAccountIds={selectedAccountIds}
-                            onChange={handleAccountFilterChange}
-                        />
+                            <AccountFilter
+                                selectedAccountIds={selectedAccountIds}
+                                onChange={handleAccountFilterChange}
+                            />
 
-                        <button
-                            onClick={refreshData}
-                            disabled={isLoading}
-                            className={cn(
-                                "p-2 rounded-lg bg-background-muted text-foreground-muted hover:text-foreground hover:bg-background-subtle transition-colors border border-border",
-                                isLoading && "opacity-50 cursor-not-allowed"
-                            )}
-                            title={t('accounts.refreshData')}
-                        >
-                            <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                        </button>
-                    </>
-                }
-            />
+                            <button
+                                onClick={refreshData}
+                                disabled={isLoading}
+                                className={cn(
+                                    "p-2 rounded-lg bg-background-muted text-foreground-muted hover:text-foreground hover:bg-background-subtle transition-colors border border-border",
+                                    isLoading && "opacity-50 cursor-not-allowed"
+                                )}
+                                title={t('accounts.refreshData')}
+                            >
+                                <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-card-gap p-card-p">

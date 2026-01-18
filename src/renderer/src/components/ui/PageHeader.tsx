@@ -20,7 +20,7 @@ export function PageHeader({
     className
 }: PageHeaderProps) {
     return (
-        <header className={cn("px-card-p py-4 border-b border-border flex items-center justify-between bg-background", className)}>
+        <header className={cn("py-4 border-b border-border flex items-center justify-between bg-background", className)}>
             <div>
                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                     {Icon && <Icon className={cn("w-6 h-6", iconClassName)} />}

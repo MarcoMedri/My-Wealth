@@ -73,28 +73,31 @@ export function DepositDashboard() {
     }
 
     return (
-        <div className="space-y-card-gap">
-            {/* Header */}
-            <PageHeader
-                title={t('deposits.title')}
-                icon={PiggyBank}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <button
-                            onClick={() => refreshData()}
-                            className="btn btn-ghost flex items-center gap-1"
-                            disabled={isLoading}
-                        >
-                            <RefreshCw className={`w - 4 h - 4 ${isLoading ? 'animate-spin' : ''} `} />
-                        </button>
-                        <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
-                            <Plus className="w-4 h-4 mr-2" />
-                            {t('deposits.addDeposit')}
-                        </button>
-                    </>
-                }
-            />
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('deposits.title')}
+                    description={t('deposits.subtitle')}
+                    icon={PiggyBank}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <button
+                                onClick={() => refreshData()}
+                                className="btn btn-ghost flex items-center gap-1"
+                                disabled={isLoading}
+                            >
+                                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            </button>
+                            <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('deposits.addDeposit')}
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             <div className="p-card-p">
                 {/* Stats Grid */}
@@ -183,7 +186,7 @@ export function DepositDashboard() {
                                                     deposit.constraintType === 'locked' ? 'bg-rose-500/10 text-rose-500' :
                                                         'bg-amber-500/10 text-amber-500'
                                             )}>
-                                                {t(`deposits.constraintTypes.${deposit.constraintType} `)}
+                                                {t(`deposits.constraintTypes.${deposit.constraintType}`)}
                                             </span>
                                         </div>
                                     </div>
@@ -207,7 +210,7 @@ export function DepositDashboard() {
                                     </div>
                                     <div>
                                         <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.interestPeriodicity')}</span>
-                                        <span className="font-medium text-foreground">{t(`deposits.interestPeriodicityTypes.${deposit.interestPeriodicity} `)}</span>
+                                        <span className="font-medium text-foreground">{t(`deposits.interestPeriodicityTypes.${deposit.interestPeriodicity}`)}</span>
                                     </div>
                                     <div>
                                         <span className="text-foreground-muted block text-xs mb-0.5">{t('deposits.activationDate')}</span>

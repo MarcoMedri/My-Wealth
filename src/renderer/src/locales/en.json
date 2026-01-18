@@ -231,6 +231,7 @@
   },
   "collectibles": {
     "title": "Collectibles",
+    "subtitle": "Track watches, art, wine, and other valuable items.",
     "yourCollectibles": "Your Collectibles",
     "trackDescription": "Track the value of watches, art, wine and other precious goods.",
     "addFirst": "Add First Item",
@@ -246,6 +247,7 @@
   },
   "properties": {
     "title": "Real Estate",
+    "subtitle": "Manage your real estate portfolio and track value.",
     "yourProperties": "Track Your Real Estate",
     "trackDescription": "Monitor property values, track appreciation, and manage your real estate portfolio.",
     "addFirst": "Add First Property",
@@ -261,6 +263,7 @@
   },
   "accounts": {
     "title": "Accounts",
+    "subtitle": "Track income, expenses, and account balances.",
     "welcome": "Welcome back! Here's your financial overview.",
     "importCSV": "Import CSV",
     "allAccounts": "All Accounts",
@@ -391,6 +394,7 @@
   },
   "investments": {
     "title": "Investments",
+    "subtitle": "Monitor your portfolio performance and holdings.",
     "startInvesting": "Start Investing",
     "trackDescription": "Track your stocks, ETFs, and crypto in one place. Real-time quotes and performance analysis.",
     "addFirst": "Add First Investment",
@@ -708,6 +712,12 @@
       "locked": "Locked (Non-withdrawable)",
       "flexible": "Flexible (with penalty)"
     },
+
+    "totalPrincipal": "Total Principal",
+    "totalInterest": "Total Interest Earned",
+    "activeDeposits": "Active Deposits",
+    "disclaimerTitle": "Interest Calculation Disclaimer",
+    "disclaimerText": "Interest values shown are estimates based on gross rates and configured frequency. Actual interest may vary based on bank policies, withholding taxes, and compounding methods.",
 
     "placeholders": {
       "name": "e.g. Cherry Bank Vincolato 60m"

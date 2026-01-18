@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -34,7 +34,8 @@ interface NetWorthTrendProps {
 
 import { useFormatDate } from '../../hooks/useFormatDate';
 
-export default function NetWorthTrendChart({ snapshots, startDate, endDate, viewMode = 'gross' }: NetWorthTrendProps) {
+// Memoized component - prevents re-render if props unchanged
+function NetWorthTrendChartComponent({ snapshots, startDate, endDate, viewMode = 'gross' }: NetWorthTrendProps) {
     const { t } = useTranslation();
     const formatMoney = useFormatMoney();
     const { formatDate } = useFormatDate();
@@ -195,3 +196,6 @@ export default function NetWorthTrendChart({ snapshots, startDate, endDate, view
         </div>
     );
 }
+
+// Export memoized version as default
+export default memo(NetWorthTrendChartComponent);

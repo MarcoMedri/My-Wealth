@@ -144,8 +144,9 @@
     "close": "Chiudi dialoghi"
   },
   "collectibles": {
-    "title": "Collezionabili",
-    "yourCollectibles": "I tuoi Collezionabili",
+    "title": "Oggetti da Collezione",
+    "subtitle": "Traccia orologi, arte, vini e altri beni preziosi.",
+    "yourCollectibles": "I tuoi Oggetti da Collezione",
     "trackDescription": "Traccia il valore di orologi, arte, vini e altri beni preziosi.",
     "addFirst": "Aggiungi Primo Oggetto",
     "addItem": "Aggiungi Oggetto",
@@ -160,7 +161,8 @@
   },
   "properties": {
     "title": "Immobili",
-    "yourProperties": "Gestisci i tuoi Immobili",
+    "subtitle": "Gestisci il tuo portafoglio immobiliare e traccia il valore.",
+    "yourProperties": "Traccia i Tuoi Immobili",
     "trackDescription": "Monitora il valore degli immobili, traccia l'apprezzamento e gestisci il tuo portafoglio immobiliare.",
     "addFirst": "Aggiungi Primo Immobile",
     "addProperty": "Aggiungi Immobile",
@@ -175,7 +177,8 @@
   },
   "accounts": {
     "title": "Conti",
-    "welcome": "Bentornato! Ecco la tua panoramica finanziaria.",
+    "subtitle": "Traccia entrate, uscite e saldi dei conti.",
+    "welcome": "Bentornato! Ecco il tuo riepilogo finanziario.",
     "importCSV": "Importa CSV",
     "allAccounts": "Tutti i Conti",
     "filterByAccount": "Filtra per Conto",
@@ -382,6 +385,7 @@
   },
   "investments": {
     "title": "Investimenti",
+    "subtitle": "Monitora le performance e le posizioni del portafoglio.",
     "startInvesting": "Inizia ad Investire",
     "trackDescription": "Traccia azioni, ETF e crypto in un unico posto. Quotazioni in tempo reale e analisi delle performance.",
     "addFirst": "Aggiungi Primo Investimento",
@@ -707,8 +711,14 @@
       "flexible": "Svincolabile (con penale)"
     },
 
+    "totalPrincipal": "Capitale Totale",
+    "totalInterest": "Interessi Totali Maturati",
+    "activeDeposits": "Conti Attivi",
+    "disclaimerTitle": "Disclaimer Calcolo Interessi",
+    "disclaimerText": "I valori di interesse mostrati sono stime basate sui tassi lordi e sulla frequenza configurata. Gli interessi effettivi possono variare in base alle politiche bancarie, ritenute fiscali e metodi di capitalizzazione.",
+
     "placeholders": {
-      "name": "es. Cherry Bank Vincolato 60m"
+      "name": "es. Banca Cherry Vincolato 60m"
     },
     "net": "netto",
     "weightedAvg": "Media Ponderata"

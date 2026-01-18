@@ -100,31 +100,34 @@ export function PropertiesDashboard() {
     }
 
     return (
-        <div className="space-y-card-gap">
-            {/* Header */}
-            <PageHeader
-                title={t('properties.title')}
-                icon={Building2}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <button
-                            onClick={() => refreshData()}
-                            className="btn btn-ghost flex items-center gap-1"
-                            disabled={isLoading}
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        </button>
-                        <button
-                            onClick={handleAdd}
-                            className="btn btn-primary"
-                        >
-                            <Plus className="w-4 h-4 mr-2" />
-                            {t('properties.addProperty')}
-                        </button>
-                    </>
-                }
-            />
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('properties.title')}
+                    description={t('properties.subtitle')}
+                    icon={Building2}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <button
+                                onClick={() => refreshData()}
+                                className="btn btn-ghost flex items-center gap-1"
+                                disabled={isLoading}
+                            >
+                                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            </button>
+                            <button
+                                onClick={handleAdd}
+                                className="btn btn-primary"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('properties.addProperty')}
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             <div className="p-card-p">
                 {/* Stats Grid */}

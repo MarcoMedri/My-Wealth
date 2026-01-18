@@ -8,9 +8,13 @@ interface ExchangeRatesState {
   isLoading: boolean;
   error: string | null;
   
-  fetchRates: () => Promise<void>;
+  fetchRates: (force?: boolean) => Promise<void>; // Added force parameter
   getRate: (targetCurrency: string) => number;
+  isCacheStale: () => boolean; // New helper
 }
+
+// Cache TTL: 30 minutes
+const CACHE_TTL = 30 * 60 * 1000;
 
 export const useExchangeRates = create<ExchangeRatesState>()(
   persist(
@@ -20,10 +24,23 @@ export const useExchangeRates = create<ExchangeRatesState>()(
       isLoading: false,
       error: null,
 
-      fetchRates: async () => {
+      isCacheStale: () => {
+        const { lastUpdated } = get();
+        if (!lastUpdated) return true;
+        return (Date.now() - lastUpdated) > CACHE_TTL;
+      },
+
+      fetchRates: async (force = false) => {
+        // Intelligent caching: Skip if cache is fresh and not forced
+        if (!force && !get().isCacheStale()) {
+          console.log('[ExchangeRates] Using cached rates (still fresh)');
+          return;
+        }
+
         const baseCurrency = useSettingsStore.getState().currency;
         set({ isLoading: true, error: null });
         try {
+          console.log('[ExchangeRates] Fetching fresh rates...');
           const rates = await window.api.getExchangeRates(baseCurrency);
           set({ rates, lastUpdated: Date.now(), isLoading: false });
         } catch (error) {
