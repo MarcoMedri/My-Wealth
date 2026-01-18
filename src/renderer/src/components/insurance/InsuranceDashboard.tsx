@@ -50,28 +50,31 @@ export function InsuranceDashboard() {
     }
 
     return (
-        <div className="space-y-card-gap">
-            {/* Header */}
-            <PageHeader
-                title={t('insurance.title')}
-                icon={Shield}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <button
-                            onClick={() => refreshData()}
-                            className="btn btn-ghost flex items-center gap-1"
-                            disabled={isLoading}
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        </button>
-                        <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
-                            <Plus className="w-4 h-4 mr-2" />
-                            {t('insurance.addPolicy')}
-                        </button>
-                    </>
-                }
-            />
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('insurance.title')}
+                    description={t('insurance.subtitle')}
+                    icon={Shield}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <button
+                                onClick={() => refreshData()}
+                                className="btn btn-ghost flex items-center gap-1"
+                                disabled={isLoading}
+                            >
+                                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            </button>
+                            <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('insurance.addPolicy')}
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             <div className="p-card-p">
                 {/* Stats Grid */}

@@ -210,39 +210,41 @@ export default function Dashboard() {
 
 
     return (
-        <div className="p-card-p space-y-card-gap overflow-y-auto h-full" data-tour="dashboard">
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto" data-tour="dashboard">
             <SnapshotConfirmationModal
                 isOpen={showSnapshotModal}
                 onClose={() => setShowSnapshotModal(false)}
                 onConfirm={handleModalConfirm}
             />
 
-            {/* Header */}
-            <PageHeader
-                title={t('dashboard.title')}
-                description={t('dashboard.subtitle')}
-                icon={LayoutDashboard}
-                iconClassName="text-blue-500"
-                actions={
-                    <>
-                        <button
-                            onClick={() => useVaultStore.getState().refreshAllPrices()}
-                            className="flex items-center gap-2 btn btn-ghost text-sm font-medium"
-                            title={t('investments.refreshPrices')}
-                        >
-                            <RefreshCw className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('investments.refresh')}</span>
-                        </button>
-                        <button
-                            onClick={handleSnapshotClick}
-                            className="flex items-center gap-2 btn btn-primary text-sm font-medium"
-                        >
-                            <Camera className="w-4 h-4" />
-                            <span>{t('dashboard.takeSnapshot')}</span>
-                        </button>
-                    </>
-                }
-            />
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('dashboard.title')}
+                    description={t('dashboard.subtitle')}
+                    icon={LayoutDashboard}
+                    iconClassName="text-blue-500"
+                    actions={
+                        <>
+                            <button
+                                onClick={() => useVaultStore.getState().refreshAllPrices()}
+                                className="flex items-center gap-2 btn btn-ghost text-sm font-medium"
+                                title={t('investments.refreshPrices')}
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t('investments.refresh')}</span>
+                            </button>
+                            <button
+                                onClick={handleSnapshotClick}
+                                className="flex items-center gap-2 btn btn-primary text-sm font-medium"
+                            >
+                                <Camera className="w-4 h-4" />
+                                <span>{t('dashboard.takeSnapshot')}</span>
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             <div className="p-card-p space-y-card-gap max-w-7xl mx-auto w-full">
 

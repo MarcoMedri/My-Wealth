@@ -101,31 +101,34 @@ export function CollectiblesDashboard() {
     }
 
     return (
-        <div className="space-y-card-gap">
-            {/* Header */}
-            <PageHeader
-                title={t('collectibles.title')}
-                icon={Watch}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <button
-                            onClick={() => refreshData()}
-                            className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-subtle rounded-lg transition-colors"
-                            disabled={isLoading}
-                        >
-                            <RefreshCw className={cn("w-5 h-5", isLoading && "animate-spin")} />
-                        </button>
-                        <button
-                            onClick={handleAdd}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {t('collectibles.addItem')}
-                        </button>
-                    </>
-                }
-            />
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('collectibles.title')}
+                    description={t('collectibles.subtitle')}
+                    icon={Watch}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <button
+                                onClick={() => refreshData()}
+                                className="p-2 text-foreground-muted hover:text-foreground hover:bg-background-subtle rounded-lg transition-colors"
+                                disabled={isLoading}
+                            >
+                                <RefreshCw className={cn("w-5 h-5", isLoading && "animate-spin")} />
+                            </button>
+                            <button
+                                onClick={handleAdd}
+                                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm"
+                            >
+                                <Plus className="w-4 h-4" />
+                                {t('collectibles.addItem')}
+                            </button>
+                        </>
+                    }
+                />
+            </div>
 
             <div className="p-card-p">
                 {/* Stats Grid */}

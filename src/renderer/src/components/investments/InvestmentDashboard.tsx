@@ -268,89 +268,95 @@ export function InvestmentDashboard() {
     }
 
     return (
-        <div className="p-card-p space-y-card-gap overflow-y-auto h-full">
-            {/* Header */}
-            <PageHeader
-                title={t('investments.title')}
-                icon={Activity}
-                iconClassName="text-indigo-500"
-                actions={
-                    <>
-                        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
-                        <button
-                            onClick={refreshAllPrices}
-                            className="btn btn-ghost flex items-center gap-1"
-                            disabled={isLoading}
-                            title={t('investments.refreshPrices')}
-                        >
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                            <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
-                        </button>
-                        <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
-                            <Plus className="w-4 h-4 mr-2" />
-                            {t('investments.addInvestment')}
-                        </button>
-                    </>
-                }
-            />
-
-            {/* Row 1: KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-card-gap">
-                <KpiCard title={t('investments.totalValue')} value={metrics.totalValue} currency={baseCurrency} />
-                <KpiCard
-                    title={t('investments.dayChange')}
-                    value={metrics.totalDayChange}
-                    currency={baseCurrency}
-                    percent={metrics.dayChangePercent}
-                    isChange
+        <div className="h-full flex flex-col space-y-card-gap overflow-y-auto">
+            <div className="px-card-p">
+                {/* Header */}
+                <PageHeader
+                    title={t('investments.title')}
+                    description={t('investments.subtitle')}
+                    icon={Activity}
+                    iconClassName="text-indigo-500"
+                    actions={
+                        <>
+                            <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} />
+                            <button
+                                onClick={refreshAllPrices}
+                                className="btn btn-ghost flex items-center gap-1"
+                                disabled={isLoading}
+                                title={t('investments.refreshPrices')}
+                            >
+                                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                                <span className="hidden sm:inline text-sm">{t('investments.refresh')}</span>
+                            </button>
+                            <button onClick={() => setIsAddModalOpen(true)} className="btn btn-primary">
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('investments.addInvestment')}
+                            </button>
+                        </>
+                    }
                 />
-                <KpiCard
-                    title={t('investments.totalReturn')}
-                    value={metrics.totalReturn}
-                    currency={baseCurrency}
-                    percent={metrics.returnPercent}
-                    isChange
+            </div>
+
+            <div className="p-card-p space-y-card-gap">
+
+                {/* Row 1: KPI Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-card-gap">
+                    <KpiCard title={t('investments.totalValue')} value={metrics.totalValue} currency={baseCurrency} />
+                    <KpiCard
+                        title={t('investments.dayChange')}
+                        value={metrics.totalDayChange}
+                        currency={baseCurrency}
+                        percent={metrics.dayChangePercent}
+                        isChange
+                    />
+                    <KpiCard
+                        title={t('investments.totalReturn')}
+                        value={metrics.totalReturn}
+                        currency={baseCurrency}
+                        percent={metrics.returnPercent}
+                        isChange
+                    />
+                    <KpiCard title={t('investments.costBasis')} value={metrics.totalCost} currency={baseCurrency} />
+                </div>
+
+                {/* Row 2: Charts (Asset Type, Broker, Geography) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-card-gap">
+                    <ChartCard title={t('investments.allocationByType')} data={getChartData(typeDistribution)} options={chartOptions} />
+                    <ChartCard title={t('investments.allocationByBroker')} data={getChartData(brokerDistribution)} options={chartOptions} />
+                    <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
+                </div>
+
+                {/* Row 3: Performance Metrics */}
+                <div className="grid grid-cols-1 gap-card-gap">
+                    <ReturnMetricsCard />
+                </div>
+
+                {/* Row 4: Portfolio Value Over Time */}
+                <div className="grid grid-cols-1 gap-card-gap">
+                    <PerformanceChart />
+                </div>
+
+                {/* Row 4: Holdings Table - Full Width */}
+                <HoldingsCard
+                    holdings={holdings.filter(h => {
+                        const asset = assets.find(a => a.id === h.assetId);
+                        return asset?.type !== 'insurance';
+                    })}
+                    assets={assets}
+                    onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
+                    includeClosed={includeClosed}
+                    onIncludeClosedChange={handleIncludeClosedChange}
+                    dateRange={dateRange}
+                    onDateRangeChange={handleDateRangeChange}
+                    className="min-h-[650px]"
                 />
-                <KpiCard title={t('investments.costBasis')} value={metrics.totalCost} currency={baseCurrency} />
+
+                {/* Modals */}
+                {isAddModalOpen && <AddInvestmentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
+                {sellModal && <SellInvestmentModal isOpen={!!sellModal} onClose={() => setSellModal(null)} holding={sellModal.holding} asset={sellModal.asset} />}
+                {detailModal && <HoldingDetailModal isOpen={!!detailModal} onClose={() => setDetailModal(null)} holding={detailModal.holding} asset={detailModal.asset} />}
             </div>
-
-            {/* Row 2: Charts (Asset Type, Broker, Geography) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-card-gap">
-                <ChartCard title={t('investments.allocationByType')} data={getChartData(typeDistribution)} options={chartOptions} />
-                <ChartCard title={t('investments.allocationByBroker')} data={getChartData(brokerDistribution)} options={chartOptions} />
-                <ChartCard title={t('investments.allocationByGeography')} data={getChartData(geoDistribution)} options={chartOptions} />
-            </div>
-
-            {/* Row 3: Performance Metrics */}
-            <div className="grid grid-cols-1 gap-card-gap">
-                <ReturnMetricsCard />
-            </div>
-
-            {/* Row 4: Portfolio Value Over Time */}
-            <div className="grid grid-cols-1 gap-card-gap">
-                <PerformanceChart />
-            </div>
-
-            {/* Row 4: Holdings Table - Full Width */}
-            <HoldingsCard
-                holdings={holdings.filter(h => {
-                    const asset = assets.find(a => a.id === h.assetId);
-                    return asset?.type !== 'insurance';
-                })}
-                assets={assets}
-                onEdit={(h, a) => setDetailModal({ holding: h, asset: a })}
-                includeClosed={includeClosed}
-                onIncludeClosedChange={handleIncludeClosedChange}
-                dateRange={dateRange}
-                onDateRangeChange={handleDateRangeChange}
-                className="min-h-[650px]"
-            />
-
-            {/* Modals */}
-            {isAddModalOpen && <AddInvestmentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />}
-            {sellModal && <SellInvestmentModal isOpen={!!sellModal} onClose={() => setSellModal(null)} holding={sellModal.holding} asset={sellModal.asset} />}
-            {detailModal && <HoldingDetailModal isOpen={!!detailModal} onClose={() => setDetailModal(null)} holding={detailModal.holding} asset={detailModal.asset} />}
-        </div >
+        </div>
     );
 }
 
