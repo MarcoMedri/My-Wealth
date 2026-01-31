@@ -573,7 +573,9 @@
         "other": "Altro"
       },
       "noAccountTitle": "Nessun Conto Titoli",
-      "noAccountDesc": "Per aggiungere un investimento devi prima creare un \"Conto Titoli\" (Securities Account) all'interno di un Broker."
+      "noAccountDesc": "Per aggiungere un investimento devi prima creare un \"Conto Titoli\" (Securities Account) all'interno di un Broker.",
+      "selectAccount": "Seleziona Conto",
+      "estimatedTotal": "Totale Stimato"
     }
   },
   "filters": {
@@ -613,7 +615,8 @@
     "pets": "Animali Domestici"
   },
   "errors": {
-    "saveFailed": "Salvataggio fallito"
+    "saveFailed": "Salvataggio fallito",
+    "missingRequiredFields": "Compila i campi obbligatori"
   },
   "insurance": {
     "linkedAccount": "Conto Collegato",
@@ -800,6 +803,14 @@
     "loading": "Caricamento tassi...",
     "refresh": "Aggiorna tassi",
     "clickToRetry": "Clicca per riprovare"
+  },
+  "quickActions": {
+    "addInvestment": "Aggiungi Investimento",
+    "addAccount": "Aggiungi Conto",
+    "viewAnalytics": "Vedi Analisi",
+    "snapshot": "Fai Snapshot",
+    "open": "Apri Azioni",
+    "close": "Chiudi Azioni"
   },
   "analytics": {
     "performanceMetrics": "Metriche di Performance",

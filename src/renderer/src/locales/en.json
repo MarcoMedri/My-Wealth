@@ -575,7 +575,9 @@
         "other": "Other"
       },
       "noAccountTitle": "No Securities Account",
-      "noAccountDesc": "To add an investment, you must first create a \"Securities Account\" within a Broker."
+      "noAccountDesc": "To add an investment, you must first create a \"Securities Account\" within a Broker.",
+      "selectAccount": "Select Account",
+      "estimatedTotal": "Estimated Total"
     }
   },
   "filters": {
@@ -615,7 +617,8 @@
     "pets": "Pets"
   },
   "errors": {
-    "saveFailed": "Save failed"
+    "saveFailed": "Save failed",
+    "missingRequiredFields": "Please fill required fields"
   },
   "insurance": {
     "linkedAccount": "Linked Account",
@@ -829,6 +832,14 @@
         "singleAsset": "High concentration in a single asset (> 20%)",
         "singleSector": "High concentration in a single sector (> 30%)"
     }
+  },
+  "quickActions": {
+    "addInvestment": "Add Investment",
+    "addAccount": "Add Account",
+    "viewAnalytics": "View Analytics",
+    "snapshot": "Take Snapshot",
+    "open": "Open Actions",
+    "close": "Close Actions"
   },
   "exchangeRates": {
     "staleRates": "Rates may be outdated, click to refresh",
