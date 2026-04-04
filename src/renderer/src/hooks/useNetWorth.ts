@@ -25,11 +25,15 @@ export function useNetWorth() {
     } = useCurrencyConverter();
 
     const totalNetWorth = useMemo(() => {
+        // Build lookup maps once (O(n)) instead of .find() per item (O(n²))
+        const accountMap = new Map(accounts.map(a => [a.id, a]));
+        const assetMap = new Map(assets.map(a => [a.id, a]));
+
         let total = 0;
 
         // 1. Accounts
         Object.entries(accountBalances).forEach(([accountId, balance]) => {
-            const account = accounts.find(a => a.id === accountId);
+            const account = accountMap.get(accountId);
             if (account) {
                 total += convert(balance, account.currency);
             }
@@ -37,7 +41,7 @@ export function useNetWorth() {
 
         // 2. Investments
         holdings.forEach(h => {
-             const asset = assets.find(a => a.id === h.assetId);
+             const asset = assetMap.get(h.assetId);
              if (asset) {
                  const value = h.quantity * asset.currentPrice;
                  total += convert(value, asset.currency);

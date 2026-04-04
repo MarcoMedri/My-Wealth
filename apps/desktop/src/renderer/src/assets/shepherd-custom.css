@@ -1,0 +1,137 @@
+/* Custom Shepherd.js theme matching app design */
+
+.shepherd-theme-custom {
+    background: rgb(var(--background-card)) !important;
+    border: 1px solid rgb(var(--border)) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    max-width: 400px;
+}
+
+.shepherd-theme-custom .shepherd-header {
+    padding: 1rem 1rem 0.5rem !important;
+    background: rgb(var(--background-subtle)) !important;
+    border-radius: 12px 12px 0 0 !important;
+    margin: -1px -1px 0 -1px;
+    border: none !important;
+    border-bottom: none !important;
+}
+
+.shepherd-theme-custom .shepherd-title {
+    color: rgb(var(--foreground)) !important;
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.shepherd-theme-custom .shepherd-text {
+    color: rgb(var(--foreground)) !important;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    padding: 0.5rem 1rem 1rem;
+}
+
+.shepherd-theme-custom .shepherd-footer {
+    padding: 0 1rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.shepherd-theme-custom .shepherd-button {
+    background: rgb(var(--primary)) !important;
+    color: rgb(var(--primary-foreground)) !important;
+    border: none !important;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shepherd-theme-custom .shepherd-button:hover {
+    background: rgb(var(--primary-hover)) !important;
+}
+
+.shepherd-theme-custom .shepherd-button-secondary {
+    background: rgb(var(--background-subtle)) !important;
+    color: rgb(var(--foreground)) !important;
+    border: 1px solid rgb(var(--border)) !important;
+}
+
+.shepherd-theme-custom .shepherd-button-secondary:hover {
+    background: rgb(var(--background-muted)) !important;
+    border-color: rgb(var(--border-muted)) !important;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon {
+    color: rgb(var(--foreground-muted)) !important;
+    font-size: 1.5rem;
+    font-weight: 300;
+    transition: color 0.2s;
+}
+
+.shepherd-theme-custom .shepherd-cancel-icon:hover {
+    color: rgb(var(--foreground)) !important;
+}
+
+/* Modal overlay */
+.shepherd-modal-overlay-container {
+    background: rgb(var(--foreground) / 0.5) !important;
+    backdrop-filter: blur(2px);
+}
+
+/* Arrow - nuclear option: override everything */
+div[class*="shepherd"] .shepherd-arrow,
+.shepherd-element .shepherd-arrow,
+.shepherd-theme-custom .shepherd-arrow,
+[class*="shepherd-element"] .shepherd-arrow,
+[data-shepherd-step-id]~* .shepherd-arrow {
+    width: 16px !important;
+    height: 16px !important;
+    background: transparent !important;
+}
+
+div[class*="shepherd"] .shepherd-arrow::before,
+.shepherd-element .shepherd-arrow::before,
+.shepherd-theme-custom .shepherd-arrow::before,
+[class*="shepherd-element"] .shepherd-arrow::before,
+[data-shepherd-step-id]~* .shepherd-arrow::before {
+    background: rgb(var(--background-card)) !important;
+    background-color: rgb(var(--background-card)) !important;
+    border: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Force for all attachment positions - absolute nuclear option */
+.shepherd-element-attached-top .shepherd-arrow::before,
+.shepherd-element-attached-bottom .shepherd-arrow::before,
+.shepherd-element-attached-left .shepherd-arrow::before,
+.shepherd-element-attached-right .shepherd-arrow::before,
+[class*="shepherd-element-attached-top"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-bottom"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-left"] .shepherd-arrow::before,
+[class*="shepherd-element-attached-right"] .shepherd-arrow::before {
+    background: rgb(var(--background-card)) !important;
+    background-color: rgb(var(--background-card)) !important;
+    border: none !important;
+    border-color: transparent !important;
+    border-width: 0 !important;
+    box-shadow: 0 2px 8px rgb(var(--foreground) / 0.1) !important;
+}
+
+/* Highlight element */
+.shepherd-element-attached-top.shepherd-element-attached-center .shepherd-arrow,
+.shepherd-element-attached-bottom.shepherd-element-attached-center .shepherd-arrow {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .shepherd-theme-custom {
+        max-width: calc(100vw - 2rem);
+    }
+}

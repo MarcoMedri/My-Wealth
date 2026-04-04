@@ -147,7 +147,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
         e.preventDefault();
 
         if (!accountId || !symbol.trim() || !name.trim() || !quantity || !price) {
-            setErrorMessage(t('errors.missingRequiredFields') || "Please fill required fields");
+            setErrorMessage(t('errors.missingRequiredFields', 'Please fill required fields'));
             return;
         }
 
@@ -462,7 +462,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.fees') || 'Fees'}</label>
+                                <label className="text-sm font-medium text-foreground-subtle">{t('modals.investmentModal.fees', 'Fees')}</label>
                                 <input
                                     type="number" step="any"
                                     className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
@@ -486,14 +486,14 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
 
                         <div className="space-y-1">
                             <div className="space-y-1">
-                                <label className="text-sm font-medium text-foreground-subtle">Account</label>
+                                <label className="text-sm font-medium text-foreground-subtle">{t('common.account', 'Account')}</label>
                                 <select
                                     required
                                     className="w-full p-2 bg-background-subtle border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
                                     value={accountId}
                                     onChange={e => setAccountId(e.target.value)}
                                 >
-                                    <option value="" disabled>Select Account</option>
+                                    <option value="" disabled>{t('modals.investmentModal.selectAccount', 'Select Account')}</option>
                                     {availableAccounts.map(acc => (
                                         <option key={acc.id} value={acc.id}>{acc.name} ({formatMoney(0, acc.currency)})</option>
                                     ))}
@@ -504,7 +504,7 @@ export function AddInvestmentModal({ isOpen, onClose, preselectedBrokerId }: Add
                         {/* Summary / Total */}
                         {quantity && price && (
                             <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-xl flex justify-between items-center animate-in fade-in zoom-in-95 duration-200">
-                                <span className="text-foreground-muted font-medium">Estimated Total</span>
+                                <span className="text-foreground-muted font-medium">{t('modals.investmentModal.estimatedTotal', 'Estimated Total')}</span>
                                 <span className="font-bold text-xl text-primary">
                                     {formatMoney(
                                         Math.round(parseFloat(quantity) * parseFloat(price) * 100) + Math.round(parseFloat(fees || '0') * 100),
