@@ -301,7 +301,7 @@ export default function Sidebar() {
                 {/* Version */}
                 {!isCollapsed && (
                     <p className="text-xs text-foreground-subtle text-center pt-2">
-                        MyWealth Desktop v1.3.0
+                        MyWealth Desktop v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?.?.?'}
                     </p>
                 )}
             </div>

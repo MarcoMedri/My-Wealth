@@ -268,17 +268,35 @@ export default function Dashboard() {
                                 </h2>
 
                                 {/* Trend Indicator */}
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                                        <TrendingUp className="w-5 h-5 text-green-300" />
-                                        <span className="text-xl font-semibold text-green-300">
-                                            +12.5%
-                                        </span>
-                                        <span className="text-blue-100 text-sm">
-                                            {t('dashboard.vsLastMonth', 'vs last month')}
-                                        </span>
-                                    </div>
-                                </div>
+                                {(() => {
+                                    // Calculate real trend from snapshots
+                                    const sortedSnapshots = [...snapshots].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                                    const lastSnapshot = sortedSnapshots[0];
+                                    if (!lastSnapshot) return null;
+
+                                    const lastNet = lastSnapshot.totalNetWorth;
+                                    const change = displayedNetWorth - lastNet;
+                                    const changePercent = lastNet !== 0 ? (change / Math.abs(lastNet)) * 100 : 0;
+                                    const isPositive = change >= 0;
+
+                                    return (
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                                                {isPositive ? (
+                                                    <TrendingUp className="w-5 h-5 text-green-300" />
+                                                ) : (
+                                                    <TrendingUp className="w-5 h-5 text-red-300 rotate-180" />
+                                                )}
+                                                <span className={cn("text-xl font-semibold", isPositive ? "text-green-300" : "text-red-300")}>
+                                                    {isPositive ? '+' : ''}{changePercent.toFixed(1)}%
+                                                </span>
+                                                <span className="text-blue-100 text-sm">
+                                                    {t('dashboard.vsLastSnapshot', 'vs last snapshot')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 {viewMode === 'net' && (
                                     <div className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-sm rounded-lg px-3 py-2">

@@ -20,6 +20,7 @@ import AddTransactionModal from './AddTransactionModal';
 import { useFormatMoney } from '../hooks/useFormatMoney';
 import { type DateRange, getDateRangeBounds } from './DateRangeFilter';
 import { useCategoryName } from '../hooks/useCategoryName';
+import { useDebounce } from '../hooks/useDebounce';
 
 const columnHelper = createColumnHelper<Transaction>();
 
@@ -42,6 +43,7 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
 
     // Advanced filter state
     const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 300);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [selectedType, setSelectedType] = useState<'all' | 'income' | 'expense' | 'transfer'>('all');
 
@@ -64,9 +66,9 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
             result = result.filter(tx => selectedAccountIds.includes(tx.accountId));
         }
 
-        // Search filter (payee and notes)
-        if (searchText.trim()) {
-            const search = searchText.toLowerCase().trim();
+        // Search filter (payee and notes) — debounced
+        if (debouncedSearchText.trim()) {
+            const search = debouncedSearchText.toLowerCase().trim();
             result = result.filter(tx =>
                 tx.payee.toLowerCase().includes(search) ||
                 (tx.notes?.toLowerCase().includes(search))
@@ -84,7 +86,7 @@ export default function TransactionTable({ dateRange = 'all', selectedAccountIds
         }
 
         return result;
-    }, [transactions, selectedAccountIds, searchText, selectedCategoryId, selectedType]);
+    }, [transactions, selectedAccountIds, debouncedSearchText, selectedCategoryId, selectedType]);
 
     // Modal State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);

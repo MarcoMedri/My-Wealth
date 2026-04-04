@@ -37,8 +37,11 @@ export function formatDateShort(date: string | Date): string {
 export function getRelativeTime(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  // Normalize to midnight to avoid DST issues
+  const dZero = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const nZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.round((nZero.getTime() - dZero.getTime()) / (1000 * 60 * 60 * 24));
   
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';

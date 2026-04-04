@@ -37,7 +37,6 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
             filtered = filtered.filter(a => a.brokerId === limitToBrokerId);
         }
         return filtered;
-        return filtered;
     }, [accounts, limitToBrokerId]);
 
     // All active accounts for transfer destination (unrestricted by broker)
@@ -141,32 +140,34 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
             // Month is 0-indexed in Date constructor
             const dateObj = new Date(year, month - 1, day, 12, 0, 0);
 
-            // Create transaction object
-            const tx = await window.api.saveTransaction({
+            // Build transaction payload
+            const txPayload = {
                 type: formData.type,
                 date: dateObj.toISOString(),
                 payee: formData.payee,
                 amount: amountCents,
                 currency: account.currency,
                 accountId: formData.accountId,
-                brokerId: account.brokerId, // Link transaction to broker
+                brokerId: account.brokerId,
                 categoryId: formData.categoryId || null,
                 toAccountId: formData.type === 'transfer' ? formData.toAccountId : null,
                 splits: [],
-                status: 'cleared',
+                status: 'cleared' as const,
                 notes: formData.notes,
                 tags: [],
                 isReconciled: false,
-            });
+            };
 
-            // Update UI optimistically (or full refresh)
             if (isEditing) {
+                // Edit: save with existing ID
                 const saved = await window.api.saveTransaction({
-                    ...tx,
-                    id: transaction.id,
+                    ...txPayload,
+                    id: transaction!.id,
                 });
                 updateTransaction(saved);
             } else {
+                // Create: save as new transaction
+                const tx = await window.api.saveTransaction(txPayload);
                 addTransaction(tx);
             }
 
@@ -292,7 +293,6 @@ export default function AddTransactionModal({ isOpen, onClose, transaction, isDu
                                     onChange={e => setFormData({ ...formData, toAccountId: e.target.value })}
                                     className="w-full px-3 py-2 bg-background-subtle border border-border rounded-lg text-foreground focus:ring-2 focus:ring-emerald-500 outline-none"
                                 >
-                                    <option value="" disabled>{t('transactions.selectAccount')}</option>
                                     <option value="" disabled>{t('transactions.selectAccount')}</option>
                                     {(() => {
                                         // 1. Get filtered list of valid destination accounts
